@@ -109,7 +109,6 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
 
   const handleAddToCart = () => {
     addItem({ 
-      id: PRODUCT.id, 
       productId: PRODUCT.id, 
       title: PRODUCT.title, 
       price: PRODUCT.price, 
@@ -360,7 +359,6 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                 }} 
                 onQuickAdd={() => {
                   addItem({ 
-                    id: relProduct.id, 
                     productId: relProduct.id, 
                     title: relProduct.title, 
                     price: relProduct.price,
