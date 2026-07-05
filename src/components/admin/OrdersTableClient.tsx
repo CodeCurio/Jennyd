@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
-import { Search, ChevronDown, CheckSquare, Square, MoreHorizontal, Eye } from "lucide-react";
+import { Search, CheckSquare, Square, Eye, Trash2, AlertTriangle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/ui/Toast";
 
@@ -24,6 +24,7 @@ export function OrdersTableClient({ initialOrders }: { initialOrders: Order[] })
   const [activeTab, setActiveTab] = useState("All");
   const [selectedOrders, setSelectedOrders] = useState<Set<string>>(new Set());
   const [isUpdating, setIsUpdating] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ ids: string[], mode: "single" | "bulk" } | null>(null);
   const { addToast } = useToast();
 
   const tabs = ["All", "Pending", "Paid", "Packed", "Shipped", "Delivered", "Cancelled", "Returned"];
@@ -104,6 +105,41 @@ export function OrdersTableClient({ initialOrders }: { initialOrders: Order[] })
     }
   };
 
+  const handleDeleteOrders = async (ids: string[]) => {
+    setIsUpdating(true);
+    try {
+      // First delete order_items for these orders
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .delete()
+        .in('order_id', ids);
+
+      if (itemsError) throw itemsError;
+
+      // Then delete the orders
+      const { error: ordersError } = await supabase
+        .from('orders')
+        .delete()
+        .in('id', ids);
+
+      if (ordersError) throw ordersError;
+
+      // Update local state
+      setOrders(orders.filter(o => !ids.includes(o.id)));
+      setSelectedOrders(prev => {
+        const newSet = new Set(prev);
+        ids.forEach(id => newSet.delete(id));
+        return newSet;
+      });
+      setDeleteConfirm(null);
+      addToast({ title: "Deleted", message: `${ids.length} order${ids.length > 1 ? 's' : ''} deleted successfully.`, type: "success" });
+    } catch (err: any) {
+      addToast({ title: "Delete Failed", message: err.message, type: "error" });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   const getPaymentBadgeColor = (status: string) => {
     switch(status) {
       case 'paid': return 'bg-green-100 text-green-800';
@@ -127,6 +163,37 @@ export function OrdersTableClient({ initialOrders }: { initialOrders: Order[] })
 
   return (
     <div className="space-y-6">
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => !isUpdating && setDeleteConfirm(null)}>
+          <div className="bg-white rounded-xl shadow-2xl p-8 max-w-sm w-full mx-4 text-center" onClick={(e) => e.stopPropagation()}>
+            <div className="mx-auto w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mb-5">
+              <AlertTriangle className="w-7 h-7 text-red-600" />
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Delete {deleteConfirm.ids.length} Order{deleteConfirm.ids.length > 1 ? 's' : ''}?</h3>
+            <p className="text-sm text-gray-500 mb-6">
+              This will permanently delete {deleteConfirm.ids.length === 1 ? 'this order' : 'these orders'} and all associated items. This action cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                disabled={isUpdating}
+                className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDeleteOrders(deleteConfirm.ids)}
+                disabled={isUpdating}
+                className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors disabled:opacity-50"
+              >
+                {isUpdating ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       
       <div className="flex flex-col sm:flex-row justify-between gap-4">
         <h1 className="text-2xl font-bold tracking-tight">Orders</h1>
@@ -173,7 +240,14 @@ export function OrdersTableClient({ initialOrders }: { initialOrders: Order[] })
                 disabled={isUpdating}
                 className="bg-black text-white px-4 py-1.5 rounded text-sm font-medium hover:bg-gray-800 disabled:opacity-50"
               >
-                {isUpdating ? "Updating..." : "Mark as Shipped"}
+                {isUpdating ? "Updating..." : "Mark Shipped"}
+              </button>
+              <button 
+                onClick={() => setDeleteConfirm({ ids: Array.from(selectedOrders), mode: "bulk" })}
+                disabled={isUpdating}
+                className="bg-red-600 text-white px-4 py-1.5 rounded text-sm font-medium hover:bg-red-700 disabled:opacity-50 flex items-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" /> Delete
               </button>
             </div>
           )}
@@ -249,9 +323,17 @@ export function OrdersTableClient({ initialOrders }: { initialOrders: Order[] })
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <Link href={`/admin/orders/${order.id}`} className="inline-flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-black bg-white border border-gray-300 px-3 py-1.5 rounded shadow-sm hover:shadow transition-all">
-                        <Eye className="w-4 h-4" /> View
-                      </Link>
+                      <div className="flex items-center justify-end gap-2">
+                        <Link href={`/admin/orders/${order.id}`} className="inline-flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-black bg-white border border-gray-300 px-3 py-1.5 rounded shadow-sm hover:shadow transition-all">
+                          <Eye className="w-4 h-4" /> View
+                        </Link>
+                        <button
+                          onClick={() => setDeleteConfirm({ ids: [order.id], mode: "single" })}
+                          className="inline-flex items-center gap-1 text-sm font-medium text-red-500 hover:text-red-700 bg-white border border-red-200 px-3 py-1.5 rounded shadow-sm hover:shadow hover:border-red-300 transition-all"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))

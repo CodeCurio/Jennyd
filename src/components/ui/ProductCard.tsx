@@ -23,9 +23,10 @@ interface ProductCardProps {
     };
   };
   onQuickAdd?: () => void;
+  onQuickView?: () => void;
 }
 
-export function ProductCard({ product, onQuickAdd }: ProductCardProps) {
+export function ProductCard({ product, onQuickAdd, onQuickView }: ProductCardProps) {
   const salePrice = product.salePrice || product.sale_price;
   const isSale = !!salePrice;
   const displayPrice = isSale ? salePrice : product.price;
@@ -66,6 +67,21 @@ export function ProductCard({ product, onQuickAdd }: ProductCardProps) {
             unoptimized
             className="object-cover object-center absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
           />
+        )}
+        {/* Quick View overlay button */}
+        {onQuickView && (
+          <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-20">
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onQuickView();
+              }}
+              className="bg-white/95 hover:bg-black hover:text-white text-black text-[10px] md:text-xs font-bold uppercase tracking-widest px-4 py-2.5 shadow-md transition-all cursor-pointer transform translate-y-2 group-hover:translate-y-0 duration-300"
+            >
+              Quick View
+            </button>
+          </div>
         )}
       </Link>
       

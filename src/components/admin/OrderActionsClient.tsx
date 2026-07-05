@@ -10,9 +10,10 @@ interface OrderActionsProps {
   orderId: string;
   currentFulfillment: string;
   currentPayment: string;
+  onUpdate?: () => void;
 }
 
-export function OrderActionsClient({ orderId, currentFulfillment, currentPayment }: OrderActionsProps) {
+export function OrderActionsClient({ orderId, currentFulfillment, currentPayment, onUpdate }: OrderActionsProps) {
   const [isUpdating, setIsUpdating] = useState(false);
   const router = useRouter();
   const { addToast } = useToast();
@@ -28,7 +29,8 @@ export function OrderActionsClient({ orderId, currentFulfillment, currentPayment
       if (error) throw error;
 
       addToast({ title: "Success", message: successMsg, type: "success" });
-      router.refresh(); // Refresh the page to get the updated status from the server
+      if (onUpdate) onUpdate();
+      else router.refresh();
     } catch (err: any) {
       addToast({ title: "Error", message: err.message, type: "error" });
     } finally {

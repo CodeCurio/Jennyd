@@ -7,6 +7,7 @@ import { Filter, X, RefreshCw, Sparkles, SlidersHorizontal } from "lucide-react"
 import { ProductCard } from "@/components/ui/ProductCard";
 import { useCart } from "@/lib/store/CartContext";
 import { useToast } from "@/components/ui/Toast";
+import { QuickViewModal } from "./QuickViewModal";
 
 type Product = any;
 
@@ -21,29 +22,66 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
   const categoryParam = searchParams.get("category");
   const noteParam = searchParams.get("note");
   const sortParam = searchParams.get("sort");
+  const sizeParam = searchParams.get("size");
+  const minPriceParam = searchParams.get("minPrice");
+  const maxPriceParam = searchParams.get("maxPrice");
 
+  // Local filter states
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [activeNote, setActiveNote] = useState<string>("All");
-  const [activePrice, setActivePrice] = useState<string>("All");
+  const [activeSize, setActiveSize] = useState<string>("All");
   const [sortOrder, setSortOrder] = useState<string>("featured");
+  const [selectedQuickViewProduct, setSelectedQuickViewProduct] = useState<any>(null);
 
-  // Sync state with URL Search Params on load or changes
+  // Dynamic absolute price boundaries based on catalog data
+  const absoluteMinPrice = useMemo(() => {
+    if (initialProducts.length === 0) return 0;
+    return Math.min(...initialProducts.map(p => p.sale_price || p.price));
+  }, [initialProducts]);
+
+  const absoluteMaxPrice = useMemo(() => {
+    if (initialProducts.length === 0) return 10000;
+    return Math.max(...initialProducts.map(p => p.sale_price || p.price));
+  }, [initialProducts]);
+
+  // Price slider states
+  const [priceMin, setPriceMin] = useState(0);
+  const [priceMax, setPriceMax] = useState(10000);
+
+  // Helper to extract product size from title/metadata
+  const getProductSize = (product: any) => {
+    const title = product.title.toLowerCase();
+    if (title.includes("50ml") || title.includes("50 ml")) return "50ml";
+    return "100ml";
+  };
+
+  // Sync states with URL parameters on mount
   useEffect(() => {
-    if (categoryParam) {
-      const matchedCat = categories.find(
-        (c) => c.toLowerCase() === categoryParam.toLowerCase()
-      );
-      setActiveCategory(matchedCat || categoryParam);
-    }
-    if (noteParam) {
-      setActiveNote(noteParam);
-    }
-    if (sortParam) {
-      if (sortParam === "best-selling") setSortOrder("best-selling");
-      else setSortOrder(sortParam);
-    }
-  }, [categoryParam, noteParam, sortParam]);
+    if (categoryParam) setActiveCategory(categoryParam);
+    if (noteParam) setActiveNote(noteParam);
+    if (sizeParam) setActiveSize(sizeParam);
+    if (sortParam) setSortOrder(sortParam);
+    if (minPriceParam) setPriceMin(Number(minPriceParam));
+    else setPriceMin(absoluteMinPrice);
+    if (maxPriceParam) setPriceMax(Number(maxPriceParam));
+    else setPriceMax(absoluteMaxPrice);
+  }, [categoryParam, noteParam, sizeParam, sortParam, minPriceParam, maxPriceParam, absoluteMinPrice, absoluteMaxPrice]);
+
+  // Sync state changes back to the browser's URL search parameters
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (activeCategory !== "All") params.set("category", activeCategory);
+    if (activeNote !== "All") params.set("note", activeNote);
+    if (activeSize !== "All") params.set("size", activeSize);
+    if (priceMin > absoluteMinPrice) params.set("minPrice", priceMin.toString());
+    if (priceMax < absoluteMaxPrice) params.set("maxPrice", priceMax.toString());
+    if (sortOrder !== "featured") params.set("sort", sortOrder);
+    if (searchQuery) params.set("q", searchQuery);
+
+    const qs = params.toString();
+    router.push(`${pathname}${qs ? `?${qs}` : ""}`, { scroll: false });
+  }, [activeCategory, activeNote, activeSize, priceMin, priceMax, sortOrder, searchQuery, absoluteMinPrice, absoluteMaxPrice]);
 
   // Extract unique categories (from tags)
   const categories = useMemo(() => {
@@ -70,14 +108,6 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
     });
     return Array.from(notesSet);
   }, [initialProducts]);
-
-  const priceRanges = [
-    { label: "All Prices", value: "All" },
-    { label: "Under ₹999", value: "under-999", check: (p: number) => p < 999 },
-    { label: "₹1,000 - ₹1,999", value: "1000-1999", check: (p: number) => p >= 1000 && p <= 1999 },
-    { label: "₹2,000 - ₹2,999", value: "2000-2999", check: (p: number) => p >= 2000 && p <= 2999 },
-    { label: "Above ₹3,000", value: "above-3000", check: (p: number) => p >= 3000 },
-  ];
 
   // Apply Filtering & Sorting
   const filteredProducts = useMemo(() => {
@@ -113,16 +143,16 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
       );
     }
 
-    // Price Filter
-    if (activePrice !== "All") {
-      const range = priceRanges.find((r) => r.value === activePrice);
-      if (range && range.check) {
-        result = result.filter((p) => {
-          const price = p.sale_price || p.price;
-          return range.check(price);
-        });
-      }
+    // Size Filter
+    if (activeSize !== "All") {
+      result = result.filter((p) => getProductSize(p) === activeSize.toLowerCase());
     }
+
+    // Price Slider Filter
+    result = result.filter((p) => {
+      const price = p.sale_price || p.price;
+      return price >= priceMin && price <= priceMax;
+    });
 
     // Sorting
     if (sortOrder === "price-asc") {
@@ -136,7 +166,7 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
     }
 
     return result;
-  }, [initialProducts, activeCategory, activeNote, activePrice, sortOrder, searchQuery]);
+  }, [initialProducts, activeCategory, activeNote, activeSize, priceMin, priceMax, sortOrder, searchQuery]);
 
   const handleQuickAdd = (product: Product) => {
     const displayPrice = product.sale_price || product.price;
@@ -155,12 +185,20 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
   const clearAllFilters = () => {
     setActiveCategory("All");
     setActiveNote("All");
-    setActivePrice("All");
+    setActiveSize("All");
+    setPriceMin(absoluteMinPrice);
+    setPriceMax(absoluteMaxPrice);
     setSortOrder("featured");
     router.push(pathname);
   };
 
-  const hasActiveFilters = activeCategory !== "All" || activeNote !== "All" || activePrice !== "All" || searchQuery;
+  const hasActiveFilters = 
+    activeCategory !== "All" || 
+    activeNote !== "All" || 
+    activeSize !== "All" || 
+    priceMin > absoluteMinPrice || 
+    priceMax < absoluteMaxPrice || 
+    searchQuery;
 
   return (
     <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-10 flex flex-col lg:flex-row gap-10 font-sans">
@@ -169,7 +207,7 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
       <div className="lg:hidden flex items-center justify-between pb-4 border-b border-gray-200">
         <button
           onClick={() => setIsMobileFiltersOpen(true)}
-          className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest bg-black text-white px-5 py-3 rounded-none"
+          className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest bg-black text-white px-5 py-3 rounded-none cursor-pointer"
         >
           <SlidersHorizontal className="w-4 h-4" /> Filter & Sort
         </button>
@@ -186,9 +224,9 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
           {hasActiveFilters && (
             <button
               onClick={clearAllFilters}
-              className="text-[11px] text-red-600 hover:underline flex items-center gap-1 font-medium"
+              className="text-[11px] text-red-600 hover:underline flex items-center gap-1 font-medium cursor-pointer"
             >
-              <RefreshCw className="w-3 h-3" /> Reset
+              <RefreshCw className="w-3 h-3 animate-spin-hover" /> Reset
             </button>
           )}
         </div>
@@ -203,7 +241,7 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
-                  className={`flex items-center justify-between text-left text-xs py-1.5 px-2.5 rounded transition-all ${
+                  className={`flex items-center justify-between text-left text-xs py-1.5 px-2.5 rounded transition-all cursor-pointer ${
                     isActive
                       ? "bg-black text-white font-bold tracking-wide"
                       : "text-gray-600 hover:bg-gray-50 hover:text-black"
@@ -230,7 +268,7 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
                   <button
                     key={note}
                     onClick={() => setActiveNote(note)}
-                    className={`text-xs px-3 py-1.5 border transition-all ${
+                    className={`text-xs px-3 py-1.5 border transition-all cursor-pointer ${
                       isActive
                         ? "border-black bg-black text-white font-semibold"
                         : "border-gray-200 text-gray-600 hover:border-gray-400 bg-gray-50"
@@ -244,27 +282,77 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
           </div>
         )}
 
-        {/* Price Range Filter */}
+        {/* Size Filter */}
         <div className="border-t border-gray-100 pt-6">
-          <h4 className="font-bold text-xs uppercase tracking-widest mb-4 text-gray-700">Price Range</h4>
+          <h4 className="font-bold text-xs uppercase tracking-widest mb-4 text-gray-700">Size Options</h4>
           <div className="flex flex-col gap-2.5">
-            {priceRanges.map((range) => {
-              const isActive = activePrice === range.value;
+            {(["All", "50ml", "100ml"] as const).map((size) => {
+              const isActive = activeSize === size;
               return (
                 <button
-                  key={range.value}
-                  onClick={() => setActivePrice(range.value)}
-                  className={`flex items-center justify-between text-left text-xs py-1.5 px-2.5 rounded transition-all ${
+                  key={size}
+                  onClick={() => setActiveSize(size)}
+                  className={`flex items-center justify-between text-left text-xs py-1.5 px-2.5 rounded transition-all cursor-pointer ${
                     isActive
                       ? "bg-black text-white font-bold tracking-wide"
                       : "text-gray-600 hover:bg-gray-50 hover:text-black"
                   }`}
                 >
-                  <span>{range.label}</span>
+                  <span>{size === "All" ? "All Sizes" : size.toUpperCase()}</span>
                   {isActive && <span className="w-1.5 h-1.5 rounded-full bg-accent" />}
                 </button>
               );
             })}
+          </div>
+        </div>
+
+        {/* Dual-Thumb Price Slider */}
+        <div className="border-t border-gray-100 pt-6">
+          <h4 className="font-bold text-xs uppercase tracking-widest mb-4 text-gray-700">Price (₹)</h4>
+          <div className="space-y-4 px-1">
+            <div className="relative w-full h-6 flex items-center">
+              {/* Slider Track background */}
+              <div className="absolute left-0 right-0 h-1 bg-gray-200 rounded-full" />
+              {/* Slider Active Track fill */}
+              <div 
+                className="absolute h-1 bg-black rounded-full" 
+                style={{
+                  left: `${((priceMin - absoluteMinPrice) / (absoluteMaxPrice - absoluteMinPrice || 1)) * 100}%`,
+                  right: `${100 - ((priceMax - absoluteMinPrice) / (absoluteMaxPrice - absoluteMinPrice || 1)) * 100}%`
+                }}
+              />
+              {/* Min Thumb input */}
+              <input
+                type="range"
+                min={absoluteMinPrice}
+                max={absoluteMaxPrice}
+                value={priceMin}
+                onChange={(e) => {
+                  const val = Math.min(Number(e.target.value), priceMax - 100);
+                  setPriceMin(val);
+                }}
+                className="absolute w-full h-1 appearance-none pointer-events-none bg-transparent outline-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-black [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-black [&::-moz-range-thumb]:cursor-pointer"
+                style={{ zIndex: priceMin > absoluteMaxPrice - 100 ? 5 : 3 }}
+              />
+              {/* Max Thumb input */}
+              <input
+                type="range"
+                min={absoluteMinPrice}
+                max={absoluteMaxPrice}
+                value={priceMax}
+                onChange={(e) => {
+                  const val = Math.max(Number(e.target.value), priceMin + 100);
+                  setPriceMax(val);
+                }}
+                className="absolute w-full h-1 appearance-none pointer-events-none bg-transparent outline-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-black [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-black [&::-moz-range-thumb]:cursor-pointer"
+                style={{ zIndex: 4 }}
+              />
+            </div>
+            {/* Display Values */}
+            <div className="flex items-center justify-between text-[11px] font-bold text-gray-500 font-mono">
+              <span>₹{priceMin.toLocaleString()}</span>
+              <span>₹{priceMax.toLocaleString()}</span>
+            </div>
           </div>
         </div>
 
@@ -279,7 +367,7 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsMobileFiltersOpen(false)}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 lg:hidden"
+              className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 lg:hidden"
             />
             <motion.div
               initial={{ x: "-100%" }}
@@ -290,7 +378,7 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
             >
               <div className="flex items-center justify-between p-5 border-b border-gray-100">
                 <span className="font-bold uppercase tracking-widest text-sm">Filter Products</span>
-                <button onClick={() => setIsMobileFiltersOpen(false)} className="p-2 -mr-2">
+                <button onClick={() => setIsMobileFiltersOpen(false)} className="p-2 -mr-2 cursor-pointer">
                   <X className="w-5 h-5 text-gray-500" />
                 </button>
               </div>
@@ -302,8 +390,8 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
                     {categories.map((cat) => (
                       <button
                         key={cat}
-                        onClick={() => { setActiveCategory(cat); setIsMobileFiltersOpen(false); }}
-                        className={`text-left text-sm py-2 px-3 rounded ${
+                        onClick={() => { setActiveCategory(cat); }}
+                        className={`text-left text-sm py-2 px-3 rounded cursor-pointer ${
                           activeCategory.toLowerCase() === cat.toLowerCase()
                             ? "bg-black text-white font-bold"
                             : "text-gray-700 hover:bg-gray-100"
@@ -322,8 +410,8 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
                       {fragranceNotes.map((note) => (
                         <button
                           key={note}
-                          onClick={() => { setActiveNote(note); setIsMobileFiltersOpen(false); }}
-                          className={`text-xs px-3 py-1.5 border ${
+                          onClick={() => { setActiveNote(note); }}
+                          className={`text-xs px-3 py-1.5 border cursor-pointer ${
                             activeNote.toLowerCase() === note.toLowerCase()
                               ? "border-black bg-black text-white font-bold"
                               : "border-gray-200 text-gray-700"
@@ -337,21 +425,65 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
                 )}
 
                 <div>
-                  <h4 className="font-bold text-xs uppercase tracking-widest mb-4 text-gray-500">Price</h4>
-                  <div className="flex flex-col gap-2">
-                    {priceRanges.map((range) => (
+                  <h4 className="font-bold text-xs uppercase tracking-widest mb-4 text-gray-500">Sizes</h4>
+                  <div className="flex gap-2">
+                    {(["All", "50ml", "100ml"] as const).map((size) => (
                       <button
-                        key={range.value}
-                        onClick={() => { setActivePrice(range.value); setIsMobileFiltersOpen(false); }}
-                        className={`text-left text-sm py-2 px-3 rounded ${
-                          activePrice === range.value
-                            ? "bg-black text-white font-bold"
-                            : "text-gray-700 hover:bg-gray-100"
+                        key={size}
+                        onClick={() => { setActiveSize(size); }}
+                        className={`text-xs px-4 py-2 border cursor-pointer ${
+                          activeSize === size
+                            ? "border-black bg-black text-white font-bold"
+                            : "border-gray-200 text-gray-700"
                         }`}
                       >
-                        {range.label}
+                        {size.toUpperCase()}
                       </button>
                     ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-bold text-xs uppercase tracking-widest mb-4 text-gray-500">Price (₹)</h4>
+                  <div className="space-y-4 px-1">
+                    <div className="relative w-full h-6 flex items-center">
+                      <div className="absolute left-0 right-0 h-1 bg-gray-200 rounded-full" />
+                      <div 
+                        className="absolute h-1 bg-black rounded-full" 
+                        style={{
+                          left: `${((priceMin - absoluteMinPrice) / (absoluteMaxPrice - absoluteMinPrice || 1)) * 100}%`,
+                          right: `${100 - ((priceMax - absoluteMinPrice) / (absoluteMaxPrice - absoluteMinPrice || 1)) * 100}%`
+                        }}
+                      />
+                      <input
+                        type="range"
+                        min={absoluteMinPrice}
+                        max={absoluteMaxPrice}
+                        value={priceMin}
+                        onChange={(e) => {
+                          const val = Math.min(Number(e.target.value), priceMax - 100);
+                          setPriceMin(val);
+                        }}
+                        className="absolute w-full h-1 appearance-none pointer-events-none bg-transparent outline-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-black [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-black [&::-moz-range-thumb]:cursor-pointer"
+                        style={{ zIndex: priceMin > absoluteMaxPrice - 100 ? 5 : 3 }}
+                      />
+                      <input
+                        type="range"
+                        min={absoluteMinPrice}
+                        max={absoluteMaxPrice}
+                        value={priceMax}
+                        onChange={(e) => {
+                          const val = Math.max(Number(e.target.value), priceMin + 100);
+                          setPriceMax(val);
+                        }}
+                        className="absolute w-full h-1 appearance-none pointer-events-none bg-transparent outline-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-black [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-black [&::-moz-range-thumb]:cursor-pointer"
+                        style={{ zIndex: 4 }}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] font-bold text-gray-500 font-mono">
+                      <span>₹{priceMin.toLocaleString()}</span>
+                      <span>₹{priceMax.toLocaleString()}</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -359,13 +491,13 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
               <div className="p-5 border-t border-gray-100 flex gap-3">
                 <button
                   onClick={clearAllFilters}
-                  className="flex-1 py-3 text-xs font-bold border border-gray-200 uppercase tracking-widest"
+                  className="flex-1 py-3 text-xs font-bold border border-gray-200 uppercase tracking-widest cursor-pointer"
                 >
                   Reset
                 </button>
                 <button
                   onClick={() => setIsMobileFiltersOpen(false)}
-                  className="flex-1 py-3 text-xs font-bold bg-black text-white uppercase tracking-widest"
+                  className="flex-1 py-3 text-xs font-bold bg-black text-white uppercase tracking-widest cursor-pointer"
                 >
                   Apply ({filteredProducts.length})
                 </button>
@@ -409,30 +541,44 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
             {activeCategory !== "All" && (
               <span className="inline-flex items-center gap-1 bg-gray-100 text-black text-xs font-medium px-3 py-1 rounded-full border border-gray-200">
                 Category: {activeCategory}
-                <button onClick={() => setActiveCategory("All")} className="hover:text-red-600 ml-1"><X className="w-3 h-3" /></button>
+                <button onClick={() => setActiveCategory("All")} className="hover:text-red-600 ml-1 cursor-pointer"><X className="w-3 h-3" /></button>
               </span>
             )}
             {activeNote !== "All" && (
               <span className="inline-flex items-center gap-1 bg-gray-100 text-black text-xs font-medium px-3 py-1 rounded-full border border-gray-200">
                 Note: {activeNote}
-                <button onClick={() => setActiveNote("All")} className="hover:text-red-600 ml-1"><X className="w-3 h-3" /></button>
+                <button onClick={() => setActiveNote("All")} className="hover:text-red-600 ml-1 cursor-pointer"><X className="w-3 h-3" /></button>
               </span>
             )}
-            {activePrice !== "All" && (
+            {activeSize !== "All" && (
               <span className="inline-flex items-center gap-1 bg-gray-100 text-black text-xs font-medium px-3 py-1 rounded-full border border-gray-200">
-                Price: {priceRanges.find(r => r.value === activePrice)?.label}
-                <button onClick={() => setActivePrice("All")} className="hover:text-red-600 ml-1"><X className="w-3 h-3" /></button>
+                Size: {activeSize.toUpperCase()}
+                <button onClick={() => setActiveSize("All")} className="hover:text-red-600 ml-1 cursor-pointer"><X className="w-3 h-3" /></button>
+              </span>
+            )}
+            {(priceMin > absoluteMinPrice || priceMax < absoluteMaxPrice) && (
+              <span className="inline-flex items-center gap-1 bg-gray-100 text-black text-xs font-medium px-3 py-1 rounded-full border border-gray-200">
+                Price: ₹{priceMin.toLocaleString()} - ₹{priceMax.toLocaleString()}
+                <button 
+                  onClick={() => {
+                    setPriceMin(absoluteMinPrice);
+                    setPriceMax(absoluteMaxPrice);
+                  }} 
+                  className="hover:text-red-600 ml-1 cursor-pointer"
+                >
+                  <X className="w-3 h-3" />
+                </button>
               </span>
             )}
             {searchQuery && (
               <span className="inline-flex items-center gap-1 bg-gray-100 text-black text-xs font-medium px-3 py-1 rounded-full border border-gray-200">
                 Search: "{searchQuery}"
-                <button onClick={() => router.push(pathname)} className="hover:text-red-600 ml-1"><X className="w-3 h-3" /></button>
+                <button onClick={() => router.push(pathname)} className="hover:text-red-600 ml-1 cursor-pointer"><X className="w-3 h-3" /></button>
               </span>
             )}
             <button
               onClick={clearAllFilters}
-              className="text-xs text-red-600 hover:underline font-bold uppercase tracking-wider ml-2"
+              className="text-xs text-red-600 hover:underline font-bold uppercase tracking-wider ml-2 cursor-pointer"
             >
               Clear All
             </button>
@@ -446,7 +592,7 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
               <p className="text-base text-gray-600 font-medium mb-4">No perfumes found matching your selected filters.</p>
               <button
                 onClick={clearAllFilters}
-                className="text-xs font-bold uppercase tracking-widest bg-black text-white px-6 py-3 hover:bg-gray-800 transition-colors"
+                className="text-xs font-bold uppercase tracking-widest bg-black text-white px-6 py-3 hover:bg-gray-800 transition-colors cursor-pointer"
               >
                 Clear All Filters
               </button>
@@ -463,7 +609,11 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <ProductCard product={product} onQuickAdd={() => handleQuickAdd(product)} />
+                    <ProductCard 
+                      product={product} 
+                      onQuickAdd={() => handleQuickAdd(product)} 
+                      onQuickView={() => setSelectedQuickViewProduct(product)}
+                    />
                   </motion.div>
                 ))}
               </AnimatePresence>
@@ -472,6 +622,15 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
         </div>
 
       </div>
+
+      {/* Quick View Modal */}
+      {selectedQuickViewProduct && (
+        <QuickViewModal
+          product={selectedQuickViewProduct}
+          isOpen={!!selectedQuickViewProduct}
+          onClose={() => setSelectedQuickViewProduct(null)}
+        />
+      )}
 
     </div>
   );

@@ -7,6 +7,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useCart } from "@/lib/store/CartContext";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/lib/store/AuthContext";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -24,6 +26,9 @@ export function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
   const { setIsDrawerOpen, itemCount } = useCart();
+  const { user, profile } = useAuth();
+  const [settings, setSettings] = useState<any>(null);
+  const [currentAnnIndex, setCurrentAnnIndex] = useState(0);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,12 +45,78 @@ export function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("site_settings")
+          .select("*")
+          .limit(1);
+        if (data && data.length > 0 && !error) {
+          setSettings(data[0]);
+        }
+      } catch (e) {
+        console.error("Error fetching site settings:", e);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  // Slide announcements interval
+  useEffect(() => {
+    const list = settings?.announcements || [];
+    if (list.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrentAnnIndex(p => (p + 1) % list.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [settings?.announcements]);
+
   return (
     <>
       {/* Top Announcement Bar */}
-      <div className="bg-foreground text-background text-[10px] md:text-xs py-2 px-4 text-center tracking-widest uppercase relative z-50">
-        Free Shipping on all orders above ₹999 | COD Available
-      </div>
+      {(!settings || settings.announcement_bar_active !== false) && (
+        <div 
+          className="text-[10px] md:text-xs text-center tracking-widest uppercase relative z-50 transition-colors overflow-hidden h-9 md:h-10 flex items-center justify-center"
+          style={{
+            backgroundColor: settings?.announcement_bar_color || "#000000",
+            color: settings?.announcement_bar_text_color || "#ffffff"
+          }}
+        >
+          {Array.isArray(settings?.announcements) && settings.announcements.length > 1 ? (
+            <div className="relative w-full h-full flex items-center justify-center">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentAnnIndex}
+                  initial={{ y: 15, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: -15, opacity: 0 }}
+                  transition={{ duration: 0.35, ease: "easeInOut" }}
+                  className="absolute inset-0 flex items-center justify-center px-4"
+                >
+                  {settings.announcements[currentAnnIndex].link ? (
+                    <Link href={settings.announcements[currentAnnIndex].link} className="hover:underline">
+                      {settings.announcements[currentAnnIndex].text}
+                    </Link>
+                  ) : (
+                    <span>{settings.announcements[currentAnnIndex].text}</span>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          ) : (
+            <div className="px-4">
+              {settings?.announcement_bar_link ? (
+                <Link href={settings.announcement_bar_link} className="hover:underline">
+                  {settings.announcement_bar_text || "Free Shipping on all orders above ₹999 | COD Available"}
+                </Link>
+              ) : (
+                <span>{settings?.announcement_bar_text || "Free Shipping on all orders above ₹999 | COD Available"}</span>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       <header
         className={`sticky top-0 z-40 bg-background w-full transition-all duration-300 border-b border-gray-100 ${
@@ -60,8 +131,8 @@ export function Header() {
             <Link href="/" className="shrink-0">
               <div className="relative w-36 h-12 lg:w-40 lg:h-14">
                 <Image
-                  src="/logo.png"
-                  alt="Jennyd"
+                  src={settings?.logo_url || "/logo.png"}
+                  alt={settings?.site_name || "Jennyd"}
                   fill
                   className="object-contain object-left"
                   priority
@@ -90,9 +161,15 @@ export function Header() {
                 
                 {/* Icons */}
                 <div className="flex items-center gap-6 shrink-0">
-                  <button className="hover:text-accent transition-colors flex flex-col items-center gap-1">
-                    <User className="w-5 h-5" strokeWidth={1.5} />
-                  </button>
+                  <Link href={user ? "/account" : "/account/login"} className="hover:text-accent transition-colors flex flex-col items-center gap-1 relative">
+                    {user && profile?.full_name ? (
+                      <div className="w-7 h-7 rounded-full bg-[#D4AF37] flex items-center justify-center text-white text-xs font-bold">
+                        {profile.full_name[0].toUpperCase()}
+                      </div>
+                    ) : (
+                      <User className="w-5 h-5" strokeWidth={1.5} />
+                    )}
+                  </Link>
                   <button 
                     className="hover:text-accent transition-colors relative flex flex-col items-center gap-1"
                     onClick={() => setIsDrawerOpen(true)}
@@ -195,8 +272,8 @@ export function Header() {
             <Link href="/" className="flex-1 flex justify-center">
               <div className="relative w-32 h-10">
                 <Image
-                  src="/logo.png"
-                  alt="Jennyd"
+                  src={settings?.logo_url || "/logo.png"}
+                  alt={settings?.site_name || "Jennyd"}
                   fill
                   className="object-contain"
                   priority
@@ -264,9 +341,20 @@ export function Header() {
                   ))}
                 </div>
                 <div className="mt-auto p-6 bg-secondary-background/50 border-t border-gray-100">
-                  <button className="flex items-center gap-3 w-full py-3 text-sm uppercase tracking-widest font-medium hover:text-accent transition-colors">
-                    <User className="w-5 h-5" /> My Account
-                  </button>
+                  <Link
+                    href={user ? "/account" : "/account/login"}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 w-full py-3 text-sm uppercase tracking-widest font-medium hover:text-accent transition-colors"
+                  >
+                    {user && profile?.full_name ? (
+                      <div className="w-6 h-6 rounded-full bg-[#D4AF37] flex items-center justify-center text-white text-[10px] font-bold">
+                        {profile.full_name[0].toUpperCase()}
+                      </div>
+                    ) : (
+                      <User className="w-5 h-5" />
+                    )}
+                    {user ? (profile?.full_name?.split(" ")[0] || "My Account") : "Sign In"}
+                  </Link>
                 </div>
               </motion.div>
             </>

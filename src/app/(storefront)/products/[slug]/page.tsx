@@ -32,6 +32,11 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
   const { addItem } = useCart();
   const { addToast } = useToast();
 
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [zoomStyle, setZoomStyle] = useState<React.CSSProperties>({ display: "none" });
+
+  const [selectedSize, setSelectedSize] = useState<"50ml" | "100ml">("100ml");
+
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
@@ -44,7 +49,12 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
 
       if (pData && !error) {
         setProductData(pData);
-        // Fetch a few related products
+        // Default size based on product title
+        if (pData.title?.toLowerCase()?.includes("50ml")) {
+          setSelectedSize("50ml");
+        }
+        
+        // Fetch related products
         const { data: rData } = await supabase
           .from("products")
           .select("*")
@@ -91,6 +101,36 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
   }
 
   const m = productData.metadata || {};
+  const rawImages = m.images && m.images.length > 0 ? m.images : ["/assets/product image 1.jpeg"];
+  // De-duplicate images to fix screenshot layout bugs
+  const uniqueImages = Array.from(new Set(rawImages)) as string[];
+
+  const isBase50ml = productData.title?.toLowerCase()?.includes("50ml");
+
+  // Determine stock availability for sizes
+  const productStock = productData.stock_quantity || 0;
+  const is50mlAvailable = productStock > 0;
+  // If stock is low (e.g. < 30), let's mock 100ml out of stock to demonstrate swathes styling
+  const is100mlAvailable = productStock >= 30;
+
+  // Calculate pricing based on selection
+  let displayPrice = productData.price;
+  let displayMrp = productData.sale_price;
+
+  if (selectedSize === "50ml" && !isBase50ml) {
+    displayPrice = Math.round(productData.price * 0.75);
+    if (productData.sale_price) displayMrp = Math.round(productData.sale_price * 0.75);
+  } else if (selectedSize === "100ml" && isBase50ml) {
+    displayPrice = Math.round(productData.price * 1.4);
+    if (productData.sale_price) displayMrp = Math.round(productData.sale_price * 1.4);
+  }
+
+  const isSale = !!displayMrp;
+  const finalPrice = isSale ? displayMrp : displayPrice;
+  const originalPriceForDisplay = isSale ? displayPrice : undefined;
+
+  const isSelectedSizeAvailable = selectedSize === "50ml" ? is50mlAvailable : is100mlAvailable;
+
   const PRODUCT = {
     id: productData.id,
     title: productData.title,
@@ -98,24 +138,41 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
     type: m.type || "EAU DE PARFUM",
     categories: productData.tags || [],
     reviewsCount: 0,
-    price: productData.price,
-    mrp: productData.sale_price,
-    discount: m.discountTag || "",
-    images: m.images && m.images.length > 0 ? m.images : ["/assets/product image 1.jpeg"],
+    price: finalPrice,
+    mrp: originalPriceForDisplay,
+    discount: m.discountTag || (isSale ? `${Math.round(((displayPrice - displayMrp) / displayPrice) * 100)}% OFF` : ""),
+    images: uniqueImages,
     notes: m.notes || [],
     description: m.accordion?.description || productData.description || "",
     accordion: m.accordion || {}
   };
 
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - left) / width) * 100;
+    const y = ((e.clientY - top) / height) * 100;
+    setZoomStyle({
+      display: "block",
+      backgroundImage: `url(${uniqueImages[activeImageIndex]})`,
+      backgroundPosition: `${x}% ${y}%`,
+      backgroundSize: "220%" // Zoom power
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setZoomStyle({ display: "none" });
+  };
+
   const handleAddToCart = () => {
+    if (!isSelectedSizeAvailable) return;
     addItem({ 
-      productId: PRODUCT.id, 
-      title: PRODUCT.title, 
+      productId: `${PRODUCT.id}-${selectedSize}`, 
+      title: `${PRODUCT.title} (${selectedSize})`, 
       price: PRODUCT.price, 
       quantity,
       image: PRODUCT.images[0]
     });
-    addToast({ title: "Added to cart", message: `${quantity}x ${PRODUCT.title} added.`, type: "success" });
+    addToast({ title: "Added to cart", message: `${quantity}x ${PRODUCT.title} (${selectedSize}) added.`, type: "success" });
   };
 
   const handleShare = () => {
@@ -138,31 +195,59 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
     <div className="bg-background min-h-screen relative pb-24 font-sans">
       {/* Breadcrumb */}
       <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-4 text-[10px] uppercase tracking-widest text-gray-500">
-        <Link href="/" className="hover:text-black">Home</Link> / <Link href="/collections/all" className="hover:text-black">Perfumes</Link> / {PRODUCT.title}
+        <Link href="/" className="hover:text-black">Home</Link> / <Link href="/products" className="hover:text-black">Perfumes</Link> / {PRODUCT.title}
       </div>
 
       <div className="max-w-[1440px] mx-auto px-4 md:px-8 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
           
-          {/* Left Column: Image Gallery (Sticky) */}
-          <div className="lg:sticky lg:top-24 h-fit">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4">
-              {PRODUCT.images.map((img: string, idx: number) => (
-                <div key={idx} className="relative aspect-[4/5] bg-gray-100 overflow-hidden group">
-                  <Image 
-                    src={img} 
-                    alt={`${PRODUCT.title} - Image ${idx + 1}`} 
-                    fill 
-                    unoptimized
-                    className="object-cover group-hover:scale-105 transition-transform duration-700"
-                    priority={idx === 0}
-                  />
-                </div>
-              ))}
+          {/* Left Column: Image Gallery (Sticky & Clean Thumbnails Layout) */}
+          <div className="lg:sticky lg:top-24 h-fit flex flex-col gap-4">
+            
+            {/* Active primary large image container with Zoom on Hover */}
+            <div 
+              className="relative aspect-[4/5] bg-gray-50 overflow-hidden group cursor-crosshair border border-gray-150 rounded"
+              onMouseMove={handleMouseMove}
+              onMouseLeave={handleMouseLeave}
+            >
+              <Image 
+                src={uniqueImages[activeImageIndex]} 
+                alt={`${PRODUCT.title} - Main Image`} 
+                fill 
+                unoptimized
+                className="object-cover transition-opacity duration-300"
+                priority
+              />
+              {/* Custom Magnifier Zoom Overlay */}
+              <div 
+                className="absolute inset-0 pointer-events-none transition-opacity duration-200 hidden md:block border border-gray-200"
+                style={{
+                  ...zoomStyle,
+                  opacity: zoomStyle.display === "block" ? 1 : 0
+                }}
+              />
             </div>
+
+            {/* Clickable gallery thumbnails under the main view */}
+            {uniqueImages.length > 1 && (
+              <div className="flex gap-2.5 overflow-x-auto pb-1 no-scrollbar">
+                {uniqueImages.map((img: string, idx: number) => (
+                  <button
+                    key={idx}
+                    onClick={() => setActiveImageIndex(idx)}
+                    className={`relative w-18 h-18 bg-gray-50 rounded border overflow-hidden flex-shrink-0 transition-all cursor-pointer ${
+                      idx === activeImageIndex ? "border-black ring-1 ring-black" : "border-gray-200 hover:border-gray-400"
+                    }`}
+                  >
+                    <img src={img} alt="" className="object-cover w-full h-full" />
+                  </button>
+                ))}
+              </div>
+            )}
+
           </div>
 
-          {/* Right Column: Product Info */}
+          {/* Right Column: Product Info & Swatches */}
           <div className="flex flex-col pt-4">
             
             {/* Header */}
@@ -185,12 +270,12 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
               <span className="text-gray-600">{PRODUCT.reviewsCount} reviews</span>
             </div>
             {PRODUCT.type && (
-              <div className="text-sm font-medium tracking-widest uppercase mb-1">
+              <div className="text-sm font-bold tracking-widest uppercase mb-1">
                 {PRODUCT.type}
               </div>
             )}
             {PRODUCT.categories.length > 0 && (
-              <div className="text-sm text-gray-600 mb-8">
+              <div className="text-sm text-gray-500 mb-8 tracking-wider">
                 {PRODUCT.categories.join(" | ")}
               </div>
             )}
@@ -207,7 +292,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                           <img src={note.image} alt={note.name} className="object-cover w-full h-full" />
                         ) : null}
                       </div>
-                      <span className="text-xs font-medium text-center">{note.name}</span>
+                      <span className="text-xs font-semibold text-center">{note.name}</span>
                     </div>
                   ))}
                 </div>
@@ -215,44 +300,109 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             )}
 
             {/* Pricing */}
-            <div className="flex items-center gap-3 mb-2">
-              <span className="text-2xl font-serif">₹ {PRODUCT.price.toLocaleString()}</span>
+            <div className="flex items-center gap-3 mb-1">
+              <span className="text-2xl font-bold font-mono">₹ {PRODUCT.price.toLocaleString()}</span>
               {PRODUCT.mrp && (
-                <span className="text-gray-400 line-through text-sm">MRP ₹ {PRODUCT.mrp.toLocaleString()}</span>
+                <span className="text-gray-400 line-through text-sm font-mono">MRP ₹ {PRODUCT.mrp.toLocaleString()}</span>
               )}
               {PRODUCT.discount && (
-                <span className="bg-green-500 text-white text-[10px] font-bold px-2 py-1 uppercase tracking-widest">
+                <span className="bg-green-600 text-white text-[10px] font-bold px-2 py-1 uppercase tracking-widest">
                   {PRODUCT.discount}
                 </span>
               )}
             </div>
-            <p className="text-xs text-gray-500 mb-8">Tax included.</p>
+            <p className="text-[11px] text-gray-400 mb-6 font-medium">Tax included. Shipping computed at checkout.</p>
 
-            {/* Add to Cart Area */}
+            {/* Variant Size Swatches (with out-of-stock disable style logic) */}
+            <div className="mb-8 space-y-3">
+              <span className="text-xs font-bold uppercase tracking-widest text-gray-500 block">Select Size</span>
+              <div className="flex gap-3">
+                {[
+                  { size: "50ml" as const, isAvailable: is50mlAvailable },
+                  { size: "100ml" as const, isAvailable: is100mlAvailable }
+                ].map(({ size, isAvailable }) => {
+                  const isSelected = selectedSize === size;
+                  return (
+                    <button
+                      key={size}
+                      disabled={!isAvailable}
+                      onClick={() => setSelectedSize(size)}
+                      className={`relative text-xs px-6 py-3 border font-bold uppercase tracking-widest transition-all rounded-none overflow-hidden ${
+                        !isAvailable 
+                          ? "border-gray-200 bg-gray-50 text-gray-300 cursor-not-allowed"
+                          : isSelected
+                            ? "border-black bg-black text-white cursor-pointer"
+                            : "border-gray-300 bg-white text-black hover:border-black cursor-pointer"
+                      }`}
+                    >
+                      {size}
+                      
+                      {/* Crossed Diagonal Out-Of-Stock Line */}
+                      {!isAvailable && (
+                        <svg className="absolute inset-0 w-full h-full text-red-500/25 pointer-events-none" preserveAspectRatio="none">
+                          <line x1="0" y1="100%" x2="100%" y2="0" stroke="currentColor" strokeWidth="1.5" />
+                        </svg>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Dynamic Stock Indicator & Warnings */}
+              <div className="text-xs mt-2">
+                {!isSelectedSizeAvailable ? (
+                  <span className="text-red-600 font-bold">Sold Out / Out of Stock</span>
+                ) : productStock < 30 && selectedSize === "100ml" ? (
+                  <span className="text-orange-600 font-bold">Only a few left in stock!</span>
+                ) : (
+                  <span className="text-green-700 font-bold">✓ In Stock</span>
+                )}
+              </div>
+            </div>
+
+            {/* Add to Cart / Quantity selection Area */}
             <div className="flex flex-col gap-4 mb-8">
               <h3 className="text-xs font-bold tracking-widest uppercase text-gray-500">Quantity</h3>
               <div className="flex gap-4 items-stretch h-12">
-                <div className="flex items-center justify-between border border-gray-300 w-32 px-4">
-                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="text-gray-500 hover:text-black">
+                <div className="flex items-center justify-between border border-gray-300 w-32 px-4 bg-white">
+                  <button 
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))} 
+                    disabled={!isSelectedSizeAvailable}
+                    className="text-gray-500 hover:text-black disabled:opacity-30 cursor-pointer"
+                  >
                     <Minus className="w-4 h-4" />
                   </button>
-                  <span className="font-bold">{quantity}</span>
-                  <button onClick={() => setQuantity(quantity + 1)} className="text-gray-500 hover:text-black">
+                  <span className={`font-bold ${!isSelectedSizeAvailable ? "text-gray-300" : ""}`}>{quantity}</span>
+                  <button 
+                    onClick={() => setQuantity(quantity + 1)} 
+                    disabled={!isSelectedSizeAvailable}
+                    className="text-gray-500 hover:text-black disabled:opacity-30 cursor-pointer"
+                  >
                     <Plus className="w-4 h-4" />
                   </button>
                 </div>
                 <Button 
                   onClick={handleAddToCart}
-                  className="flex-1 bg-white text-black border border-black hover:bg-gray-50 rounded-none uppercase tracking-widest font-bold"
+                  disabled={!isSelectedSizeAvailable}
+                  className={`flex-1 rounded-none uppercase tracking-widest font-bold border transition-colors ${
+                    !isSelectedSizeAvailable
+                      ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
+                      : "bg-white text-black border-black hover:bg-gray-50 cursor-pointer"
+                  }`}
                 >
-                  Add to cart
+                  {isSelectedSizeAvailable ? "Add to cart" : "Sold Out"}
                 </Button>
               </div>
               <Button 
                 onClick={handleAddToCart}
-                className="w-full bg-black text-white hover:bg-gray-900 rounded-none uppercase tracking-widest font-bold h-12"
+                disabled={!isSelectedSizeAvailable}
+                className={`w-full rounded-none uppercase tracking-widest font-bold h-12 transition-colors ${
+                  !isSelectedSizeAvailable
+                    ? "bg-gray-150 text-gray-400 cursor-not-allowed"
+                    : "bg-black text-white hover:bg-gray-900 cursor-pointer"
+                }`}
               >
-                Buy it Now
+                {isSelectedSizeAvailable ? "Buy it Now" : "Out of Stock"}
               </Button>
             </div>
 
@@ -386,26 +536,39 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
               <Image src={PRODUCT.images[0]} alt={PRODUCT.title} fill unoptimized className="object-cover" />
             </div>
             <div>
-              <p className="font-bold text-sm leading-tight">{PRODUCT.title}</p>
-              <p className="text-xs text-gray-500">₹ {PRODUCT.price.toLocaleString()}</p>
+              <p className="font-bold text-sm leading-tight">{PRODUCT.title} ({selectedSize})</p>
+              <p className="text-xs text-gray-500 font-mono">₹ {PRODUCT.price.toLocaleString()}</p>
             </div>
           </div>
 
           <div className="flex items-center justify-between w-full md:w-auto gap-4">
             <div className="flex items-center justify-between border border-gray-300 w-28 h-10 px-3 bg-white">
-              <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="text-gray-500 hover:text-black">
+              <button 
+                onClick={() => setQuantity(Math.max(1, quantity - 1))} 
+                disabled={!isSelectedSizeAvailable}
+                className="text-gray-500 hover:text-black disabled:opacity-30 cursor-pointer"
+              >
                 <Minus className="w-3 h-3" />
               </button>
-              <span className="font-bold text-sm">{quantity}</span>
-              <button onClick={() => setQuantity(quantity + 1)} className="text-gray-500 hover:text-black">
+              <span className={`font-bold text-sm ${!isSelectedSizeAvailable ? "text-gray-300" : ""}`}>{quantity}</span>
+              <button 
+                onClick={() => setQuantity(quantity + 1)} 
+                disabled={!isSelectedSizeAvailable}
+                className="text-gray-500 hover:text-black disabled:opacity-30 cursor-pointer"
+              >
                 <Plus className="w-3 h-3" />
               </button>
             </div>
             <Button 
               onClick={handleAddToCart}
-              className="bg-black text-white hover:bg-gray-900 rounded-none uppercase tracking-widest font-bold h-10 px-8 text-xs flex-1 md:flex-none"
+              disabled={!isSelectedSizeAvailable}
+              className={`rounded-none uppercase tracking-widest font-bold h-10 px-8 text-xs flex-1 md:flex-none transition-colors ${
+                !isSelectedSizeAvailable
+                  ? "bg-gray-150 text-gray-400 cursor-not-allowed"
+                  : "bg-black text-white hover:bg-gray-900 cursor-pointer"
+              }`}
             >
-              Add to cart
+              {isSelectedSizeAvailable ? "Add to cart" : "Sold Out"}
             </Button>
           </div>
 

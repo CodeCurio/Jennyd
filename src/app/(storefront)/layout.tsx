@@ -3,6 +3,7 @@ import { Footer } from "@/components/storefront/Footer";
 import { CartDrawer } from "@/components/storefront/CartDrawer";
 import { CartProvider } from "@/lib/store/CartContext";
 import { ToastProvider } from "@/components/ui/Toast";
+import { AuthProvider } from "@/lib/store/AuthContext";
 
 export default function StorefrontLayout({
   children,
@@ -11,16 +12,19 @@ export default function StorefrontLayout({
 }) {
   return (
     <ToastProvider>
-      <CartProvider>
-        <div className="flex flex-col min-h-screen">
-          <Header />
-          <main className="flex-1">
-            {children}
-          </main>
-          <Footer />
-          <CartDrawer />
-        </div>
-      </CartProvider>
+      <AuthProvider>
+        <CartProvider>
+          <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-1">
+              {children}
+            </main>
+            <Footer />
+            <CartDrawer />
+          </div>
+        </CartProvider>
+      </AuthProvider>
     </ToastProvider>
   );
 }
+
