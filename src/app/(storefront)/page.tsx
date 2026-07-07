@@ -289,7 +289,7 @@ export default function Home() {
                 initial={{ y: 40, opacity: 0 }}
                 animate={i === currentSlide ? { y: 0, opacity: 1 } : {}}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
-                className="text-4xl md:text-6xl lg:text-7xl font-serif text-white mb-8 tracking-wide font-normal max-w-4xl leading-tight"
+                className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-serif text-white mb-6 md:mb-8 tracking-wide font-normal max-w-4xl leading-tight"
               >
                 {slide.title}
               </motion.h1>
@@ -302,7 +302,7 @@ export default function Home() {
                 <Link href={slide.link || "/products"}>
                   <Button 
                     variant="outline"
-                    className="border-white text-white hover:bg-white hover:text-black rounded-none px-12 py-6 uppercase tracking-widest text-xs font-bold transition-all duration-300"
+                    className="border-white text-white hover:bg-white hover:text-black rounded-none px-6 py-3 sm:px-10 sm:py-4.5 md:px-12 md:py-6 uppercase tracking-widest text-[10px] sm:text-xs font-bold transition-all duration-300"
                   >
                     {slide.cta}
                   </Button>
@@ -312,21 +312,21 @@ export default function Home() {
           </motion.div>
         ))}
 
-        {/* Carousel Controls */}
-        <button onClick={prevSlide} className="absolute left-6 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 p-3.5 rounded-full text-white backdrop-blur-md transition-all opacity-0 group-hover:opacity-100 z-20">
+        {/* Carousel Controls - Hidden on mobile, shown on desktop */}
+        <button onClick={prevSlide} className="hidden sm:flex absolute left-6 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 p-3.5 rounded-full text-white backdrop-blur-md transition-all opacity-0 group-hover:opacity-100 z-20">
           <ChevronLeft className="w-5 h-5" />
         </button>
-        <button onClick={nextSlide} className="absolute right-6 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 p-3.5 rounded-full text-white backdrop-blur-md transition-all opacity-0 group-hover:opacity-100 z-20">
+        <button onClick={nextSlide} className="hidden sm:flex absolute right-6 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 p-3.5 rounded-full text-white backdrop-blur-md transition-all opacity-0 group-hover:opacity-100 z-20">
           <ChevronRight className="w-5 h-5" />
         </button>
         
         {/* Dynamic Line Indicators */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3 z-20">
+        <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex gap-2 md:gap-3 z-20">
           {slides.map((_, i) => (
             <button 
               key={i} 
               onClick={() => setCurrentSlide(i)}
-              className="h-[2px] w-12 md:w-16 bg-white/20 relative overflow-hidden cursor-pointer"
+              className="h-[2px] w-8 md:w-16 bg-white/20 relative overflow-hidden cursor-pointer"
             >
               {i === currentSlide && (
                 <motion.div
@@ -343,11 +343,11 @@ export default function Home() {
       </section>
 
       {/* 2. Elevated Story Circles Navigation */}
-      <section className="py-16 px-4 max-w-[1440px] mx-auto w-full overflow-x-auto no-scrollbar">
-        <div className="flex justify-start md:justify-center gap-8 md:gap-14 min-w-max px-4">
+      <section className="py-10 sm:py-16 px-4 max-w-[1440px] mx-auto w-full overflow-x-auto no-scrollbar">
+        <div className="flex justify-start md:justify-center gap-5 sm:gap-9 md:gap-14 min-w-max px-4">
           {STORY_CIRCLES.map((circle, i) => (
             <Link key={i} href={circle.link} className="flex flex-col items-center gap-4 group cursor-pointer">
-              <div className="relative w-24 h-24 md:w-32 md:h-32 flex items-center justify-center">
+              <div className="relative w-20 h-20 sm:w-26 sm:h-26 md:w-32 md:h-32 flex items-center justify-center">
                 {/* Decorative Orbit Rings */}
                 <div className="absolute inset-0 rounded-full border border-accent/20 group-hover:border-accent group-hover:scale-105 transition-all duration-700 ease-out pointer-events-none" />
                 <div className="absolute inset-[3px] rounded-full border border-dashed border-accent/10 group-hover:rotate-45 transition-transform duration-[1.5s] ease-out pointer-events-none" />
@@ -371,17 +371,17 @@ export default function Home() {
       </section>
 
       {/* 3. Brand Story & Craftsmanship Section */}
-      <section className="py-24 px-6 md:px-12 bg-secondary-background relative overflow-hidden">
+      <section className="py-12 sm:py-20 md:py-24 px-4 sm:px-8 md:px-12 bg-secondary-background relative overflow-hidden">
         {/* Elegant blur element */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-accent/5 rounded-full filter blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-black/5 rounded-full filter blur-3xl pointer-events-none" />
 
-        <div className="max-w-[1280px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+        <div className="max-w-[1280px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
           {/* Brand Philosophy Text */}
           <div className="lg:col-span-7 flex flex-col gap-8">
             <div className="flex flex-col gap-3">
               <span className="text-accent uppercase tracking-[0.3em] text-xs font-bold">Our Philosophy</span>
-              <h2 className="text-3xl md:text-5xl font-serif leading-tight font-normal text-foreground">
+              <h2 className="text-2xl sm:text-3xl md:text-5xl font-serif leading-tight font-normal text-foreground">
                 Artisanal Blends, Crafted for the Extraordinary
               </h2>
             </div>
@@ -390,7 +390,7 @@ export default function Home() {
               At Jennyd, we believe a fragrance is more than a scent—it is your silent signature. Inspired by the rich heritage of Indian perfumery and infused with global sophistication, each blend is hand-poured in small batches using the finest natural essential oils.
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 mt-4">
               <div className="flex flex-col gap-3">
                 <div className="w-12 h-12 rounded-full bg-background flex items-center justify-center text-accent shadow-sm">
                   <Award className="w-5 h-5" />
@@ -416,7 +416,7 @@ export default function Home() {
           </div>
 
           {/* Editorial Image and Note */}
-          <div className="lg:col-span-5 relative w-full aspect-[4/5] bg-gray-100 overflow-hidden shadow-2xl group border border-black/5">
+          <div className="lg:col-span-5 relative w-full aspect-[4/5] max-h-[500px] lg:max-h-none bg-gray-100 overflow-hidden shadow-2xl group border border-black/5">
             <Image
               src="/assets/product image 1.jpeg"
               alt="Artisanal Blending Process"
@@ -424,7 +424,7 @@ export default function Home() {
               className="object-cover group-hover:scale-105 transition-transform duration-[1.2s] ease-out"
             />
             {/* Floating Glassmorphic Note */}
-            <div className="absolute bottom-6 left-6 right-6 p-6 bg-white/80 backdrop-blur-md border border-white/20 shadow-lg flex flex-col gap-2">
+            <div className="absolute bottom-4 left-4 right-4 p-4 sm:bottom-6 sm:left-6 sm:right-6 sm:p-6 bg-white/80 backdrop-blur-md border border-white/20 shadow-lg flex flex-col gap-2">
               <span className="text-[10px] text-accent uppercase tracking-widest font-bold">Featured Scent</span>
               <h4 className="font-serif text-lg font-normal text-foreground">Signature Bloom Extrait</h4>
               <p className="text-xs text-secondary-foreground">A symphony of fresh Jasmine, Bulgarian Rose, and creamy Sandalwood.</p>
@@ -437,31 +437,31 @@ export default function Home() {
       </section>
 
       {/* 4. Interactive Celestial Scent Matcher (Zodiac Finder) */}
-      <section className="py-24 bg-foreground text-background relative overflow-hidden">
+      <section className="py-12 sm:py-20 md:py-24 bg-foreground text-background relative overflow-hidden">
         {/* Constellation Overlay Grid (Minimal) */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(212,175,55,0.06),transparent_70%)] pointer-events-none" />
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:100px_100px] pointer-events-none opacity-40" />
 
         <div className="max-w-[1280px] mx-auto px-6 relative z-10">
-          <div className="text-center max-w-2xl mx-auto mb-16 flex flex-col gap-3">
+          <div className="text-center max-w-2xl mx-auto mb-12 md:mb-16 flex flex-col gap-3">
             <span className="text-accent uppercase tracking-[0.3em] text-xs font-bold flex items-center justify-center gap-2">
               <Sparkles className="w-4 h-4" /> Celestial Scent Matcher
             </span>
-            <h2 className="text-3xl md:text-5xl font-serif font-normal">Discover Your Zodiac Signature</h2>
+            <h2 className="text-2xl sm:text-3xl md:text-5xl font-serif font-normal">Discover Your Zodiac Signature</h2>
             <p className="text-gray-400 text-sm md:text-base leading-relaxed">
               Every zodiac sign carries a unique energetic vibration. Explore our cosmic collection and find the exact fragrance profile written in the stars for you.
             </p>
           </div>
 
-          {/* Zodiac Selector Grid */}
-          <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-3 mb-16">
+          {/* Zodiac Selector Horizontal Scroll on mobile, grid on desktop */}
+          <div className="flex md:grid md:grid-cols-6 lg:grid-cols-12 overflow-x-auto no-scrollbar gap-2 md:gap-3 mb-10 md:mb-16 pb-2">
             {ZODIAC_SIGNS.map((sign) => {
               const isActive = selectedSign.name === sign.name;
               return (
                 <button
                   key={sign.name}
                   onClick={() => setSelectedSign(sign)}
-                  className={`flex flex-col items-center justify-center p-3 border transition-all duration-300 group cursor-pointer ${
+                  className={`flex flex-col items-center justify-center p-2.5 sm:p-3 border transition-all duration-300 group cursor-pointer shrink-0 min-w-[76px] md:min-w-0 md:w-auto ${
                     isActive 
                       ? "border-accent bg-accent/10 text-accent" 
                       : "border-gray-800 bg-black/20 text-gray-400 hover:border-gray-600 hover:text-white"
@@ -475,8 +475,8 @@ export default function Home() {
           </div>
 
           {/* Zodiac Profile Panel */}
-          <div className="bg-black/30 border border-gray-800 p-6 md:p-12 shadow-2xl relative overflow-hidden backdrop-blur-sm rounded-none">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 md:gap-16 items-center">
+          <div className="bg-black/30 border border-gray-800 p-5 sm:p-8 md:p-12 shadow-2xl relative overflow-hidden backdrop-blur-sm rounded-none">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 lg:gap-16 items-center">
               
               {/* Artwork Side */}
               <div className="lg:col-span-5 flex justify-center relative">
@@ -495,7 +495,7 @@ export default function Home() {
               {/* Detail Side */}
               <div className="lg:col-span-7 flex flex-col gap-6 text-left">
                 <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2 border-b border-gray-800 pb-4">
-                  <h3 className="text-3xl md:text-5xl font-serif text-white tracking-wide">{selectedSign.name}</h3>
+                  <h3 className="text-2xl sm:text-3xl md:text-5xl font-serif text-white tracking-wide">{selectedSign.name}</h3>
                   <span className="text-xs text-gray-400 font-sans tracking-widest uppercase">({selectedSign.dates})</span>
                   <span className="text-xs text-accent font-semibold tracking-widest uppercase ml-auto">Element: {selectedSign.element}</span>
                 </div>
@@ -513,7 +513,7 @@ export default function Home() {
                 </div>
 
                 {/* Supabase Product Details & Quick Add */}
-                <div className="border-t border-gray-800 pt-6 mt-2 flex flex-wrap items-center justify-between gap-6">
+                <div className="border-t border-gray-800 pt-6 mt-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 sm:gap-6">
                   {loadingZodiac ? (
                     <div className="flex items-center gap-2 text-gray-500">
                       <Loader2 className="w-5 h-5 animate-spin" />
@@ -531,15 +531,15 @@ export default function Home() {
                         </div>
                       </div>
 
-                      <div className="flex gap-4">
-                        <Link href={`/products/${zodiacProduct.slug}`}>
-                          <Button variant="outline" className="border-gray-700 text-gray-300 hover:border-white hover:text-white uppercase tracking-widest text-[11px] h-12 rounded-none px-6">
+                      <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                        <Link href={`/products/${zodiacProduct.slug}`} className="w-full sm:w-auto">
+                          <Button variant="outline" className="w-full border-gray-700 text-gray-300 hover:border-white hover:text-white uppercase tracking-widest text-[11px] h-12 rounded-none px-6">
                             View details
                           </Button>
                         </Link>
                         <Button
                           onClick={() => handleQuickAdd(zodiacProduct)}
-                          className="bg-accent text-white hover:bg-white hover:text-black uppercase tracking-widest text-[11px] h-12 px-8 rounded-none font-bold"
+                          className="w-full sm:w-auto bg-accent text-white hover:bg-white hover:text-black uppercase tracking-widest text-[11px] h-12 px-8 rounded-none font-bold"
                         >
                           Acquire Scent
                         </Button>
@@ -558,18 +558,18 @@ export default function Home() {
       </section>
 
       {/* 5. Trending Now */}
-      <section className="py-24 px-6 md:px-8 max-w-[1440px] mx-auto w-full">
-        <div className="flex items-center justify-between mb-12 border-b border-gray-200 pb-4">
+      <section className="py-12 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 max-w-[1440px] mx-auto w-full">
+        <div className="flex items-center justify-between mb-8 md:mb-12 border-b border-gray-200 pb-4">
           <div className="flex flex-col gap-2">
             <span className="text-accent uppercase tracking-[0.3em] text-[10px] md:text-xs font-bold">Curated Selections</span>
-            <h2 className="text-2xl md:text-4xl font-serif text-foreground font-normal">Trending Now</h2>
+            <h2 className="text-xl sm:text-2xl md:text-4xl font-serif text-foreground font-normal">Trending Now</h2>
           </div>
           <Link href="/products" className="text-xs font-bold uppercase tracking-[0.2em] hover:text-accent transition-colors self-end pb-1 border-b border-black hover:border-accent">
             View All
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-12 md:gap-x-8 md:gap-y-16">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-8 sm:gap-y-12 md:gap-x-8 md:gap-y-16">
           {(trendingProducts.length > 0 ? trendingProducts : MOCK_PRODUCTS).map((product) => (
             <ProductCard 
               key={product.id} 
@@ -581,8 +581,8 @@ export default function Home() {
       </section>
 
       {/* 6. Promo Banner (Artisanal Attars) */}
-      <section className="py-8 px-4 md:px-8 max-w-[1440px] mx-auto w-full">
-        <div className="relative w-full aspect-[4/5] sm:aspect-[16/7] md:aspect-[21/9] overflow-hidden bg-foreground text-background flex items-center border border-black/5">
+      <section className="py-6 sm:py-8 px-4 md:px-8 max-w-[1440px] mx-auto w-full">
+        <div className="relative w-full min-h-[420px] sm:min-h-0 sm:aspect-[16/7] md:aspect-[21/9] overflow-hidden bg-foreground text-background flex items-center border border-black/5">
           <Image
             src="https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?q=80&w=1600"
             alt="Promo"
@@ -590,12 +590,12 @@ export default function Home() {
             unoptimized
             className="object-cover opacity-25"
           />
-          <div className="relative z-10 p-8 md:p-16 max-w-2xl text-left">
+          <div className="relative z-10 p-6 sm:p-10 md:p-16 max-w-2xl text-left">
             <span className="bg-sale text-white text-[10px] font-bold uppercase tracking-widest px-3.5 py-1.5 mb-6 inline-block">Special Offer</span>
-            <h2 className="text-3xl md:text-5xl font-serif mb-4 leading-tight font-normal">Buy 2 Get 1 Free on all Signature Attars</h2>
+            <h2 className="text-2xl sm:text-3xl md:text-5xl font-serif mb-4 leading-tight font-normal">Buy 2 Get 1 Free on all Signature Attars</h2>
             <p className="text-gray-350 mb-8 max-w-md text-sm md:text-base leading-relaxed">Experience the rich heritage of Indian perfumery. Pure, hand-blended perfume oils that linger on the skin all day.</p>
             <Link href="/products?category=attar">
-              <Button className="bg-accent text-white hover:bg-white hover:text-black rounded-none px-10 py-6 uppercase tracking-widest text-xs font-bold transition-all">
+              <Button className="bg-accent text-white hover:bg-white hover:text-black rounded-none px-6 py-3.5 sm:px-10 sm:py-4 uppercase tracking-widest text-[10px] sm:text-xs font-bold transition-all">
                 Shop Attars
               </Button>
             </Link>
@@ -604,14 +604,14 @@ export default function Home() {
       </section>
 
       {/* 7. Fragrance Notes Bento Grid */}
-      <section className="py-24 px-6 md:px-8 max-w-[1440px] mx-auto w-full">
-        <div className="text-center max-w-2xl mx-auto mb-16 flex flex-col gap-3">
+      <section className="py-12 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 max-w-[1440px] mx-auto w-full">
+        <div className="text-center max-w-2xl mx-auto mb-12 md:mb-16 flex flex-col gap-3">
           <span className="text-accent uppercase tracking-[0.3em] text-xs font-bold">Fragrance Families</span>
-          <h2 className="text-3xl md:text-4xl font-serif font-normal text-foreground">Shop by Fragrance Notes</h2>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-normal text-foreground">Shop by Fragrance Notes</h2>
           <p className="text-secondary-foreground text-sm leading-relaxed">Find your olfactory matching preference. Click to explore notes.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
           {[
             { title: "Woody & Earthy", tag: "woody", image: "/assets/product image 5.jpeg" },
             { title: "Fresh Citrus", tag: "citrus", image: "/assets/product image 4.jpeg" },
@@ -631,7 +631,7 @@ export default function Home() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent transition-opacity duration-300" />
               <div className="absolute bottom-6 left-6 right-6 text-left flex flex-col gap-1">
-                <h3 className="text-white font-serif text-xl tracking-wide">{note.title}</h3>
+                <h3 className="text-white font-serif text-sm sm:text-base md:text-xl tracking-wide">{note.title}</h3>
                 <span className="text-accent text-[10px] uppercase tracking-widest font-bold opacity-0 group-hover:opacity-100 group-hover:translate-y-0 translate-y-1 transition-all duration-300">
                   Explore Family
                 </span>
@@ -642,16 +642,16 @@ export default function Home() {
       </section>
 
       {/* 8. Customer Reviews */}
-      <section className="py-24 bg-secondary-background">
-        <div className="max-w-[1440px] mx-auto px-6 text-center">
-          <div className="max-w-2xl mx-auto mb-16 flex flex-col gap-3">
+      <section className="py-12 sm:py-20 md:py-24 bg-secondary-background">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 text-center">
+          <div className="max-w-2xl mx-auto mb-12 md:mb-16 flex flex-col gap-3">
             <span className="text-accent uppercase tracking-[0.3em] text-[10px] md:text-xs font-bold">Endorsements</span>
-            <h2 className="text-3xl md:text-4xl font-serif font-normal text-foreground">Loved By Thousands</h2>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-normal text-foreground">Loved By Thousands</h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             {REVIEWS.map((review, i) => (
-              <div key={i} className="bg-white p-8 border border-gray-100 shadow-xs text-left flex flex-col justify-between">
+              <div key={i} className="bg-white p-6 sm:p-8 border border-gray-100 shadow-xs text-left flex flex-col justify-between">
                 <div>
                   <div className="flex gap-1 mb-6">
                     {[1,2,3,4,5].map(s => <Star key={s} className="w-3.5 h-3.5 fill-accent text-accent" />)}

@@ -157,11 +157,11 @@ export function ProductReviews({ productId }: { productId: string }) {
 
   const renderStars = (count: number, interactive = false) => {
     return (
-      <div className="flex text-black">
+      <div className="flex gap-0.5 text-accent">
         {[1, 2, 3, 4, 5].map((star) => (
           <Star 
             key={star} 
-            className={`${interactive ? "w-10 h-10" : "w-5 h-5"} ${star <= count ? "fill-black" : "text-gray-300"} ${interactive ? "cursor-pointer hover:scale-110 transition-transform" : ""}`}
+            className={`${interactive ? "w-8 h-8" : "w-5 h-5"} ${star <= count ? "fill-accent text-accent" : "text-gray-200"} ${interactive ? "cursor-pointer hover:scale-110 transition-transform" : ""}`}
             onClick={() => interactive && setRating(star)}
           />
         ))}

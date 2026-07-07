@@ -4,7 +4,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Button } from "./Button";
 import Link from "next/link";
-import { Star } from "lucide-react";
+import { Star, Plus } from "lucide-react";
 
 interface ProductCardProps {
   product: {
@@ -36,83 +36,101 @@ export function ProductCard({ product, onQuickAdd, onQuickView }: ProductCardPro
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 15 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="group flex flex-col w-full h-full"
+      className="group flex flex-col w-full h-full relative"
     >
-      <Link href={`/products/${product.slug}`} className="block relative w-full aspect-[4/5] bg-secondary-background overflow-hidden mb-4">
-        {isSale && (
-          <div className="absolute top-2 left-2 z-10 bg-sale text-white text-[10px] uppercase font-bold px-3 py-1 tracking-wider">
-            Sale
-          </div>
-        )}
-        {badge && !isSale && (
-          <div className="absolute top-2 left-2 z-10 bg-foreground text-background text-[10px] uppercase font-bold px-3 py-1 tracking-wider">
-            {badge}
-          </div>
-        )}
-        <Image
-          src={image}
-          alt={product.title}
-          fill
-          unoptimized
-          className={`object-cover object-center transition-opacity duration-500 ${hoverImage ? 'group-hover:opacity-0' : 'group-hover:scale-105 transition-transform'}`}
-        />
-        {hoverImage && (
+      {/* Image Wrapper */}
+      <div className="relative w-full aspect-[3/4] sm:aspect-[4/5] bg-[#F9F9F6] overflow-hidden mb-4 border border-neutral-100 shadow-[0_4px_12px_rgba(0,0,0,0.02)]">
+        <Link href={`/products/${product.slug}`} className="block w-full h-full">
+          {/* Elegant Sticker Badges */}
+          {isSale && (
+            <div className="absolute top-3 left-3 z-10 border border-[#D4AF37] bg-white/95 backdrop-blur-xs text-[#D4AF37] text-[8px] uppercase font-bold px-2 py-0.5 tracking-widest shadow-xs">
+              Sale
+            </div>
+          )}
+          {badge && !isSale && (
+            <div className="absolute top-3 left-3 z-10 border border-neutral-200 bg-white/95 backdrop-blur-xs text-[#1A1A1A] text-[8px] uppercase font-bold px-2 py-0.5 tracking-widest shadow-xs">
+              {badge}
+            </div>
+          )}
+          
           <Image
-            src={hoverImage}
-            alt={`${product.title} alternative view`}
+            src={image}
+            alt={product.title}
             fill
             unoptimized
-            className="object-cover object-center absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+            className={`object-cover object-center transition-all duration-[1s] ease-out ${hoverImage ? 'group-hover:opacity-0' : 'group-hover:scale-105'}`}
           />
-        )}
-        {/* Quick View overlay button */}
-        {onQuickView && (
-          <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-20">
+          {hoverImage && (
+            <Image
+              src={hoverImage}
+              alt={`${product.title} alternative view`}
+              fill
+              unoptimized
+              className="object-cover object-center absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-[1s] ease-out group-hover:scale-105"
+            />
+          )}
+        </Link>
+
+        {/* Premium bottom-sliding dual action bar on hover */}
+        <div className="absolute bottom-0 left-0 right-0 h-11 bg-[#1A1A1A]/95 backdrop-blur-xs flex items-center justify-between text-white overflow-hidden transition-all duration-300 translate-y-full group-hover:translate-y-0 z-20">
+          {onQuickAdd && (
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onQuickAdd();
+              }}
+              className="flex-1 h-full flex items-center justify-center gap-1.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest hover:bg-[#D4AF37] hover:text-white transition-all duration-300 cursor-pointer border-r border-white/10"
+            >
+              Add To Cart
+            </button>
+          )}
+          {onQuickView && (
             <button
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 onQuickView();
               }}
-              className="bg-white/95 hover:bg-black hover:text-white text-black text-[10px] md:text-xs font-bold uppercase tracking-widest px-4 py-2.5 shadow-md transition-all cursor-pointer transform translate-y-2 group-hover:translate-y-0 duration-300"
+              className="flex-1 h-full flex items-center justify-center gap-1.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest hover:bg-[#D4AF37] hover:text-white transition-all duration-300 cursor-pointer"
             >
               Quick View
             </button>
-          </div>
-        )}
-      </Link>
-      
-      <div className="flex flex-col flex-1 px-1">
-        <Link href={`/products/${product.slug}`}>
-          <h3 className="font-serif text-lg md:text-xl text-foreground group-hover:text-foreground/70 transition-colors line-clamp-1">{product.title}</h3>
-        </Link>
-        <div className="flex items-center gap-1 mt-1 mb-2">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <Star key={star} className="w-3 h-3 fill-accent text-accent" />
-          ))}
-          <span className="text-xs text-secondary-foreground ml-1">(42)</span>
-        </div>
-        <div className="flex items-center gap-2 mb-4">
-          <p className={`text-sm ${isSale ? 'text-sale font-medium' : 'text-foreground'}`}>
-            ₹{displayPrice}
-          </p>
-          {isSale && (
-            <p className="text-sm text-secondary-foreground line-through">
-              ₹{product.price}
-            </p>
           )}
         </div>
+      </div>
+      
+      {/* Product Information */}
+      <div className="flex flex-col flex-1 px-1 text-center sm:text-left">
+        <Link href={`/products/${product.slug}`} className="block group/title">
+          <h3 className="font-serif text-sm sm:text-base md:text-lg text-[#1A1A1A] group-hover/title:text-[#D4AF37] transition-colors duration-300 line-clamp-1">
+            {product.title}
+          </h3>
+        </Link>
+        
+        {/* Rating stars and review count */}
+        <div className="flex items-center justify-center sm:justify-start gap-1 mt-1.5 mb-2">
+          <div className="flex gap-0.5 text-[#D4AF37]">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Star key={star} className="w-3 h-3 fill-current text-current" />
+            ))}
+          </div>
+          <span className="text-[10px] text-neutral-400 font-mono font-medium">(42)</span>
+        </div>
 
-        <div className="mt-auto">
-          <Button 
-            onClick={onQuickAdd}
-            className="w-full bg-foreground text-background hover:bg-foreground/90 rounded-none uppercase tracking-widest text-[11px] py-4 h-auto"
-          >
-            Add to Cart
-          </Button>
+        {/* Pricing */}
+        <div className="flex items-baseline justify-center sm:justify-start gap-2 mb-1">
+          <span className="text-sm sm:text-base font-bold text-[#1A1A1A]">
+            ₹{displayPrice.toLocaleString()}
+          </span>
+          {isSale && (
+            <span className="text-xs text-neutral-400 line-through font-normal font-mono">
+              ₹{product.price.toLocaleString()}
+            </span>
+          )}
         </div>
       </div>
     </motion.div>

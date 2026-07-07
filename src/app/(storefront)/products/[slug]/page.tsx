@@ -252,10 +252,10 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             
             {/* Header */}
             <div className="flex items-start justify-between mb-2">
-              <h1 className="text-3xl md:text-4xl font-black uppercase tracking-wide flex items-center gap-3">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif font-semibold uppercase tracking-wide flex items-center gap-2 md:gap-3">
                 {PRODUCT.title}
                 {PRODUCT.badge && (
-                  <span className="bg-black text-white text-[10px] px-2 py-1 tracking-widest align-middle">
+                  <span className="bg-black text-white text-[9px] md:text-[10px] px-2 py-1 tracking-widest align-middle font-sans font-bold">
                     {PRODUCT.badge}
                   </span>
                 )}
@@ -264,8 +264,8 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
 
             {/* Reviews & Type */}
             <div className="flex items-center gap-2 mb-4 text-sm">
-              <div className="flex text-black">
-                {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-black" />)}
+              <div className="flex gap-0.5 text-accent">
+                {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-accent text-accent" />)}
               </div>
               <span className="text-gray-600">{PRODUCT.reviewsCount} reviews</span>
             </div>
@@ -362,57 +362,66 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
 
             {/* Add to Cart / Quantity selection Area */}
             <div className="flex flex-col gap-4 mb-8">
-              <h3 className="text-xs font-bold tracking-widest uppercase text-gray-500">Quantity</h3>
-              <div className="flex gap-4 items-stretch h-12">
-                <div className="flex items-center justify-between border border-gray-300 w-32 px-4 bg-white">
+              {/* Full Width Premium Quantity Selector */}
+              <div className="flex items-center justify-between border border-neutral-200 h-14 px-5 bg-white select-none">
+                <span className="text-xs font-bold uppercase tracking-widest text-[#6B6B6B]">Quantity</span>
+                <div className="flex items-center gap-4">
                   <button 
+                    type="button"
                     onClick={() => setQuantity(Math.max(1, quantity - 1))} 
                     disabled={!isSelectedSizeAvailable}
-                    className="text-gray-500 hover:text-black disabled:opacity-30 cursor-pointer"
+                    className="text-neutral-400 hover:text-black p-1.5 transition-colors disabled:opacity-30 cursor-pointer"
                   >
                     <Minus className="w-4 h-4" />
                   </button>
-                  <span className={`font-bold ${!isSelectedSizeAvailable ? "text-gray-300" : ""}`}>{quantity}</span>
+                  <span className={`font-bold text-sm text-[#1A1A1A] min-w-[24px] text-center ${!isSelectedSizeAvailable ? "text-neutral-300" : ""}`}>
+                    {quantity}
+                  </span>
                   <button 
+                    type="button"
                     onClick={() => setQuantity(quantity + 1)} 
                     disabled={!isSelectedSizeAvailable}
-                    className="text-gray-500 hover:text-black disabled:opacity-30 cursor-pointer"
+                    className="text-neutral-400 hover:text-black p-1.5 transition-colors disabled:opacity-30 cursor-pointer"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
                 </div>
+              </div>
+
+              {/* Full Width Stacked CTA Buttons */}
+              <div className="flex flex-col gap-3">
                 <Button 
                   onClick={handleAddToCart}
                   disabled={!isSelectedSizeAvailable}
-                  className={`flex-1 rounded-none uppercase tracking-widest font-bold border transition-colors ${
+                  className={`w-full rounded-none uppercase tracking-widest font-bold h-14 text-xs transition-all duration-300 ${
                     !isSelectedSizeAvailable
-                      ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
-                      : "bg-white text-black border-black hover:bg-gray-50 cursor-pointer"
+                      ? "bg-neutral-100 text-neutral-400 border border-neutral-200 cursor-not-allowed"
+                      : "bg-[#1A1A1A] text-white hover:bg-[#D4AF37] hover:border-[#D4AF37] cursor-pointer"
                   }`}
                 >
                   {isSelectedSizeAvailable ? "Add to cart" : "Sold Out"}
                 </Button>
+                <Button 
+                  onClick={handleAddToCart}
+                  disabled={!isSelectedSizeAvailable}
+                  className={`w-full rounded-none uppercase tracking-widest font-bold h-14 text-xs transition-all duration-300 ${
+                    !isSelectedSizeAvailable
+                      ? "bg-[#FAF9F6] text-neutral-300 border border-neutral-150 cursor-not-allowed"
+                      : "bg-[#F5F5F0] hover:bg-[#1A1A1A] border border-[#1a1a1a]/5 hover:border-black text-[#1A1A1A] hover:text-white cursor-pointer"
+                  }`}
+                >
+                  {isSelectedSizeAvailable ? "Buy it Now" : "Out of Stock"}
+                </Button>
               </div>
-              <Button 
-                onClick={handleAddToCart}
-                disabled={!isSelectedSizeAvailable}
-                className={`w-full rounded-none uppercase tracking-widest font-bold h-12 transition-colors ${
-                  !isSelectedSizeAvailable
-                    ? "bg-gray-150 text-gray-400 cursor-not-allowed"
-                    : "bg-black text-white hover:bg-gray-900 cursor-pointer"
-                }`}
-              >
-                {isSelectedSizeAvailable ? "Buy it Now" : "Out of Stock"}
-              </Button>
             </div>
 
             {/* Trust Badges */}
-            <div className="grid grid-cols-4 gap-2 mb-6">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-2 mb-6">
               {TRUST_BADGES.map((badge, idx) => {
                 const Icon = badge.icon;
                 return (
                   <div key={idx} className="flex flex-col items-center text-center gap-2">
-                    <Icon className="w-6 h-6 text-blue-900" strokeWidth={1.5} />
+                    <Icon className="w-6 h-6 text-accent" strokeWidth={1.5} />
                     <span className="text-[10px] leading-tight text-gray-600">{badge.label}</span>
                   </div>
                 );

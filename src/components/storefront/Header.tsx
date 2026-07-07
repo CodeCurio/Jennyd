@@ -9,6 +9,7 @@ import Image from "next/image";
 import { useCart } from "@/lib/store/CartContext";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/store/AuthContext";
+import { SearchModal } from "./SearchModal";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -29,6 +30,7 @@ export function Header() {
   const { user, profile } = useAuth();
   const [settings, setSettings] = useState<any>(null);
   const [currentAnnIndex, setCurrentAnnIndex] = useState(0);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -146,18 +148,20 @@ export function Header() {
               {/* Row 1: Search & Icons */}
               <div className="flex items-center justify-between gap-8 w-full">
                 {/* Search Bar */}
-                <form onSubmit={handleSearch} className="flex-1 relative max-w-4xl">
+                <div 
+                  onClick={() => setIsSearchOpen(true)}
+                  className="flex-1 relative max-w-4xl cursor-pointer"
+                >
                   <input 
                     type="text" 
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search your Perfume" 
-                    className="w-full border border-gray-300 rounded-full py-2 pl-6 pr-12 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent text-sm"
+                    readOnly
+                    placeholder="Search your Perfume..." 
+                    className="w-full border border-gray-350 rounded-full py-2 pl-6 pr-12 text-sm text-gray-400 bg-transparent cursor-pointer focus:outline-none"
                   />
-                  <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-accent">
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">
                     <Search className="w-4 h-4" />
-                  </button>
-                </form>
+                  </div>
+                </div>
                 
                 {/* Icons */}
                 <div className="flex items-center gap-6 shrink-0">
@@ -282,7 +286,10 @@ export function Header() {
             </Link>
 
             <div className="flex items-center gap-3">
-              <button className="p-1 hover:text-accent transition-colors">
+              <button 
+                onClick={() => setIsSearchOpen(true)}
+                className="p-1 hover:text-accent transition-colors cursor-pointer"
+              >
                 <Search className="w-5 h-5" />
               </button>
               <button 
@@ -361,6 +368,7 @@ export function Header() {
           )}
         </AnimatePresence>
       </header>
+      <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </>
   );
 }

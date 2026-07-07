@@ -233,22 +233,21 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
 
         {/* Category Filter */}
         <div>
-          <h4 className="font-bold text-xs uppercase tracking-widest mb-4 text-gray-700">Collection / Tag</h4>
-          <div className="flex flex-col gap-2.5">
+          <h4 className="font-bold text-[10px] uppercase tracking-[0.2em] mb-4 text-[#1A1A1A] border-b border-neutral-100 pb-2">Collection / Tag</h4>
+          <div className="flex flex-col gap-1.5">
             {categories.map((cat) => {
               const isActive = activeCategory.toLowerCase() === cat.toLowerCase();
               return (
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
-                  className={`flex items-center justify-between text-left text-xs py-1.5 px-2.5 rounded transition-all cursor-pointer ${
+                  className={`text-left text-xs py-2 px-1 transition-all duration-300 cursor-pointer border-l-2 ${
                     isActive
-                      ? "bg-black text-white font-bold tracking-wide"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-black"
+                      ? "border-[#D4AF37] pl-3 text-[#1A1A1A] font-bold tracking-wider"
+                      : "border-transparent pl-2 text-neutral-500 hover:text-black hover:border-neutral-200"
                   }`}
                 >
-                  <span>{cat}</span>
-                  {isActive && <span className="w-1.5 h-1.5 rounded-full bg-accent" />}
+                  {cat}
                 </button>
               );
             })}
@@ -257,9 +256,9 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
 
         {/* Fragrance Notes Filter */}
         {fragranceNotes.length > 1 && (
-          <div className="border-t border-gray-100 pt-6">
-            <h4 className="font-bold text-xs uppercase tracking-widest mb-4 text-gray-700 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-accent" /> Fragrance Notes
+          <div className="border-t border-neutral-100 pt-6">
+            <h4 className="font-bold text-[10px] uppercase tracking-[0.2em] mb-4 text-[#1A1A1A] flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" /> Fragrance Notes
             </h4>
             <div className="flex flex-wrap gap-2">
               {fragranceNotes.map((note) => {
@@ -268,10 +267,10 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
                   <button
                     key={note}
                     onClick={() => setActiveNote(note)}
-                    className={`text-xs px-3 py-1.5 border transition-all cursor-pointer ${
+                    className={`text-[10px] px-3 py-1.5 border uppercase tracking-wider transition-all duration-300 cursor-pointer ${
                       isActive
-                        ? "border-black bg-black text-white font-semibold"
-                        : "border-gray-200 text-gray-600 hover:border-gray-400 bg-gray-50"
+                        ? "border-[#D4AF37] bg-[#D4AF37]/10 text-[#1A1A1A] font-semibold"
+                        : "border-neutral-200 text-neutral-500 hover:border-neutral-400 bg-transparent"
                     }`}
                   >
                     {note}
@@ -283,23 +282,22 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
         )}
 
         {/* Size Filter */}
-        <div className="border-t border-gray-100 pt-6">
-          <h4 className="font-bold text-xs uppercase tracking-widest mb-4 text-gray-700">Size Options</h4>
-          <div className="flex flex-col gap-2.5">
+        <div className="border-t border-neutral-100 pt-6">
+          <h4 className="font-bold text-[10px] uppercase tracking-[0.2em] mb-4 text-[#1A1A1A]">Size Options</h4>
+          <div className="flex flex-col gap-1.5">
             {(["All", "50ml", "100ml"] as const).map((size) => {
               const isActive = activeSize === size;
               return (
                 <button
                   key={size}
                   onClick={() => setActiveSize(size)}
-                  className={`flex items-center justify-between text-left text-xs py-1.5 px-2.5 rounded transition-all cursor-pointer ${
+                  className={`text-left text-xs py-2 px-1 transition-all duration-300 cursor-pointer border-l-2 ${
                     isActive
-                      ? "bg-black text-white font-bold tracking-wide"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-black"
+                      ? "border-[#D4AF37] pl-3 text-[#1A1A1A] font-bold tracking-wider"
+                      : "border-transparent pl-2 text-neutral-500 hover:text-black hover:border-neutral-200"
                   }`}
                 >
-                  <span>{size === "All" ? "All Sizes" : size.toUpperCase()}</span>
-                  {isActive && <span className="w-1.5 h-1.5 rounded-full bg-accent" />}
+                  {size === "All" ? "All Sizes" : size.toUpperCase()}
                 </button>
               );
             })}

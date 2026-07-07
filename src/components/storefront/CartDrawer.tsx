@@ -1,24 +1,194 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Minus, Plus, Trash2, Ticket } from "lucide-react";
+import { X, Minus, Plus, Trash2, Ticket, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useCart } from "@/lib/store/CartContext";
 import { Button } from "../ui/Button";
+import { supabase } from "@/lib/supabase";
+
+const QUICK_NAV = [
+  { label: "Bestsellers", href: "/products?sort=best-selling" },
+  { label: "New Arrivals", href: "/products?sort=newest" },
+  { label: "All Perfumes", href: "/products" },
+];
+
+/* ── Horizontal sliding product carousel for "You may also like" ── */
+function RecommendationCarousel({
+  products,
+  onAdd,
+  onClose,
+}: {
+  products: any[];
+  onAdd: (p: any) => void;
+  onClose: () => void;
+}) {
+  const ITEMS_PER_PAGE = 2;
+  const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
+  const [currentPage, setCurrentPage] = useState(0);
+
+  // Touch / swipe support
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  const goTo = useCallback(
+    (page: number) => {
+      if (page < 0 || page >= totalPages) return;
+      setCurrentPage(page);
+    },
+    [totalPages]
+  );
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+  const handleTouchEnd = () => {
+    const diff = touchStartX.current - touchEndX.current;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) goTo(currentPage + 1);
+      else goTo(currentPage - 1);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-3 flex-1 min-h-0">
+      {/* Header row with arrows */}
+      <div className="flex items-center justify-between">
+        <h4 className="text-sm font-serif text-[#1a1a1a]">You may also like</h4>
+        {totalPages > 1 && (
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => goTo(currentPage - 1)}
+              disabled={currentPage === 0}
+              className="p-1 text-neutral-400 hover:text-black disabled:opacity-30 transition-colors cursor-pointer"
+              aria-label="Previous products"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <button
+              onClick={() => goTo(currentPage + 1)}
+              disabled={currentPage === totalPages - 1}
+              className="p-1 text-neutral-400 hover:text-black disabled:opacity-30 transition-colors cursor-pointer"
+              aria-label="Next products"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Sliding track */}
+      <div
+        className="overflow-hidden flex-1 min-h-0"
+        ref={trackRef}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        <div
+          className="flex transition-transform duration-400 ease-in-out h-full"
+          style={{ transform: `translateX(-${currentPage * 100}%)` }}
+        >
+          {Array.from({ length: totalPages }).map((_, pageIdx) => (
+            <div
+              key={pageIdx}
+              className="flex gap-3 w-full shrink-0 px-[1px]"
+              style={{ minWidth: "100%" }}
+            >
+              {products
+                .slice(pageIdx * ITEMS_PER_PAGE, (pageIdx + 1) * ITEMS_PER_PAGE)
+                .map((product) => {
+                  const salePrice = product.sale_price;
+                  const isSale = !!salePrice;
+                  const displayPrice = isSale ? salePrice : product.price;
+                  return (
+                    <div
+                      key={product.id}
+                      className="flex-1 border border-neutral-200 p-3 bg-white flex flex-col justify-between"
+                    >
+                      <div>
+                        <Link
+                          href={`/products/${product.slug}`}
+                          onClick={onClose}
+                          className="block relative aspect-square bg-white overflow-hidden mb-2"
+                        >
+                          <img
+                            src={product.image}
+                            alt={product.title}
+                            className="object-contain w-full h-full"
+                          />
+                        </Link>
+                        <Link href={`/products/${product.slug}`} onClick={onClose}>
+                          <h5 className="text-[11px] font-bold text-[#1A1A1A] font-sans line-clamp-2 leading-tight min-h-[28px]">
+                            {product.title}
+                          </h5>
+                        </Link>
+                        <div className="flex items-baseline gap-1.5 mt-1.5 text-xs">
+                          <span className="font-bold text-[#1A1A1A]">
+                            ₹{displayPrice.toLocaleString()}
+                          </span>
+                          {isSale && (
+                            <span className="text-[10px] text-neutral-400 line-through font-mono">
+                              ₹{product.price.toLocaleString()}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => onAdd(product)}
+                        className="w-full mt-2 h-8 bg-black text-white hover:bg-[#D4AF37] text-[10px] font-bold uppercase tracking-widest transition-all duration-300 cursor-pointer"
+                      >
+                        Add
+                      </button>
+                    </div>
+                  );
+                })}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Dots */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-1.5 pt-1">
+          {Array.from({ length: totalPages }).map((_, i) => (
+            <button
+              key={i}
+              onClick={() => goTo(i)}
+              aria-label={`Go to page ${i + 1}`}
+              className={`rounded-full transition-all duration-300 cursor-pointer ${
+                i === currentPage
+                  ? "w-2.5 h-2.5 bg-neutral-600"
+                  : "w-2 h-2 bg-neutral-200 hover:bg-neutral-400"
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════════ */
 
 export function CartDrawer() {
-  const { 
-    isDrawerOpen, 
-    setIsDrawerOpen, 
-    items, 
-    updateQuantity, 
-    removeItem, 
+  const {
+    isDrawerOpen,
+    setIsDrawerOpen,
+    items,
+    updateQuantity,
+    removeItem,
     subtotal,
     appliedCoupon,
     discount,
     applyCoupon,
-    removeCoupon
+    removeCoupon,
+    addItem,
   } = useCart();
 
   const [couponCode, setCouponCode] = useState("");
@@ -38,6 +208,43 @@ export function CartDrawer() {
     }
   };
 
+  const [recommendations, setRecommendations] = useState<any[]>([]);
+
+  // Fetch recommended products for empty cart state inside drawer
+  useEffect(() => {
+    if (!isDrawerOpen) return;
+    const fetchRecommendations = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("products")
+          .select("id, title, slug, price, sale_price, metadata")
+          .limit(8);
+        if (!error && data) {
+          setRecommendations(
+            data.map((p: any) => ({
+              ...p,
+              image: p.metadata?.images?.[0] || "/assets/placeholder.jpg",
+            }))
+          );
+        }
+      } catch (err) {
+        console.error("Error fetching recommendations:", err);
+      }
+    };
+    fetchRecommendations();
+  }, [isDrawerOpen]);
+
+  const handleAddRecommendation = (product: any) => {
+    const displayPrice = product.sale_price || product.price;
+    addItem({
+      productId: product.id,
+      title: product.title,
+      price: displayPrice,
+      image: product.image,
+      quantity: 1,
+    });
+  };
+
   return (
     <AnimatePresence>
       {isDrawerOpen && (
@@ -47,34 +254,71 @@ export function CartDrawer() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsDrawerOpen(false)}
-            className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm"
+            className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-xs"
           />
           <motion.div
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="fixed top-0 right-0 bottom-0 z-[70] w-full max-w-md bg-card shadow-2xl flex flex-col font-sans"
+            className="fixed top-0 right-0 bottom-0 z-[70] w-full max-w-md bg-white shadow-2xl flex flex-col font-sans"
           >
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h2 className="text-xl font-serif tracking-wide uppercase">Your Cart</h2>
-              <button onClick={() => setIsDrawerOpen(false)} className="text-secondary-foreground hover:text-foreground cursor-pointer">
-                <X size={24} />
+            {/* ── Drawer Header ── */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200">
+              <h2 className="text-lg font-bold tracking-wider uppercase text-[#1A1A1A] font-sans">
+                Your Cart
+              </h2>
+              <button
+                onClick={() => setIsDrawerOpen(false)}
+                className="text-neutral-400 hover:text-black transition-colors cursor-pointer p-1"
+                aria-label="Close cart"
+              >
+                <X size={20} />
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6">
-              {items.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center gap-4 text-secondary-foreground">
-                  <div className="w-20 h-20 bg-secondary-background rounded-full flex items-center justify-center mb-2">
-                    <Trash2 size={28} />
+            {/* ── Drawer Body ── */}
+            {items.length === 0 ? (
+              /* Empty state – everything fits in one viewport, no scroll required */
+              <div className="flex-1 flex flex-col px-6 py-5 overflow-hidden">
+                {/* Empty message */}
+                <div className="text-center flex flex-col items-center">
+                  <h3 className="text-base font-serif text-[#1a1a1a] mb-5">
+                    Your cart is currently empty
+                  </h3>
+
+                  {/* Quick navigation – compact stacked buttons */}
+                  <div className="flex flex-col gap-2.5 w-full max-w-[240px] mx-auto">
+                    {QUICK_NAV.map((nav) => (
+                      <Link
+                        key={nav.label}
+                        href={nav.href}
+                        onClick={() => setIsDrawerOpen(false)}
+                        className="w-full"
+                      >
+                        <button className="w-full h-9 border border-neutral-300 text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white hover:border-[#1A1A1A] text-[11px] font-bold uppercase tracking-[0.15em] transition-all duration-300 cursor-pointer bg-white">
+                          {nav.label}
+                        </button>
+                      </Link>
+                    ))}
                   </div>
-                  <p className="text-xs uppercase tracking-widest font-bold">Your cart is empty.</p>
-                  <Button variant="outline" onClick={() => setIsDrawerOpen(false)} className="rounded-none text-xs uppercase tracking-widest font-bold border-black hover:bg-black hover:text-white cursor-pointer">
-                    Continue Shopping
-                  </Button>
                 </div>
-              ) : (
+
+                {/* Divider */}
+                <div className="border-t border-neutral-100 my-4" />
+
+                {/* Sliding recommendations carousel */}
+                {recommendations.length > 0 && (
+                  <RecommendationCarousel
+                    products={recommendations}
+                    onAdd={handleAddRecommendation}
+                    onClose={() => setIsDrawerOpen(false)}
+                  />
+                )}
+              </div>
+            ) : (
+              /* ── Cart items ── */
+              <div className="flex-1 overflow-y-auto p-6 no-scrollbar bg-white">
                 <div className="flex flex-col gap-6">
                   <AnimatePresence>
                     {items.map((item) => (
@@ -85,57 +329,81 @@ export function CartDrawer() {
                         exit={{ opacity: 0, height: 0, x: 50 }}
                         className="flex gap-4 overflow-hidden"
                       >
-                        {/* Standard img tag to support spaces in local asset paths and Supabase remote assets without loading errors */}
                         <div className="relative w-20 h-24 bg-gray-50 border border-gray-150 shrink-0 overflow-hidden rounded">
-                          <img src={item.image} alt={item.title} className="object-cover w-full h-full" />
+                          <img
+                            src={item.image}
+                            alt={item.title}
+                            className="object-cover w-full h-full"
+                          />
                         </div>
                         <div className="flex flex-col justify-between flex-1">
                           <div className="flex justify-between gap-2">
                             <div>
-                              <h3 className="font-semibold text-xs text-foreground uppercase tracking-wide leading-tight">{item.title}</h3>
-                              {item.variantInfo && <p className="text-[10px] text-gray-500 uppercase tracking-widest mt-1 font-medium">{item.variantInfo}</p>}
+                              <h3 className="font-semibold text-xs text-foreground uppercase tracking-wide leading-tight">
+                                {item.title}
+                              </h3>
+                              {item.variantInfo && (
+                                <p className="text-[10px] text-gray-500 uppercase tracking-widest mt-1 font-medium">
+                                  {item.variantInfo}
+                                </p>
+                              )}
                             </div>
-                            <button onClick={() => removeItem(item.id)} className="text-gray-400 hover:text-red-600 transition-colors cursor-pointer">
+                            <button
+                              onClick={() => removeItem(item.id)}
+                              className="text-gray-400 hover:text-red-600 transition-colors cursor-pointer"
+                            >
                               <Trash2 size={16} />
                             </button>
                           </div>
                           <div className="flex items-center justify-between mt-2">
                             <div className="flex items-center border border-gray-300">
-                              <button 
-                                onClick={() => updateQuantity(item.id, item.quantity - 1)} 
+                              <button
+                                onClick={() =>
+                                  updateQuantity(item.id, item.quantity - 1)
+                                }
                                 className="p-1.5 hover:bg-gray-100 transition-all cursor-pointer"
                               >
                                 <Minus size={12} />
                               </button>
-                              <span className="px-3 text-xs font-bold">{item.quantity}</span>
-                              <button 
-                                onClick={() => updateQuantity(item.id, item.quantity + 1)} 
+                              <span className="px-3 text-xs font-bold">
+                                {item.quantity}
+                              </span>
+                              <button
+                                onClick={() =>
+                                  updateQuantity(item.id, item.quantity + 1)
+                                }
                                 className="p-1.5 hover:bg-gray-100 transition-all cursor-pointer"
                               >
                                 <Plus size={12} />
                               </button>
                             </div>
-                            <p className="font-bold text-xs font-mono">₹{(item.price * item.quantity).toLocaleString()}</p>
+                            <p className="font-bold text-xs font-mono">
+                              ₹{(item.price * item.quantity).toLocaleString()}
+                            </p>
                           </div>
                         </div>
                       </motion.div>
                     ))}
                   </AnimatePresence>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
+            {/* ── Footer (only when items exist) ── */}
             {items.length > 0 && (
               <div className="p-6 border-t border-gray-200 bg-gray-50/50 space-y-4">
-                
                 {/* Coupon Input Block */}
                 <div className="border-b border-gray-200 pb-4">
                   {appliedCoupon ? (
                     <div className="flex items-center justify-between bg-green-50 text-green-800 text-[11px] px-3 py-2 border border-green-200 font-medium">
                       <span className="flex items-center gap-1.5 font-bold uppercase tracking-wider">
-                        <Ticket className="w-3.5 h-3.5" /> {appliedCoupon.code} (-₹{discount.toLocaleString()})
+                        <Ticket className="w-3.5 h-3.5" /> {appliedCoupon.code}{" "}
+                        (-₹{discount.toLocaleString()})
                       </span>
-                      <button onClick={removeCoupon} className="text-red-600 hover:text-red-900 font-bold uppercase tracking-widest text-[9px] cursor-pointer">
+                      <button
+                        onClick={removeCoupon}
+                        className="text-red-600 hover:text-red-900 font-bold uppercase tracking-widest text-[9px] cursor-pointer"
+                      >
                         Remove
                       </button>
                     </div>
@@ -160,7 +428,11 @@ export function CartDrawer() {
                           {isApplyingCoupon ? "..." : "Apply"}
                         </button>
                       </div>
-                      {couponError && <p className="text-[10px] text-red-600 font-medium">{couponError}</p>}
+                      {couponError && (
+                        <p className="text-[10px] text-red-600 font-medium">
+                          {couponError}
+                        </p>
+                      )}
                     </div>
                   )}
                 </div>
@@ -169,30 +441,49 @@ export function CartDrawer() {
                 <div className="space-y-1.5">
                   <div className="flex justify-between text-xs text-gray-500 font-semibold uppercase tracking-wider">
                     <span>Subtotal</span>
-                    <span className="font-mono">₹{subtotal.toLocaleString()}</span>
+                    <span className="font-mono">
+                      ₹{subtotal.toLocaleString()}
+                    </span>
                   </div>
                   {appliedCoupon && (
                     <div className="flex justify-between text-xs text-green-700 font-semibold uppercase tracking-wider">
                       <span>Discount ({appliedCoupon.code})</span>
-                      <span className="font-mono">-₹{discount.toLocaleString()}</span>
+                      <span className="font-mono">
+                        -₹{discount.toLocaleString()}
+                      </span>
                     </div>
                   )}
                   <div className="flex justify-between text-base font-bold text-gray-900 pt-2 border-t border-gray-150 uppercase tracking-widest">
                     <span>Total</span>
-                    <span className="font-mono">₹{(subtotal - discount).toLocaleString()}</span>
+                    <span className="font-mono">
+                      ₹{(subtotal - discount).toLocaleString()}
+                    </span>
                   </div>
                 </div>
 
-                <p className="text-[10px] text-gray-400 text-center leading-normal">Shipping and taxes calculated at checkout.</p>
-                
+                <p className="text-[10px] text-gray-400 text-center leading-normal">
+                  Shipping and taxes calculated at checkout.
+                </p>
+
                 {/* Checkout Links */}
                 <div className="flex gap-3">
-                  <Link href="/cart" onClick={() => setIsDrawerOpen(false)} className="flex-1">
-                    <Button variant="outline" className="w-full text-[10px] py-3 rounded-none uppercase tracking-widest font-bold border-black text-black cursor-pointer">
+                  <Link
+                    href="/cart"
+                    onClick={() => setIsDrawerOpen(false)}
+                    className="flex-1"
+                  >
+                    <Button
+                      variant="outline"
+                      className="w-full text-[10px] py-3 rounded-none uppercase tracking-widest font-bold border-black text-black cursor-pointer"
+                    >
                       View Cart
                     </Button>
                   </Link>
-                  <Link href="/checkout" onClick={() => setIsDrawerOpen(false)} className="flex-1">
+                  <Link
+                    href="/checkout"
+                    onClick={() => setIsDrawerOpen(false)}
+                    className="flex-1"
+                  >
                     <Button className="w-full text-[10px] py-3 rounded-none uppercase tracking-widest font-bold bg-black hover:bg-gray-900 text-white cursor-pointer">
                       Checkout
                     </Button>
