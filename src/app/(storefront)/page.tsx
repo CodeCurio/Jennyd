@@ -23,28 +23,31 @@ import { supabase } from "@/lib/supabase";
 
 const HERO_SLIDES = [
   {
-    image: "/assets/product image 1.jpeg",
-    tabletImage: "/assets/product image 1.jpeg",
-    mobileImage: "/assets/product image 1.jpeg",
-    title: "The Golden Era",
-    subtitle: "NEW ARRIVALS",
-    cta: "SHOP NOW"
+    image: "/assets/Banner-1.jpeg",
+    tabletImage: "/assets/Banner-1.jpeg",
+    mobileImage: "/assets/Banner-1.jpeg",
+    title: "",
+    subtitle: "",
+    cta: "",
+    link: "/products"
   },
   {
-    image: "/assets/product image 2.jpeg",
-    tabletImage: "/assets/product image 2.jpeg",
-    mobileImage: "/assets/product image 2.jpeg",
-    title: "Floral Fantasies",
-    subtitle: "FOR HER",
-    cta: "EXPLORE COLLECTION"
+    image: "/assets/Banner-2.jpeg",
+    tabletImage: "/assets/Banner-2.jpeg",
+    mobileImage: "/assets/Banner-2.jpeg",
+    title: "",
+    subtitle: "",
+    cta: "",
+    link: "/products"
   },
   {
-    image: "/assets/product image 3.jpeg",
-    tabletImage: "/assets/product image 3.jpeg",
-    mobileImage: "/assets/product image 3.jpeg",
-    title: "Mystic Oud",
-    subtitle: "LIMITED EDITION",
-    cta: "DISCOVER OUD"
+    image: "/assets/Banner-3.jpeg",
+    tabletImage: "/assets/Banner-3.jpeg",
+    mobileImage: "/assets/Banner-3.jpeg",
+    title: "",
+    subtitle: "",
+    cta: "",
+    link: "/products"
   }
 ];
 
@@ -241,76 +244,46 @@ export default function Home() {
     <div className="flex flex-col bg-background selection:bg-accent selection:text-white overflow-hidden pb-20">
       
       {/* 1. Hero Carousel */}
-      <section className="relative w-full aspect-[4/5] sm:aspect-[16/9] lg:h-[85vh] overflow-hidden group">
-        {slides.map((slide, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: i === currentSlide ? 1 : 0 }}
-            transition={{ duration: 1 }}
-            className="absolute inset-0"
-            style={{ pointerEvents: i === currentSlide ? "auto" : "none" }}
-          >
-            {/* Ken Burns Effect zoom on active image */}
-            {i === currentSlide && (
+      <section className="relative w-full aspect-[12/5] overflow-hidden group">
+        {slides.map((slide, i) => {
+          const isActive = i === currentSlide;
+          return (
+            <Link
+              key={i}
+              href={slide.link || "/products"}
+              className="absolute inset-0 block"
+              style={{ 
+                pointerEvents: isActive ? "auto" : "none",
+                zIndex: isActive ? 10 : 0
+              }}
+            >
               <motion.div
-                initial={{ scale: 1.08 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 6, ease: "easeOut" }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: isActive ? 1 : 0 }}
+                transition={{ duration: 0.8, ease: "easeInOut" }}
                 className="absolute inset-0 w-full h-full"
               >
-                <picture className="w-full h-full absolute inset-0">
-                  <source media="(max-width: 640px)" srcSet={slide.mobileImage || slide.image} />
-                  <source media="(max-width: 1024px)" srcSet={slide.tabletImage || slide.image} />
-                  <img
-                    src={slide.image}
-                    alt={slide.title}
-                    className="w-full h-full object-cover"
-                  />
-                </picture>
+                {/* Gentle, slow zoom-in animation when active */}
+                <motion.div
+                  initial={{ scale: 1 }}
+                  animate={{ scale: isActive ? 1.04 : 1 }}
+                  transition={{ duration: 5.2, ease: "easeOut" }}
+                  className="absolute inset-0 w-full h-full"
+                >
+                  <picture className="w-full h-full absolute inset-0">
+                    <source media="(max-width: 640px)" srcSet={slide.mobileImage || slide.image} />
+                    <source media="(max-width: 1024px)" srcSet={slide.tabletImage || slide.image} />
+                    <img
+                      src={slide.image}
+                      alt={slide.title || "Hero banner"}
+                      className="w-full h-full object-cover"
+                    />
+                  </picture>
+                </motion.div>
               </motion.div>
-            )}
-            
-            <div className="absolute inset-0 bg-black/45" />
-            
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
-              <motion.div
-                initial={{ y: 30, opacity: 0 }}
-                animate={i === currentSlide ? { y: 0, opacity: 1 } : {}}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-                className="overflow-hidden mb-3"
-              >
-                <span className="text-accent uppercase tracking-[0.4em] text-xs md:text-sm font-bold">
-                  {slide.subtitle}
-                </span>
-              </motion.div>
-              
-              <motion.h1 
-                initial={{ y: 40, opacity: 0 }}
-                animate={i === currentSlide ? { y: 0, opacity: 1 } : {}}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
-                className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-serif text-white mb-6 md:mb-8 tracking-wide font-normal max-w-4xl leading-tight"
-              >
-                {slide.title}
-              </motion.h1>
-              
-              <motion.div
-                initial={{ y: 30, opacity: 0 }}
-                animate={i === currentSlide ? { y: 0, opacity: 1 } : {}}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.6 }}
-              >
-                <Link href={slide.link || "/products"}>
-                  <Button 
-                    variant="outline"
-                    className="border-white text-white hover:bg-white hover:text-black rounded-none px-6 py-3 sm:px-10 sm:py-4.5 md:px-12 md:py-6 uppercase tracking-widest text-[10px] sm:text-xs font-bold transition-all duration-300"
-                  >
-                    {slide.cta}
-                  </Button>
-                </Link>
-              </motion.div>
-            </div>
-          </motion.div>
-        ))}
+            </Link>
+          );
+        })}
 
         {/* Carousel Controls - Hidden on mobile, shown on desktop */}
         <button onClick={prevSlide} className="hidden sm:flex absolute left-6 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 p-3.5 rounded-full text-white backdrop-blur-md transition-all opacity-0 group-hover:opacity-100 z-20">
