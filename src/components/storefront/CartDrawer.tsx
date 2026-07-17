@@ -56,10 +56,10 @@ function RecommendationCarousel({
   };
 
   return (
-    <div className="flex flex-col gap-3 flex-1 min-h-0">
+    <div className="flex flex-col gap-3 mt-2 shrink-0 pb-2">
       {/* Header row with arrows */}
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-serif text-[#1a1a1a]">You may also like</h4>
+        <h4 className="text-[13px] font-semibold text-gray-900 uppercase tracking-wide">You may also like</h4>
         {totalPages > 1 && (
           <div className="flex items-center gap-1">
             <button
@@ -84,14 +84,14 @@ function RecommendationCarousel({
 
       {/* Sliding track */}
       <div
-        className="overflow-hidden flex-1 min-h-0"
+        className="overflow-hidden"
         ref={trackRef}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
         <div
-          className="flex transition-transform duration-400 ease-in-out h-full"
+          className="flex transition-transform duration-400 ease-in-out"
           style={{ transform: `translateX(-${currentPage * 100}%)` }}
         >
           {Array.from({ length: totalPages }).map((_, pageIdx) => (
@@ -109,42 +109,47 @@ function RecommendationCarousel({
                   return (
                     <div
                       key={product.id}
-                      className="flex-1 border border-neutral-200 p-3 bg-white flex flex-col justify-between"
+                      className="flex-1 p-2 bg-white border border-gray-150 hover:border-gray-300 rounded-lg flex flex-col group transition-colors shadow-sm hover:shadow-md"
                     >
-                      <div>
-                        <Link
-                          href={`/products/${product.slug}`}
-                          onClick={onClose}
-                          className="block relative aspect-square bg-white overflow-hidden mb-2"
-                        >
-                          <img
-                            src={product.image}
-                            alt={product.title}
-                            className="object-contain w-full h-full"
-                          />
-                        </Link>
-                        <Link href={`/products/${product.slug}`} onClick={onClose}>
-                          <h5 className="text-[11px] font-bold text-[#1A1A1A] font-sans line-clamp-2 leading-tight min-h-[28px]">
+                      <Link
+                        href={`/products/${product.slug}`}
+                        onClick={onClose}
+                        className="block relative aspect-[4/5] w-full bg-gray-50/50 rounded-md overflow-hidden mb-2.5"
+                      >
+                        <img
+                          src={product.image}
+                          alt={product.title}
+                          className="object-contain w-full h-full p-2 group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </Link>
+
+                      <div className="flex flex-col flex-1 justify-between">
+                        <Link href={`/products/${product.slug}`} onClick={onClose} className="mb-2">
+                          <h5 className="text-[11px] font-medium text-gray-800 line-clamp-2 hover:text-accent transition-colors leading-snug">
                             {product.title}
                           </h5>
                         </Link>
-                        <div className="flex items-baseline gap-1.5 mt-1.5 text-xs">
-                          <span className="font-bold text-[#1A1A1A]">
-                            ₹{displayPrice.toLocaleString()}
-                          </span>
-                          {isSale && (
-                            <span className="text-[10px] text-neutral-400 line-through font-mono">
-                              ₹{product.price.toLocaleString()}
+
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-[13px] font-bold text-gray-900">
+                              ₹{displayPrice.toLocaleString()}
                             </span>
-                          )}
+                            {isSale && (
+                              <span className="text-[10px] text-neutral-400 line-through font-mono">
+                                ₹{product.price.toLocaleString()}
+                              </span>
+                            )}
+                          </div>
+
+                          <button
+                            onClick={() => onAdd(product)}
+                            className="w-full py-1.5 border border-black bg-white text-black hover:bg-black hover:text-white text-[10px] font-bold uppercase tracking-widest rounded transition-colors duration-300 cursor-pointer"
+                          >
+                            Add to Cart
+                          </button>
                         </div>
                       </div>
-                      <button
-                        onClick={() => onAdd(product)}
-                        className="w-full mt-2 h-8 bg-black text-white hover:bg-[#D4AF37] text-[10px] font-bold uppercase tracking-widest transition-all duration-300 cursor-pointer"
-                      >
-                        Add
-                      </button>
                     </div>
                   );
                 })}
@@ -327,57 +332,62 @@ export function CartDrawer() {
                         initial={{ opacity: 0, height: 0, x: 50 }}
                         animate={{ opacity: 1, height: "auto", x: 0 }}
                         exit={{ opacity: 0, height: 0, x: 50 }}
-                        className="flex gap-4 overflow-hidden"
+                        className="flex gap-4 overflow-hidden border-b border-gray-100 pb-4"
                       >
-                        <div className="relative w-20 h-24 bg-gray-50 border border-gray-150 shrink-0 overflow-hidden rounded">
+                        {/* Image: unclipped object-contain box */}
+                        <div className="relative w-20 h-24 bg-gray-50/50 border border-gray-100 shrink-0 overflow-hidden rounded-xl flex items-center justify-center p-2">
                           <img
                             src={item.image}
                             alt={item.title}
-                            className="object-cover w-full h-full"
+                            className="object-contain max-h-full max-w-full"
                           />
                         </div>
-                        <div className="flex flex-col justify-between flex-1">
+                        
+                        <div className="flex flex-col justify-between flex-1 py-0.5">
                           <div className="flex justify-between gap-2">
                             <div>
                               <h3 className="font-semibold text-xs text-foreground uppercase tracking-wide leading-tight">
                                 {item.title}
                               </h3>
                               {item.variantInfo && (
-                                <p className="text-[10px] text-gray-500 uppercase tracking-widest mt-1 font-medium">
+                                <p className="text-[10px] text-gray-400 uppercase tracking-widest mt-1 font-medium">
                                   {item.variantInfo}
                                 </p>
                               )}
                             </div>
                             <button
                               onClick={() => removeItem(item.id)}
-                              className="text-gray-400 hover:text-red-600 transition-colors cursor-pointer"
+                              className="text-gray-400 hover:text-red-600 transition-colors cursor-pointer p-1 -mt-1"
+                              aria-label="Remove item"
                             >
-                              <Trash2 size={16} />
+                              <Trash2 size={15} />
                             </button>
                           </div>
+                          
+                          {/* Quantity Selector & Price */}
                           <div className="flex items-center justify-between mt-2">
-                            <div className="flex items-center border border-gray-300">
+                            <div className="flex items-center bg-gray-50 border border-gray-250 rounded-lg overflow-hidden">
                               <button
                                 onClick={() =>
                                   updateQuantity(item.id, item.quantity - 1)
                                 }
-                                className="p-1.5 hover:bg-gray-100 transition-all cursor-pointer"
+                                className="p-1.5 text-gray-500 hover:text-black hover:bg-gray-150 transition-colors cursor-pointer"
                               >
-                                <Minus size={12} />
+                                <Minus size={10} strokeWidth={2.5} />
                               </button>
-                              <span className="px-3 text-xs font-bold">
+                              <span className="w-8 text-center text-xs font-bold text-gray-800">
                                 {item.quantity}
                               </span>
                               <button
                                 onClick={() =>
                                   updateQuantity(item.id, item.quantity + 1)
                                 }
-                                className="p-1.5 hover:bg-gray-100 transition-all cursor-pointer"
+                                className="p-1.5 text-gray-500 hover:text-black hover:bg-gray-150 transition-colors cursor-pointer"
                               >
-                                <Plus size={12} />
+                                <Plus size={10} strokeWidth={2.5} />
                               </button>
                             </div>
-                            <p className="font-bold text-xs font-mono">
+                            <p className="font-extrabold text-xs text-gray-900 font-mono">
                               ₹{(item.price * item.quantity).toLocaleString()}
                             </p>
                           </div>
