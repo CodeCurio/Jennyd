@@ -51,14 +51,6 @@ const HERO_SLIDES = [
   }
 ];
 
-const STORY_CIRCLES = [
-  { name: "Best Sellers", image: "/assets/product image 1.jpeg", link: "/products?sort=best-selling" },
-  { name: "For Him", image: "/assets/product image 2.jpeg", link: "/products?category=men" },
-  { name: "For Her", image: "/assets/product image 3.jpeg", link: "/products?category=women" },
-  { name: "Unisex", image: "/assets/product image 4.jpeg", link: "/products?category=unisex" },
-  { name: "Combos", image: "/assets/product image 5.jpeg", link: "/products?category=combos" },
-  { name: "Attars", image: "/assets/product image 1.jpeg", link: "/products?category=attar" },
-];
 
 const MOCK_PRODUCTS = [
   { id: "1", title: "Oud Royale Extrait", price: 2499, salePrice: 1999, image: "/assets/product image 1.jpeg", slug: "oud-royale", badge: "Best Seller" },
@@ -315,31 +307,55 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 2. Elevated Story Circles Navigation */}
-      <section className="py-10 sm:py-16 px-4 max-w-[1440px] mx-auto w-full overflow-x-auto no-scrollbar">
-        <div className="flex justify-start md:justify-center gap-5 sm:gap-9 md:gap-14 min-w-max px-4">
-          {STORY_CIRCLES.map((circle, i) => (
-            <Link key={i} href={circle.link} className="flex flex-col items-center gap-4 group cursor-pointer">
-              <div className="relative w-20 h-20 sm:w-26 sm:h-26 md:w-32 md:h-32 flex items-center justify-center">
-                {/* Decorative Orbit Rings */}
-                <div className="absolute inset-0 rounded-full border border-accent/20 group-hover:border-accent group-hover:scale-105 transition-all duration-700 ease-out pointer-events-none" />
-                <div className="absolute inset-[3px] rounded-full border border-dashed border-accent/10 group-hover:rotate-45 transition-transform duration-[1.5s] ease-out pointer-events-none" />
-                
-                {/* Image Frame */}
-                <div className="w-[86%] h-[86%] rounded-full overflow-hidden relative bg-secondary-background shadow-inner">
-                  <Image 
-                    src={circle.image} 
-                    alt={circle.name} 
-                    fill 
-                    className="object-cover group-hover:scale-110 transition-transform duration-700 ease-out" 
-                  />
+      {/* 2. Shop By Category — Story Circles */}
+      <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 max-w-[1440px] mx-auto w-full">
+        {/* Section Header */}
+        <div className="text-center mb-10 md:mb-12 flex flex-col gap-2">
+          <span className="text-accent uppercase tracking-[0.3em] text-[10px] md:text-xs font-bold">Collections</span>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-normal text-foreground">Shop By Category</h2>
+        </div>
+
+        {/* Circles Row */}
+        <div className="overflow-x-auto no-scrollbar">
+          <div className="flex justify-start md:justify-center gap-6 sm:gap-10 md:gap-14 lg:gap-20 min-w-max mx-auto px-2">
+            {[
+              { name: "Best Sellers", image: "/assets/product image 1.jpeg", link: "/products?sort=best-selling" },
+              { name: "For Him",      image: "/assets/product image 2.jpeg", link: "/products?category=men" },
+              { name: "For Her",      image: "/assets/product image 3.jpeg", link: "/products?category=women" },
+              { name: "Unisex",       image: "/assets/product image 4.jpeg", link: "/products?category=unisex" },
+              { name: "Combos",       image: "/assets/product image 5.jpeg", link: "/products?category=combos" },
+              { name: "Attars",       image: "/assets/product image 1.jpeg", link: "/products?category=attar" },
+            ].map((circle) => (
+              <Link
+                key={circle.name}
+                href={circle.link}
+                className="flex flex-col items-center gap-4 group cursor-pointer shrink-0"
+              >
+                {/* Circle Frame */}
+                <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-36 md:h-36 flex items-center justify-center">
+                  {/* Outer gold ring — always visible, brightens on hover */}
+                  <div className="absolute inset-0 rounded-full border-2 border-accent/25 group-hover:border-accent group-hover:scale-105 transition-all duration-500 ease-out pointer-events-none" />
+                  {/* Inner dashed ring — rotates on hover */}
+                  <div className="absolute inset-[4px] rounded-full border border-dashed border-accent/15 group-hover:border-accent/40 group-hover:rotate-45 transition-all duration-[1.2s] ease-out pointer-events-none" />
+
+                  {/* Photo */}
+                  <div className="w-[84%] h-[84%] rounded-full overflow-hidden relative bg-secondary-background shadow-md ring-1 ring-black/5">
+                    <Image
+                      src={circle.image}
+                      alt={circle.name}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                    />
+                  </div>
                 </div>
-              </div>
-              <span className="text-[10px] md:text-xs font-semibold uppercase tracking-[0.2em] text-secondary-foreground group-hover:text-accent transition-colors duration-300">
-                {circle.name}
-              </span>
-            </Link>
-          ))}
+
+                {/* Label */}
+                <span className="text-[11px] md:text-[13px] font-semibold uppercase tracking-[0.22em] text-gray-500 group-hover:text-accent transition-colors duration-300 text-center">
+                  {circle.name}
+                </span>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
