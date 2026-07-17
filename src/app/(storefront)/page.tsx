@@ -59,6 +59,13 @@ const MOCK_PRODUCTS = [
   { id: "4", title: "Citrus Breeze Eau De Parfum", price: 1499, image: "/assets/product image 4.jpeg", slug: "citrus-breeze" },
 ];
 
+const MOCK_BEST_SELLERS = [
+  { id: "b1", title: "Oud Royale Extrait", price: 2499, salePrice: 1999, image: "/assets/product image 1.jpeg", slug: "oud-royale", badge: "Best Seller" },
+  { id: "b2", title: "Midnight Amber Intense", price: 2999, salePrice: 2499, image: "/assets/product image 3.jpeg", slug: "midnight-amber", badge: "Best Seller" },
+  { id: "b3", title: "Velvet Rose & Vanilla", price: 1899, image: "/assets/product image 2.jpeg", slug: "velvet-rose", badge: "Best Seller" },
+  { id: "b4", title: "Citrus Breeze Eau De Parfum", price: 1499, image: "/assets/product image 4.jpeg", slug: "citrus-breeze", badge: "Best Seller" },
+];
+
 const ZODIAC_SIGNS = [
   { name: "Aries", dates: "Mar 21 - Apr 19", element: "Fire", notes: "Fiery Orange, Amber, Spicy Pink Pepper", description: "Bold, energetic, and pioneering. A vibrant fragrance to match your passionate drive.", slug: "aries" },
   { name: "Taurus", dates: "Apr 20 - May 20", element: "Earth", notes: "Rich Rose, Vanilla, Grounding Sandalwood", description: "Sensual, grounded, and elegant. A comforting and luxurious blend.", slug: "taurus" },
@@ -76,25 +83,34 @@ const ZODIAC_SIGNS = [
 
 const REVIEWS = [
   {
-    title: "My Signature Scent",
-    content: "I've been searching for a scent like this for years. The Velvet Rose is perfectly balanced, not too sweet, and lasts my entire 10-hour shift. I get asked what I'm wearing daily.",
-    author: "Priya S.",
-    initial: "P",
-    product: "Velvet Rose & Vanilla"
+    title: "Stays on all day!",
+    content: "Absolutely in love with Velvet Rose & Vanilla. The projection is fantastic without being overwhelming. I sprayed it in the morning, went out for dinner, and could still catch whiffs of warm vanilla late at night. Definitely my new signature scent.",
+    author: "Priya Sharma",
+    location: "Mumbai",
+    rating: 5,
+    date: "July 12, 2026",
+    product: "Velvet Rose & Vanilla",
+    initial: "PS"
   },
   {
-    title: "Absolutely Beautiful!",
-    content: "I have been using Oud Royale for weeks now and the compliments never stop. It smells identical to a ₹15,000 niche perfume I used to buy. Incredible value.",
-    author: "Rahul M.",
-    initial: "R",
-    product: "Oud Royale Extrait"
+    title: "Identical to high-end niche perfumes",
+    content: "Smells exactly like a 15k luxury brand perfume I used to buy. The blend of rich oud and warm spice is incredibly rich and expensive. Everyone at my workplace asked me what I was wearing. Truly incredible craftsmanship.",
+    author: "Rahul Mehta",
+    location: "Delhi",
+    rating: 5,
+    date: "July 08, 2026",
+    product: "Oud Royale Extrait",
+    initial: "RM"
   },
   {
-    title: "Perfect for Gifting",
-    content: "Bought the Citrus Breeze for my husband and he loves it. The packaging is super premium and the fragrance projection is amazing. Will definitely be ordering the Oud series next.",
-    author: "Ananya K.",
-    initial: "A",
-    product: "Citrus Breeze"
+    title: "Superb packaging & projection",
+    content: "Gifted Citrus Breeze to my partner. The box packaging feels extremely luxurious—very heavy glass bottle and high-quality atomizer. The scent itself is clean, zesty, and perfect for hot days. Buying the Unisex collection next!",
+    author: "Ananya Kapoor",
+    location: "Bangalore",
+    rating: 5,
+    date: "June 29, 2026",
+    product: "Citrus Breeze",
+    initial: "AK"
   }
 ];
 
@@ -106,6 +122,7 @@ export default function Home() {
   const [slides, setSlides] = useState<any[]>(HERO_SLIDES);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [trendingProducts, setTrendingProducts] = useState<any[]>([]);
+  const [bestSellers, setBestSellers] = useState<any[]>([]);
   const [promoSettings, setPromoSettings] = useState<any>(null);
   
   // Zodiac States
@@ -166,27 +183,40 @@ export default function Home() {
     fetchPromoSettings();
   }, []);
 
-  // Fetch Trending Products
+  // Fetch Best Sellers & Trending Products
   useEffect(() => {
-    const fetchTrending = async () => {
+    const fetchHomeProducts = async () => {
       try {
         const { data, error } = await supabase
           .from("products")
-          .select("*, product_images(*)")
-          .limit(4);
+          .select("*, product_images(*)");
+        
         if (data && !error) {
           const productsWithImages = data.map(p => ({
             ...p,
             image: p.product_images?.[0]?.image_url || p.metadata?.images?.[0] || "/assets/placeholder.jpg",
             hoverImage: p.product_images?.[1]?.image_url || p.metadata?.images?.[1] || undefined
           }));
-          setTrendingProducts(productsWithImages);
+
+          // Filter best sellers (by badge metadata or tags), fallback to first 4
+          const best = productsWithImages.filter(p => 
+            p.metadata?.badge?.toLowerCase().includes("best") || 
+            p.tags?.some((t: string) => t.toLowerCase().includes("best"))
+          );
+
+          if (best.length >= 4) {
+            setBestSellers(best.slice(0, 4));
+            setTrendingProducts(productsWithImages.filter(p => !best.includes(p)).slice(0, 4));
+          } else {
+            setBestSellers(productsWithImages.slice(0, 4));
+            setTrendingProducts(productsWithImages.slice(4, 8));
+          }
         }
       } catch (err) {
-        console.error("Error fetching trending products:", err);
+        console.error("Error fetching home products:", err);
       }
     };
-    fetchTrending();
+    fetchHomeProducts();
   }, []);
 
   // Fetch Zodiac Product dynamically
@@ -359,69 +389,26 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 3. Brand Story & Craftsmanship Section */}
-      <section className="py-12 sm:py-20 md:py-24 px-4 sm:px-8 md:px-12 bg-secondary-background relative overflow-hidden">
-        {/* Elegant blur element */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-accent/5 rounded-full filter blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-black/5 rounded-full filter blur-3xl pointer-events-none" />
-
-        <div className="max-w-[1280px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
-          {/* Brand Philosophy Text */}
-          <div className="lg:col-span-7 flex flex-col gap-8">
-            <div className="flex flex-col gap-3">
-              <span className="text-accent uppercase tracking-[0.3em] text-xs font-bold">Our Philosophy</span>
-              <h2 className="text-2xl sm:text-3xl md:text-5xl font-serif leading-tight font-normal text-foreground">
-                Artisanal Blends, Crafted for the Extraordinary
-              </h2>
-            </div>
-            
-            <p className="text-secondary-foreground text-base md:text-lg max-w-xl leading-relaxed">
-              At Jennyd, we believe a fragrance is more than a scent—it is your silent signature. Inspired by the rich heritage of Indian perfumery and infused with global sophistication, each blend is hand-poured in small batches using the finest natural essential oils.
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 mt-4">
-              <div className="flex flex-col gap-3">
-                <div className="w-12 h-12 rounded-full bg-background flex items-center justify-center text-accent shadow-sm">
-                  <Award className="w-5 h-5" />
-                </div>
-                <h3 className="font-bold font-sans text-xs uppercase tracking-wider text-foreground">Artisanal Craft</h3>
-                <p className="text-xs text-secondary-foreground leading-relaxed">Hand-blended in small batches for uncompromised quality.</p>
-              </div>
-              <div className="flex flex-col gap-3">
-                <div className="w-12 h-12 rounded-full bg-background flex items-center justify-center text-accent shadow-sm">
-                  <ShieldCheck className="w-5 h-5" />
-                </div>
-                <h3 className="font-bold font-sans text-xs uppercase tracking-wider text-foreground">Premium Oils</h3>
-                <p className="text-xs text-secondary-foreground leading-relaxed">Formulated with rare, skin-safe natural extracts.</p>
-              </div>
-              <div className="flex flex-col gap-3">
-                <div className="w-12 h-12 rounded-full bg-background flex items-center justify-center text-accent shadow-sm">
-                  <Zap className="w-5 h-5" />
-                </div>
-                <h3 className="font-bold font-sans text-xs uppercase tracking-wider text-foreground">12+ Hour Wear</h3>
-                <p className="text-xs text-secondary-foreground leading-relaxed">High projection formulas designed to linger all day.</p>
-              </div>
-            </div>
+      {/* 3. Best Sellers Section */}
+      <section className="py-12 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 max-w-[1440px] mx-auto w-full bg-secondary-background">
+        <div className="flex items-center justify-between mb-8 md:mb-12 border-b border-gray-200 pb-4">
+          <div className="flex flex-col gap-2">
+            <span className="text-accent uppercase tracking-[0.3em] text-[10px] md:text-xs font-bold font-sans">Highly Recommended</span>
+            <h2 className="text-xl sm:text-2xl md:text-4xl font-serif text-foreground font-normal">Best Sellers</h2>
           </div>
+          <Link href="/products?sort=best-selling" className="text-xs font-bold uppercase tracking-[0.2em] hover:text-accent transition-colors self-end pb-1 border-b border-black hover:border-accent">
+            View All
+          </Link>
+        </div>
 
-          {/* Editorial Image and Note */}
-          <div className="lg:col-span-5 relative w-full aspect-[4/5] max-h-[500px] lg:max-h-none bg-gray-100 overflow-hidden shadow-2xl group border border-black/5">
-            <Image
-              src="/assets/product image 1.jpeg"
-              alt="Artisanal Blending Process"
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-[1.2s] ease-out"
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-8 sm:gap-y-12 md:gap-x-8 md:gap-y-16">
+          {(bestSellers.length > 0 ? bestSellers : MOCK_BEST_SELLERS).map((product) => (
+            <ProductCard 
+              key={product.id} 
+              product={product} 
+              onQuickAdd={() => handleQuickAdd(product)}
             />
-            {/* Floating Glassmorphic Note */}
-            <div className="absolute bottom-4 left-4 right-4 p-4 sm:bottom-6 sm:left-6 sm:right-6 sm:p-6 bg-white/80 backdrop-blur-md border border-white/20 shadow-lg flex flex-col gap-2">
-              <span className="text-[10px] text-accent uppercase tracking-widest font-bold">Featured Scent</span>
-              <h4 className="font-serif text-lg font-normal text-foreground">Signature Bloom Extrait</h4>
-              <p className="text-xs text-secondary-foreground">A symphony of fresh Jasmine, Bulgarian Rose, and creamy Sandalwood.</p>
-              <Link href="/products/signature-bloom" className="text-xs font-bold uppercase tracking-wider text-black hover:text-accent mt-2 inline-flex items-center gap-1 group/link transition-colors">
-                Explore Scent <ArrowRight className="w-3 h-3 group-hover/link:translate-x-1 transition-transform" />
-              </Link>
-            </div>
-          </div>
+          ))}
         </div>
       </section>
 
@@ -592,46 +579,76 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 7. Fragrance Notes Bento Grid */}
-      <section className="py-12 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 max-w-[1440px] mx-auto w-full">
-        <div className="text-center max-w-2xl mx-auto mb-12 md:mb-16 flex flex-col gap-3">
-          <span className="text-accent uppercase tracking-[0.3em] text-xs font-bold">Fragrance Families</span>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-normal text-foreground">Shop by Fragrance Notes</h2>
-          <p className="text-secondary-foreground text-sm leading-relaxed">Find your olfactory matching preference. Click to explore notes.</p>
-        </div>
+      {/* 7. Shop by Notes Section (Infinite Scrolling Marquee) */}
+      <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 max-w-[1440px] mx-auto w-full">
+        <div className="bg-gray-100 rounded-3xl p-6 md:p-10 flex flex-col lg:flex-row items-center gap-8 md:gap-12 overflow-hidden">
+          
+          {/* Left Block - Dark Theme Card */}
+          <div className="w-full lg:w-[350px] bg-foreground text-background rounded-2xl p-8 md:p-10 flex flex-col justify-center min-h-[260px] shrink-0">
+            <h2 className="text-2xl md:text-3xl font-serif text-white mb-4 leading-snug">
+              Shop by Notes
+            </h2>
+            <p className="text-gray-400 text-sm leading-relaxed">
+              Indulge in the enchanting world of perfumes with Jennyd, the best perfume.
+            </p>
+          </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-          {[
-            { title: "Woody & Earthy", tag: "woody", image: "/assets/product image 5.jpeg" },
-            { title: "Fresh Citrus", tag: "citrus", image: "/assets/product image 4.jpeg" },
-            { title: "Floral", tag: "floral", image: "/assets/product image 3.jpeg" },
-            { title: "Oriental Spicy", tag: "spicy", image: "/assets/product image 2.jpeg" },
-          ].map((note, i) => (
-            <Link 
-              key={i} 
-              href={`/products?note=${note.tag}`} 
-              className="relative aspect-square group overflow-hidden bg-gray-100 border border-black/5 cursor-pointer block"
-            >
-              <Image 
-                src={note.image} 
-                alt={note.title} 
-                fill 
-                className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent transition-opacity duration-300" />
-              <div className="absolute bottom-6 left-6 right-6 text-left flex flex-col gap-1">
-                <h3 className="text-white font-serif text-sm sm:text-base md:text-xl tracking-wide">{note.title}</h3>
-                <span className="text-accent text-[10px] uppercase tracking-widest font-bold opacity-0 group-hover:opacity-100 group-hover:translate-y-0 translate-y-1 transition-all duration-300">
-                  Explore Family
-                </span>
+          {/* Right Block - Infinite Marquee Container */}
+          <div className="flex-1 w-full overflow-hidden relative">
+            {/* Fade effect on borders for smooth transition */}
+            <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-gray-100 to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-gray-100 to-transparent z-10 pointer-events-none" />
+
+            <div className="w-full overflow-x-auto no-scrollbar">
+              <div className="animate-marquee flex items-center gap-8 py-4">
+                {/* Render the notes list multiple times to support seamless infinite loop */}
+                {[...Array(3)].map((_, listIndex) => (
+                  <div key={listIndex} className="flex items-center gap-8 shrink-0">
+                    {[
+                      { name: "Tobacco", tag: "tobacco", image: "/assets/product image 5.jpeg" },
+                      { name: "Vanilla", tag: "vanilla", image: "/assets/product image 2.jpeg" },
+                      { name: "Woody", tag: "woody", image: "/assets/product image 1.jpeg" },
+                      { name: "Amber", tag: "amber", image: "/assets/product image 3.jpeg" },
+                      { name: "Animalic", tag: "animalic", image: "/assets/product image 4.jpeg" },
+                      { name: "Aquatic", tag: "aquatic", image: "/assets/product image 1.jpeg" },
+                      { name: "Floral", tag: "floral", image: "/assets/product image 3.jpeg" },
+                      { name: "Citrus", tag: "citrus", image: "/assets/product image 4.jpeg" },
+                    ].map((note, noteIndex) => (
+                      <Link
+                        key={`${listIndex}-${noteIndex}-${note.name}`}
+                        href={`/products?note=${note.tag}`}
+                        className="flex flex-col items-center gap-3.5 group cursor-pointer shrink-0 w-24 sm:w-28"
+                      >
+                        {/* Circle Image with dashed border */}
+                        <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full border border-dashed border-gray-400/80 group-hover:border-accent group-hover:scale-105 transition-all duration-300 flex items-center justify-center p-1 bg-white">
+                          <div className="relative w-full h-full rounded-full overflow-hidden">
+                            <Image
+                              src={note.image}
+                              alt={note.name}
+                              fill
+                              className="object-cover transition-transform duration-500 ease-out group-hover:scale-110"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Label */}
+                        <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-gray-700 group-hover:text-accent transition-colors duration-300 text-center">
+                          {note.name}
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                ))}
               </div>
-            </Link>
-          ))}
+            </div>
+          </div>
+
         </div>
       </section>
 
+
       {/* 8. Customer Reviews */}
-      <section className="py-12 sm:py-20 md:py-24 bg-secondary-background">
+      <section className="py-16 sm:py-20 md:py-24 bg-secondary-background">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 text-center">
           <div className="max-w-2xl mx-auto mb-12 md:mb-16 flex flex-col gap-3">
             <span className="text-accent uppercase tracking-[0.3em] text-[10px] md:text-xs font-bold">Endorsements</span>
@@ -640,28 +657,51 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             {REVIEWS.map((review, i) => (
-              <div key={i} className="bg-white p-6 sm:p-8 border border-gray-100 shadow-xs text-left flex flex-col justify-between">
+              <div
+                key={i}
+                className="bg-white p-7 sm:p-8 rounded-2xl border border-gray-200/60 shadow-xs hover:-translate-y-1 hover:shadow-md hover:border-accent/30 transition-all duration-300 text-left flex flex-col justify-between"
+              >
                 <div>
-                  <div className="flex gap-1 mb-6">
-                    {[1,2,3,4,5].map(s => <Star key={s} className="w-3.5 h-3.5 fill-accent text-accent" />)}
+                  {/* Top Bar: Stars + Verified Badge */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex gap-1">
+                      {[...Array(review.rating)].map((_, s) => (
+                        <Star key={s} className="w-3.5 h-3.5 fill-accent text-accent" />
+                      ))}
+                    </div>
+                    <span className="inline-flex items-center gap-1 bg-green-50 text-green-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-green-150">
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Verified Buyer
+                    </span>
                   </div>
-                  <h4 className="font-bold text-sm uppercase tracking-wide mb-3 text-foreground">{review.title}</h4>
-                  <p className="text-secondary-foreground text-sm mb-8 italic leading-relaxed">
+
+                  {/* Scent Variant Purchased */}
+                  <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-2">
+                    Purchased: {review.product}
+                  </div>
+
+                  {/* Review Title & Body */}
+                  <h4 className="font-serif text-base font-semibold text-foreground mb-2.5 leading-snug">
+                    {review.title}
+                  </h4>
+                  <p className="text-gray-600 text-sm leading-relaxed mb-6 font-light">
                     "{review.content}"
                   </p>
                 </div>
-                
-                <div className="flex items-center gap-3.5 border-t border-gray-100 pt-6">
-                  <div className="w-10 h-10 rounded-full bg-accent text-white flex items-center justify-center font-serif text-lg font-normal shrink-0">
+
+                {/* Reviewer Meta Info */}
+                <div className="flex items-center gap-3.5 border-t border-gray-150/70 pt-5 mt-auto">
+                  {/* Initial Avatar */}
+                  <div className="w-10 h-10 rounded-full bg-secondary-background border border-gray-100 flex items-center justify-center font-bold text-xs text-accent tracking-wider select-none shrink-0">
                     {review.initial}
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-foreground">{review.author}</p>
-                    <p className="text-[9px] text-green-600 font-bold uppercase flex items-center gap-1 mt-0.5 tracking-wider">
-                      <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
-                      Verified Buyer
+                    <p className="text-xs font-bold text-foreground leading-tight">{review.author}</p>
+                    <p className="text-[10px] text-gray-400 mt-1">
+                      {review.location} • {review.date}
                     </p>
-                    <p className="text-[9px] text-gray-400 mt-1 tracking-wide uppercase">Purchased {review.product}</p>
                   </div>
                 </div>
               </div>
