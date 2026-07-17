@@ -24,8 +24,8 @@ import { supabase } from "@/lib/supabase";
 const HERO_SLIDES = [
   {
     image: "/assets/Banner-1.jpeg",
-    tabletImage: "/assets/Banner-1.jpeg",
-    mobileImage: "/assets/Banner-1.jpeg",
+    tabletImage: "/assets/Mobile-banner1.jpeg",
+    mobileImage: "/assets/Mobile-banner1.jpeg",
     title: "",
     subtitle: "",
     cta: "",
@@ -33,8 +33,8 @@ const HERO_SLIDES = [
   },
   {
     image: "/assets/Banner-2.jpeg",
-    tabletImage: "/assets/Banner-2.jpeg",
-    mobileImage: "/assets/Banner-2.jpeg",
+    tabletImage: "/assets/Mobile-banner2.jpeg",
+    mobileImage: "/assets/Mobile-banner2.jpeg",
     title: "",
     subtitle: "",
     cta: "",
@@ -42,8 +42,8 @@ const HERO_SLIDES = [
   },
   {
     image: "/assets/Banner-3.jpeg",
-    tabletImage: "/assets/Banner-3.jpeg",
-    mobileImage: "/assets/Banner-3.jpeg",
+    tabletImage: "/assets/Mobile-banner3.png",
+    mobileImage: "/assets/Mobile-banner3.png",
     title: "",
     subtitle: "",
     cta: "",
@@ -244,7 +244,7 @@ export default function Home() {
     <div className="flex flex-col bg-background selection:bg-accent selection:text-white overflow-hidden pb-20">
       
       {/* 1. Hero Carousel */}
-      <section className="relative w-full aspect-[12/5] overflow-hidden group">
+      <section className="relative w-full aspect-[4/5] sm:aspect-[12/5] overflow-hidden group">
         {slides.map((slide, i) => {
           const isActive = i === currentSlide;
           return (

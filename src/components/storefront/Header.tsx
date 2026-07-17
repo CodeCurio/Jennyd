@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { ShoppingBag, Search, Menu, X, User } from "lucide-react";
+import { ShoppingBag, Search, Menu, X, User, Globe } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -121,17 +121,17 @@ export function Header() {
       )}
 
       <header
-        className={`sticky top-0 z-40 bg-background w-full transition-all duration-300 border-b border-gray-100 ${
-          isScrolled ? "py-1 shadow-sm" : "py-2"
+        className={`sticky top-0 z-40 bg-white w-full transition-all duration-300 border-b border-gray-100 ${
+          isScrolled ? "py-1 shadow-sm" : "py-1.5"
         }`}
       >
-        <div className="max-w-[1440px] mx-auto px-4 md:px-8">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
           
           {/* Desktop Layout */}
           <div className="hidden md:flex items-center gap-8 lg:gap-12 w-full">
             {/* Left: Logo */}
             <Link href="/" className="shrink-0">
-              <div className="relative w-36 h-12 lg:w-40 lg:h-14">
+              <div className="relative w-[160px] h-[48px] lg:w-[185px] lg:h-[56px]">
                 <Image
                   src={settings?.logo_url || "/logo.png"}
                   alt={settings?.site_name || "Jennyd"}
@@ -143,14 +143,14 @@ export function Header() {
             </Link>
 
             {/* Right: Search + Icons (Row 1) & Nav Links (Row 2) */}
-            <div className="flex flex-col flex-1 gap-2">
+            <div className="flex flex-col flex-1 gap-1">
               
               {/* Row 1: Search & Icons */}
               <div className="flex items-center justify-between gap-8 w-full">
                 {/* Search Bar */}
                 <div 
                   onClick={() => setIsSearchOpen(true)}
-                  className="flex-1 relative max-w-4xl cursor-pointer"
+                  className="flex-1 relative max-w-xl cursor-pointer"
                 >
                   <input 
                     type="text" 
@@ -165,6 +165,15 @@ export function Header() {
                 
                 {/* Icons */}
                 <div className="flex items-center gap-6 shrink-0">
+                  {/* Globe Language Selector */}
+                  <button
+                    onClick={() => window.showLanguageSelector?.()}
+                    className="hover:text-accent text-gray-800 transition-colors flex flex-col items-center gap-1 cursor-pointer"
+                    title="Select Language"
+                  >
+                    <Globe className="w-5 h-5" strokeWidth={1.5} />
+                  </button>
+
                   <Link href={user ? "/account" : "/account/login"} className="hover:text-accent transition-colors flex flex-col items-center gap-1 relative">
                     {user && profile?.full_name ? (
                       <div className="w-7 h-7 rounded-full bg-[#D4AF37] flex items-center justify-center text-white text-xs font-bold">
@@ -203,7 +212,7 @@ export function Header() {
                         
                         {/* Mega Menu Dropdown */}
                         <div className="absolute left-0 right-0 top-full bg-white shadow-xl border-t border-gray-100 opacity-0 invisible group-hover/nav:opacity-100 group-hover/nav:visible transition-all duration-300 pointer-events-none group-hover/nav:pointer-events-auto z-50">
-                          <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-10">
+                          <div className="max-w-7xl mx-auto px-4 md:px-8 py-10">
                             <div className="grid grid-cols-4 gap-8">
                               {/* Column 1 */}
                               <div className="flex flex-col gap-4">
@@ -274,7 +283,7 @@ export function Header() {
             </button>
 
             <Link href="/" className="flex-1 flex justify-center">
-              <div className="relative w-32 h-10">
+              <div className="relative w-[135px] h-[40px]">
                 <Image
                   src={settings?.logo_url || "/logo.png"}
                   alt={settings?.site_name || "Jennyd"}
@@ -286,6 +295,15 @@ export function Header() {
             </Link>
 
             <div className="flex items-center gap-3">
+              {/* Globe Language Selector */}
+              <button
+                onClick={() => window.showLanguageSelector?.()}
+                className="p-1 hover:text-accent text-gray-800 transition-colors cursor-pointer"
+                title="Select Language"
+              >
+                <Globe className="w-5 h-5" />
+              </button>
+
               <button 
                 onClick={() => setIsSearchOpen(true)}
                 className="p-1 hover:text-accent transition-colors cursor-pointer"
