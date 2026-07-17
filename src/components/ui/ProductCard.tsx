@@ -47,7 +47,7 @@ export function ProductCard({ product, onQuickAdd, onQuickView }: ProductCardPro
           {/* Elegant Sticker Badges */}
           {isSale && (
             <div className="absolute top-3 left-3 z-10 border border-[#D4AF37] bg-white/95 backdrop-blur-xs text-[#D4AF37] text-[8px] uppercase font-bold px-2 py-0.5 tracking-widest shadow-xs">
-              Sale
+              Discount
             </div>
           )}
           {badge && !isSale && (

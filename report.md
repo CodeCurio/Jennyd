@@ -6,7 +6,7 @@ Based on the requirements listed in `instructions.md`, here is a comprehensive a
 
 ## 1. Storefront Pages & Features
 
-| Feature / Page | Status | Details|
+| Feature / Page | Status | DetailsIn|
 | :--- | :--- | :--- |
 | **Homepage** | ✅ Complete | Carousel, Categories, New Arrivals, Best Sellers, and Footer exist but are powered by static mock data rather than dynamic Supabase fetches. Newsletter form does not save to the `subscribers` table. |
 | **Product Listing Page (PLP)** | ⚠️ Partial | Grid, sorting, and initial dynamic loading are in place. However, the filters sidebar (by category, size, price range slider), URL parameter synchronization, and Quick View modal are missing. | || ✅ Complete |

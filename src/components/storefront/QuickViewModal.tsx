@@ -83,7 +83,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
             />
             {isSale && (
               <span className="absolute top-3 left-3 bg-red-600 text-white text-[10px] uppercase font-bold px-2.5 py-1 tracking-widest">
-                Sale
+                Discount
               </span>
             )}
             {badge && !isSale && (
