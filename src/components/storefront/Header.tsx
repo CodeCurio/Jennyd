@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { ShoppingBag, Search, Menu, X, User, Globe, Coins } from "lucide-react";
+import { ShoppingBag, Search, Menu, X, User, Globe } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -165,22 +165,13 @@ export function Header() {
 
             {/* Action Icons */}
             <div className="flex items-center gap-1 shrink-0">
-              {/* Language */}
+              {/* Preferences */}
               <button
                 onClick={() => window.showLanguageSelector?.()}
-                title="Select Language"
+                title="Select Preferences"
                 className="w-10 h-10 flex items-center justify-center rounded-full text-gray-600 hover:text-[#D4AF37] hover:bg-[#D4AF37]/8 transition-all duration-200 cursor-pointer"
               >
                 <Globe className="w-[22px] h-[22px]" strokeWidth={1.6} />
-              </button>
-
-              {/* Currency */}
-              <button
-                onClick={() => window.showCurrencySelector?.()}
-                title="Select Currency"
-                className="w-10 h-10 flex items-center justify-center rounded-full text-gray-600 hover:text-[#D4AF37] hover:bg-[#D4AF37]/8 transition-all duration-200 cursor-pointer"
-              >
-                <Coins className="w-[22px] h-[22px]" strokeWidth={1.6} />
               </button>
 
               {/* Account */}
@@ -319,16 +310,9 @@ export function Header() {
             <button
               onClick={() => window.showLanguageSelector?.()}
               className="w-9 h-9 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors cursor-pointer"
-              title="Select Language"
+              title="Select Preferences"
             >
               <Globe className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => window.showCurrencySelector?.()}
-              className="w-9 h-9 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors cursor-pointer"
-              title="Select Currency"
-            >
-              <Coins className="w-5 h-5" />
             </button>
             <button
               onClick={() => setIsSearchOpen(true)}
