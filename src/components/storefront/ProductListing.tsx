@@ -8,12 +8,14 @@ import { ProductCard } from "@/components/ui/ProductCard";
 import { useCart } from "@/lib/store/CartContext";
 import { useToast } from "@/components/ui/Toast";
 import { QuickViewModal } from "./QuickViewModal";
+import { useCurrency } from "@/lib/store/CurrencyContext";
 
 type Product = any;
 
 export function ProductListing({ initialProducts }: { initialProducts: Product[] }) {
   const { addItem } = useCart();
   const { addToast } = useToast();
+  const { currency, formatPrice } = useCurrency();
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -306,7 +308,7 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
 
         {/* Dual-Thumb Price Slider */}
         <div className="border-t border-gray-100 pt-6">
-          <h4 className="font-bold text-xs uppercase tracking-widest mb-4 text-gray-700">Price (₹)</h4>
+          <h4 className="font-bold text-xs uppercase tracking-widest mb-4 text-gray-700">Price ({currency})</h4>
           <div className="space-y-4 px-1">
             <div className="relative w-full h-6 flex items-center">
               {/* Slider Track background */}
@@ -348,8 +350,8 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
             </div>
             {/* Display Values */}
             <div className="flex items-center justify-between text-[11px] font-bold text-gray-500 font-mono">
-              <span>₹{priceMin.toLocaleString()}</span>
-              <span>₹{priceMax.toLocaleString()}</span>
+              <span>{formatPrice(priceMin)}</span>
+              <span>{formatPrice(priceMax)}</span>
             </div>
           </div>
         </div>
@@ -442,7 +444,7 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
                 </div>
 
                 <div>
-                  <h4 className="font-bold text-xs uppercase tracking-widest mb-4 text-gray-500">Price (₹)</h4>
+                  <h4 className="font-bold text-xs uppercase tracking-widest mb-4 text-gray-500">Price ({currency})</h4>
                   <div className="space-y-4 px-1">
                     <div className="relative w-full h-6 flex items-center">
                       <div className="absolute left-0 right-0 h-1 bg-gray-200 rounded-full" />
@@ -479,8 +481,8 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
                       />
                     </div>
                     <div className="flex items-center justify-between text-[11px] font-bold text-gray-500 font-mono">
-                      <span>₹{priceMin.toLocaleString()}</span>
-                      <span>₹{priceMax.toLocaleString()}</span>
+                      <span>{formatPrice(priceMin)}</span>
+                      <span>{formatPrice(priceMax)}</span>
                     </div>
                   </div>
                 </div>
@@ -556,7 +558,7 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
             )}
             {(priceMin > absoluteMinPrice || priceMax < absoluteMaxPrice) && (
               <span className="inline-flex items-center gap-1 bg-gray-100 text-black text-xs font-medium px-3 py-1 rounded-full border border-gray-200">
-                Price: ₹{priceMin.toLocaleString()} - ₹{priceMax.toLocaleString()}
+                Price: {formatPrice(priceMin)} - {formatPrice(priceMax)}
                 <button 
                   onClick={() => {
                     setPriceMin(absoluteMinPrice);

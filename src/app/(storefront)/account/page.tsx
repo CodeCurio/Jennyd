@@ -6,9 +6,11 @@ import { useAuth } from "@/lib/store/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { Package, MapPin, UserCircle, ShoppingBag, ArrowRight, Loader2 } from "lucide-react";
 import { format } from "date-fns";
+import { useCurrency } from "@/lib/store/CurrencyContext";
 
 export default function AccountDashboardPage() {
   const { user, profile } = useAuth();
+  const { formatPrice } = useCurrency();
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [totalOrders, setTotalOrders] = useState(0);
   const [addressCount, setAddressCount] = useState(0);
@@ -148,7 +150,7 @@ export default function AccountDashboardPage() {
                   <span className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full ${getStatusColor(order.fulfillment_status)}`}>
                     {order.fulfillment_status === "processing" ? "packed" : order.fulfillment_status}
                   </span>
-                  <span className="font-bold text-sm text-gray-900 font-mono">₹{Number(order.total).toLocaleString("en-IN")}</span>
+                  <span className="font-bold text-sm text-gray-900 font-mono">{formatPrice(Number(order.total))}</span>
                   <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-gray-500 transition-colors" />
                 </div>
               </Link>

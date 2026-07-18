@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { ShoppingBag, Search, Menu, X, User, Globe } from "lucide-react";
+import { ShoppingBag, Search, Menu, X, User, Globe, Coins } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -10,6 +10,7 @@ import { useCart } from "@/lib/store/CartContext";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/store/AuthContext";
 import { SearchModal } from "./SearchModal";
+import { useCurrency } from "@/lib/store/CurrencyContext";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -31,6 +32,7 @@ export function Header() {
   const [settings, setSettings] = useState<any>(null);
   const [currentAnnIndex, setCurrentAnnIndex] = useState(0);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const { formatPrice } = useCurrency();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,11 +117,11 @@ export function Header() {
                 className="hover:underline underline-offset-2"
               >
                 {settings.announcement_bar_text ||
-                  "Free Shipping on all orders above ₹999 | COD Available"}
+                  `Free Shipping on all orders above ${formatPrice(999)} | COD Available`}
               </Link>
             ) : (
               settings?.announcement_bar_text ||
-              "Free Shipping on all orders above ₹999 | COD Available"
+              `Free Shipping on all orders above ${formatPrice(999)} | COD Available`
             )}
           </p>
         </div>
@@ -170,6 +172,15 @@ export function Header() {
                 className="w-10 h-10 flex items-center justify-center rounded-full text-gray-600 hover:text-[#D4AF37] hover:bg-[#D4AF37]/8 transition-all duration-200 cursor-pointer"
               >
                 <Globe className="w-[22px] h-[22px]" strokeWidth={1.6} />
+              </button>
+
+              {/* Currency */}
+              <button
+                onClick={() => window.showCurrencySelector?.()}
+                title="Select Currency"
+                className="w-10 h-10 flex items-center justify-center rounded-full text-gray-600 hover:text-[#D4AF37] hover:bg-[#D4AF37]/8 transition-all duration-200 cursor-pointer"
+              >
+                <Coins className="w-[22px] h-[22px]" strokeWidth={1.6} />
               </button>
 
               {/* Account */}
@@ -241,10 +252,10 @@ export function Header() {
                           </div>
                           <div className="flex flex-col gap-3">
                             <h3 className="text-xs font-bold uppercase tracking-widest text-[#D4AF37] mb-1 pb-2 border-b border-gray-100">By Price</h3>
-                            <Link href="/products?price=under-999" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors">Under ₹999</Link>
-                            <Link href="/products?price=1000-1999" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors">₹1000 to ₹1999</Link>
-                            <Link href="/products?price=2000-2999" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors">₹2000 to ₹2999</Link>
-                            <Link href="/products?price=above-3000" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors">Above ₹3000</Link>
+                            <Link href="/products?price=under-999" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors">Under {formatPrice(999)}</Link>
+                            <Link href="/products?price=1000-1999" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors">{formatPrice(1000)} to {formatPrice(1999)}</Link>
+                            <Link href="/products?price=2000-2999" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors">{formatPrice(2000)} to {formatPrice(2999)}</Link>
+                            <Link href="/products?price=above-3000" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors">Above {formatPrice(3000)}</Link>
                           </div>
                           <div className="relative rounded-lg overflow-hidden">
                             <Image
@@ -308,8 +319,16 @@ export function Header() {
             <button
               onClick={() => window.showLanguageSelector?.()}
               className="w-9 h-9 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors cursor-pointer"
+              title="Select Language"
             >
               <Globe className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => window.showCurrencySelector?.()}
+              className="w-9 h-9 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors cursor-pointer"
+              title="Select Currency"
+            >
+              <Coins className="w-5 h-5" />
             </button>
             <button
               onClick={() => setIsSearchOpen(true)}

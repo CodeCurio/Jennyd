@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useCart } from "@/lib/store/CartContext";
 import { Button } from "../ui/Button";
 import { supabase } from "@/lib/supabase";
+import { useCurrency } from "@/lib/store/CurrencyContext";
 
 const QUICK_NAV = [
   { label: "Bestsellers", href: "/products?sort=best-selling" },
@@ -24,6 +25,7 @@ function RecommendationCarousel({
   onAdd: (p: any) => void;
   onClose: () => void;
 }) {
+  const { formatPrice } = useCurrency();
   const ITEMS_PER_PAGE = 2;
   const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
   const [currentPage, setCurrentPage] = useState(0);
@@ -133,11 +135,11 @@ function RecommendationCarousel({
                         <div className="flex flex-col gap-2">
                           <div className="flex items-center gap-1.5 flex-wrap">
                             <span className="text-[13px] font-bold text-gray-900">
-                              ₹{displayPrice.toLocaleString()}
+                              {formatPrice(displayPrice)}
                             </span>
                             {isSale && (
                               <span className="text-[10px] text-neutral-400 line-through font-mono">
-                                ₹{product.price.toLocaleString()}
+                                {formatPrice(product.price)}
                               </span>
                             )}
                           </div>
@@ -196,6 +198,7 @@ export function CartDrawer() {
     addItem,
   } = useCart();
 
+  const { formatPrice } = useCurrency();
   const [couponCode, setCouponCode] = useState("");
   const [couponError, setCouponError] = useState("");
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
@@ -388,7 +391,7 @@ export function CartDrawer() {
                               </button>
                             </div>
                             <p className="font-extrabold text-xs text-gray-900 font-mono">
-                              ₹{(item.price * item.quantity).toLocaleString()}
+                              {formatPrice(item.price * item.quantity)}
                             </p>
                           </div>
                         </div>
@@ -408,7 +411,7 @@ export function CartDrawer() {
                     <div className="flex items-center justify-between bg-green-50 text-green-800 text-[11px] px-3 py-2 border border-green-200 font-medium">
                       <span className="flex items-center gap-1.5 font-bold uppercase tracking-wider">
                         <Ticket className="w-3.5 h-3.5" /> {appliedCoupon.code}{" "}
-                        (-₹{discount.toLocaleString()})
+                        (-{formatPrice(discount)})
                       </span>
                       <button
                         onClick={removeCoupon}
@@ -452,21 +455,21 @@ export function CartDrawer() {
                   <div className="flex justify-between text-xs text-gray-500 font-semibold uppercase tracking-wider">
                     <span>Subtotal</span>
                     <span className="font-mono">
-                      ₹{subtotal.toLocaleString()}
+                      {formatPrice(subtotal)}
                     </span>
                   </div>
                   {appliedCoupon && (
                     <div className="flex justify-between text-xs text-green-700 font-semibold uppercase tracking-wider">
                       <span>Discount ({appliedCoupon.code})</span>
                       <span className="font-mono">
-                        -₹{discount.toLocaleString()}
+                        -{formatPrice(discount)}
                       </span>
                     </div>
                   )}
                   <div className="flex justify-between text-base font-bold text-gray-900 pt-2 border-t border-gray-150 uppercase tracking-widest">
                     <span>Total</span>
                     <span className="font-mono">
-                      ₹{(subtotal - discount).toLocaleString()}
+                      {formatPrice(subtotal - discount)}
                     </span>
                   </div>
                 </div>

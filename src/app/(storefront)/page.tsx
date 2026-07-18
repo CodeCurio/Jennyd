@@ -20,6 +20,7 @@ import {
   Loader2
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { useCurrency } from "@/lib/store/CurrencyContext";
 
 const HERO_SLIDES = [
   {
@@ -117,6 +118,7 @@ const REVIEWS = [
 export default function Home() {
   const { addItem } = useCart();
   const { addToast } = useToast();
+  const { formatPrice } = useCurrency();
   
   // Slide States
   const [slides, setSlides] = useState<any[]>(HERO_SLIDES);
@@ -500,9 +502,9 @@ export default function Home() {
                       <div className="flex flex-col">
                         <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1">Celestial Extract</span>
                         <div className="flex items-baseline gap-2">
-                          <span className="text-xl md:text-2xl font-serif text-white">₹{zodiacProduct.sale_price || zodiacProduct.price}</span>
+                          <span className="text-xl md:text-2xl font-serif text-white">{formatPrice(zodiacProduct.sale_price || zodiacProduct.price)}</span>
                           {(zodiacProduct.sale_price || zodiacProduct.salePrice) && (
-                            <span className="text-xs text-gray-500 line-through">₹{zodiacProduct.price}</span>
+                            <span className="text-xs text-gray-500 line-through">{formatPrice(zodiacProduct.price)}</span>
                           )}
                         </div>
                       </div>

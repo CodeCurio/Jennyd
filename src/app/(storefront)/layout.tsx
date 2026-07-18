@@ -5,6 +5,7 @@ import { CartProvider } from "@/lib/store/CartContext";
 import { ToastProvider } from "@/components/ui/Toast";
 import { AuthProvider } from "@/lib/store/AuthContext";
 import { LanguageSelectorPopup } from "@/components/storefront/LanguageSelectorPopup";
+import { CurrencyProvider } from "@/lib/store/CurrencyContext";
 
 export default function StorefrontLayout({
   children,
@@ -14,19 +15,22 @@ export default function StorefrontLayout({
   return (
     <ToastProvider>
       <AuthProvider>
-        <CartProvider>
-          <div className="flex flex-col min-h-screen">
-            <Header />
-            <main className="flex-1">
-              {children}
-            </main>
-            <Footer />
-            <CartDrawer />
-            <LanguageSelectorPopup />
-          </div>
-        </CartProvider>
+        <CurrencyProvider>
+          <CartProvider>
+            <div className="flex flex-col min-h-screen">
+              <Header />
+              <main className="flex-1">
+                {children}
+              </main>
+              <Footer />
+              <CartDrawer />
+              <LanguageSelectorPopup />
+            </div>
+          </CartProvider>
+        </CurrencyProvider>
       </AuthProvider>
     </ToastProvider>
   );
 }
+
 

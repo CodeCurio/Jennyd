@@ -7,6 +7,7 @@ import { Package, ChevronDown, ChevronUp, Loader2, ShoppingBag, AlertTriangle } 
 import { format } from "date-fns";
 import Link from "next/link";
 import { useToast } from "@/components/ui/Toast";
+import { useCurrency } from "@/lib/store/CurrencyContext";
 
 interface OrderItem {
   id: string;
@@ -35,6 +36,7 @@ interface Order {
 export default function OrderHistoryPage() {
   const { user } = useAuth();
   const { addToast } = useToast();
+  const { formatPrice } = useCurrency();
   const [orders, setOrders] = useState<Order[]>([]);
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
   const [orderItems, setOrderItems] = useState<Record<string, OrderItem[]>>({});
@@ -188,7 +190,7 @@ export default function OrderHistoryPage() {
                     <span className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full ${getStatusColor(order.fulfillment_status)}`}>
                       Order: {order.fulfillment_status === "processing" ? "packed" : order.fulfillment_status}
                     </span>
-                    <span className="font-bold text-sm text-gray-900 font-mono min-w-[80px] text-right">₹{Number(order.total).toLocaleString("en-IN")}</span>
+                    <span className="font-bold text-sm text-gray-900 font-mono min-w-[80px] text-right">{formatPrice(Number(order.total))}</span>
                     {isExpanded ? (
                       <ChevronUp className="w-5 h-5 text-gray-400" />
                     ) : (
@@ -220,9 +222,9 @@ export default function OrderHistoryPage() {
                                   {item.variant_info?.size && (
                                     <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-0.5">Size: {item.variant_info.size}</p>
                                   )}
-                                  <p className="text-xs text-gray-500 mt-0.5">₹{Number(item.unit_price).toLocaleString("en-IN")} × {item.quantity}</p>
+                                  <p className="text-xs text-gray-500 mt-0.5">{formatPrice(Number(item.unit_price))} × {item.quantity}</p>
                                 </div>
-                                <p className="font-bold text-sm text-gray-900 font-mono">₹{Number(item.line_total).toLocaleString("en-IN")}</p>
+                                <p className="font-bold text-sm text-gray-900 font-mono">{formatPrice(Number(item.line_total))}</p>
                               </div>
                             );
                           })}
@@ -232,21 +234,21 @@ export default function OrderHistoryPage() {
                         <div className="px-6 py-4 bg-gray-50/80 border-t border-gray-100 text-xs space-y-1.5 text-gray-500 font-medium">
                           <div className="flex justify-between">
                             <span>Subtotal</span>
-                            <span className="text-gray-900 font-mono">₹{Number(order.subtotal).toLocaleString("en-IN")}</span>
+                            <span className="text-gray-900 font-mono">{formatPrice(Number(order.subtotal))}</span>
                           </div>
                           <div className="flex justify-between">
                             <span>Shipping ({order.shipping_method || "Standard"})</span>
-                            <span className="text-gray-900 font-mono">₹{Number(order.shipping_cost).toLocaleString("en-IN")}</span>
+                            <span className="text-gray-900 font-mono">{formatPrice(Number(order.shipping_cost))}</span>
                           </div>
                           {Number(order.discount_amount) > 0 && (
                             <div className="flex justify-between text-green-600">
                               <span>Discount {order.coupon_code ? `(${order.coupon_code})` : ""}</span>
-                              <span className="font-mono">-₹{Number(order.discount_amount).toLocaleString("en-IN")}</span>
+                              <span className="font-mono">-{formatPrice(Number(order.discount_amount))}</span>
                             </div>
                           )}
                           <div className="flex justify-between pt-2 border-t border-gray-200 text-gray-900 font-bold">
                             <span className="uppercase tracking-wider">Total</span>
-                            <span className="font-mono text-sm">₹{Number(order.total).toLocaleString("en-IN")}</span>
+                            <span className="font-mono text-sm">{formatPrice(Number(order.total))}</span>
                           </div>
                           
                           {/* Cancel Order Action */}

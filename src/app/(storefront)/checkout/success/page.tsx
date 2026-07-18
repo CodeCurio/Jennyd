@@ -8,11 +8,13 @@ import { Check, Clipboard, Package, ArrowRight, Truck, ShieldCheck, ShoppingBag,
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
+import { useCurrency } from "@/lib/store/CurrencyContext";
 
 function OrderSuccessContent() {
   const searchParams = useSearchParams();
   const orderNumber = searchParams.get("orderNumber");
   const { addToast } = useToast();
+  const { formatPrice } = useCurrency();
 
   const [order, setOrder] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -172,25 +174,25 @@ function OrderSuccessContent() {
               <div className="space-y-2 text-gray-550 border-b border-gray-100 pb-4">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span className="font-mono text-gray-900">₹{Number(order.subtotal).toLocaleString()}</span>
+                  <span className="font-mono text-gray-900">{formatPrice(Number(order.subtotal))}</span>
                 </div>
                 {Number(order.discount_amount) > 0 && (
                   <div className="flex justify-between text-green-700">
                     <span>Discount ({order.coupon_code})</span>
-                    <span className="font-mono">-₹{Number(order.discount_amount).toLocaleString()}</span>
+                    <span className="font-mono">-{formatPrice(Number(order.discount_amount))}</span>
                   </div>
                 )}
                 <div className="flex justify-between">
                   <span>Shipping</span>
                   <span className="font-mono text-gray-900">
-                    {Number(order.shipping_cost) === 0 ? "FREE" : `₹${Number(order.shipping_cost)}`}
+                    {Number(order.shipping_cost) === 0 ? "FREE" : formatPrice(Number(order.shipping_cost))}
                   </span>
                 </div>
               </div>
 
               <div className="flex justify-between items-baseline text-gray-900">
                 <span className="text-xs">Final Amount Paid</span>
-                <span className="text-lg font-mono text-black">₹{Number(order.total).toLocaleString()}</span>
+                <span className="text-lg font-mono text-black">{formatPrice(Number(order.total))}</span>
               </div>
 
               <div className="pt-2 border-t border-gray-100 text-[10px] text-gray-400 normal-case font-medium leading-relaxed">

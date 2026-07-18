@@ -11,6 +11,7 @@ import { useCart } from "@/lib/store/CartContext";
 import { useToast } from "@/components/ui/Toast";
 import { supabase } from "@/lib/supabase";
 import { ProductReviews } from "@/components/storefront/ProductReviews";
+import { useCurrency } from "@/lib/store/CurrencyContext";
 
 const TRUST_BADGES = [
   { icon: ShieldCheck, label: "Secure Transaction" },
@@ -31,6 +32,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
   const [showStickyBar, setShowStickyBar] = useState(false);
   const { addItem } = useCart();
   const { addToast } = useToast();
+  const { formatPrice } = useCurrency();
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [zoomStyle, setZoomStyle] = useState<React.CSSProperties>({ display: "none" });
@@ -301,9 +303,9 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
 
             {/* Pricing */}
             <div className="flex items-center gap-3 mb-1">
-              <span className="text-2xl font-bold font-mono">₹ {PRODUCT.price.toLocaleString()}</span>
+              <span className="text-2xl font-bold font-mono">{formatPrice(PRODUCT.price)}</span>
               {PRODUCT.mrp && (
-                <span className="text-gray-400 line-through text-sm font-mono">MRP ₹ {PRODUCT.mrp.toLocaleString()}</span>
+                <span className="text-gray-400 line-through text-sm font-mono">MRP {formatPrice(PRODUCT.mrp)}</span>
               )}
               {PRODUCT.discount && (
                 <span className="bg-green-600 text-white text-[10px] font-bold px-2 py-1 uppercase tracking-widest">
@@ -457,7 +459,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                   </AccordionItem>
                 )}
                 <AccordionItem title="Shipping & Return">
-                  <p>Free shipping on orders above ₹999. Easy 7-day returns for unopened products.</p>
+                  <p>Free shipping on orders above {formatPrice(999)}. Easy 7-day returns for unopened products.</p>
                 </AccordionItem>
               </Accordion>
             </div>
@@ -546,7 +548,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             </div>
             <div>
               <p className="font-bold text-sm leading-tight">{PRODUCT.title} ({selectedSize})</p>
-              <p className="text-xs text-gray-500 font-mono">₹ {PRODUCT.price.toLocaleString()}</p>
+              <p className="text-xs text-gray-500 font-mono">{formatPrice(PRODUCT.price)}</p>
             </div>
           </div>
 

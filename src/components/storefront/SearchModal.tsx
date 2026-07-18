@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { useCurrency } from "@/lib/store/CurrencyContext";
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ interface SearchModalProps {
 
 export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const router = useRouter();
+  const { formatPrice } = useCurrency();
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [results, setResults] = useState<any[]>([]);
@@ -396,11 +398,11 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                                 {/* Pricing column */}
                                 <div className="text-right shrink-0">
                                   <p className={`text-sm font-semibold ${isSale ? 'text-sale' : 'text-[#1A1A1A]'}`}>
-                                    ₹{displayPrice}
+                                    {formatPrice(displayPrice)}
                                   </p>
                                   {isSale && (
                                     <p className="text-xs text-neutral-400 line-through mt-0.5">
-                                      ₹{product.price}
+                                      {formatPrice(product.price)}
                                     </p>
                                   )}
                                 </div>
@@ -459,7 +461,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                                 </p>
                               </div>
                               <div className="text-right shrink-0">
-                                <p className="text-sm font-semibold text-black">₹{displayPrice}</p>
+                                <p className="text-sm font-semibold text-black">{formatPrice(displayPrice)}</p>
                               </div>
                             </div>
                           );

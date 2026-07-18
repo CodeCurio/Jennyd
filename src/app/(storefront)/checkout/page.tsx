@@ -8,12 +8,14 @@ import { useCart } from "@/lib/store/CartContext";
 import { useToast } from "@/components/ui/Toast";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/Button";
+import { useCurrency } from "@/lib/store/CurrencyContext";
 
 type Step = "shipping" | "payment" | "review";
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, subtotal, discount, appliedCoupon, clearCart } = useCart();
+  const { formatPrice } = useCurrency();
   const { addToast } = useToast();
 
   const [activeStep, setActiveStep] = useState<Step>("shipping");
@@ -441,7 +443,7 @@ export default function CheckoutPage() {
                         </div>
                       </div>
                       <span className="font-mono text-gray-950 font-bold">
-                        {baseShippingCost === 0 ? "FREE" : `₹${baseShippingCost}`}
+                        {baseShippingCost === 0 ? "FREE" : formatPrice(baseShippingCost)}
                       </span>
                     </label>
 
@@ -461,7 +463,7 @@ export default function CheckoutPage() {
                           <span className="text-[10px] text-gray-450 lowercase font-medium tracking-normal block mt-0.5">1-2 Business Days</span>
                         </div>
                       </div>
-                      <span className="font-mono text-gray-950 font-bold">₹150</span>
+                      <span className="font-mono text-gray-950 font-bold">{formatPrice(150)}</span>
                     </label>
                   </div>
                 </div>
@@ -704,7 +706,7 @@ export default function CheckoutPage() {
                       </>
                     ) : (
                       <>
-                        Place Order (₹{grandTotal.toLocaleString()}) <ArrowRight className="w-4 h-4" />
+                        Place Order ({formatPrice(grandTotal)}) <ArrowRight className="w-4 h-4" />
                       </>
                     )}
                   </button>
@@ -738,11 +740,11 @@ export default function CheckoutPage() {
                       </span>
                     )}
                     <span className="text-[10px] text-gray-500 font-mono mt-0.5 block">
-                      {item.quantity}x ₹{item.price.toLocaleString()}
+                      {item.quantity}x {formatPrice(item.price)}
                     </span>
                   </div>
                   <span className="font-bold text-xs font-mono text-gray-900">
-                    ₹{(item.price * item.quantity).toLocaleString()}
+                    {formatPrice(item.price * item.quantity)}
                   </span>
                 </div>
               ))}
@@ -752,20 +754,20 @@ export default function CheckoutPage() {
             <div className="border-t border-gray-100 pt-4 space-y-2 text-xs uppercase tracking-wider font-semibold text-gray-500">
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span className="font-mono text-gray-900">₹{subtotal.toLocaleString()}</span>
+                <span className="font-mono text-gray-900">{formatPrice(subtotal)}</span>
               </div>
               
               {appliedCoupon && (
                 <div className="flex justify-between text-green-700 font-bold">
                   <span>Discount ({appliedCoupon.code})</span>
-                  <span className="font-mono">-₹{discount.toLocaleString()}</span>
+                  <span className="font-mono">-{formatPrice(discount)}</span>
                 </div>
               )}
 
               <div className="flex justify-between">
                 <span>Shipping</span>
                 <span className="font-mono text-gray-900">
-                  {shippingCost === 0 ? "FREE" : `₹${shippingCost}`}
+                  {shippingCost === 0 ? "FREE" : formatPrice(shippingCost)}
                 </span>
               </div>
             </div>
@@ -773,7 +775,7 @@ export default function CheckoutPage() {
             {/* Total calculation */}
             <div className="border-t border-gray-150 pt-4 flex justify-between items-baseline font-bold uppercase tracking-wider text-gray-900">
               <span className="text-xs">Total to pay</span>
-              <span className="text-lg font-mono">₹{grandTotal.toLocaleString()}</span>
+              <span className="text-lg font-mono">{formatPrice(grandTotal)}</span>
             </div>
 
             {/* Security seal */}

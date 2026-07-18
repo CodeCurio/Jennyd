@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Button } from "./Button";
 import Link from "next/link";
 import { Star, Plus } from "lucide-react";
+import { useCurrency } from "@/lib/store/CurrencyContext";
 
 interface ProductCardProps {
   product: {
@@ -33,6 +34,7 @@ export function ProductCard({ product, onQuickAdd, onQuickView }: ProductCardPro
   const badge = product.badge || product.metadata?.badge;
   const image = product.image || (product.metadata?.images && product.metadata.images[0]) || "/assets/placeholder.jpg";
   const hoverImage = product.hoverImage || (product.metadata?.images && product.metadata.images[1]) || undefined;
+  const { formatPrice } = useCurrency();
 
   return (
     <motion.div
@@ -124,11 +126,11 @@ export function ProductCard({ product, onQuickAdd, onQuickView }: ProductCardPro
         {/* Pricing */}
         <div className="flex items-baseline justify-center sm:justify-start gap-2 mb-1">
           <span className="text-sm sm:text-base font-bold text-[#1A1A1A]">
-            ₹{displayPrice.toLocaleString()}
+            {formatPrice(displayPrice)}
           </span>
           {isSale && (
             <span className="text-xs text-neutral-400 line-through font-normal font-mono">
-              ₹{product.price.toLocaleString()}
+              {formatPrice(product.price)}
             </span>
           )}
         </div>

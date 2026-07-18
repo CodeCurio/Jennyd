@@ -7,6 +7,7 @@ import { Minus, Plus, Trash2, Ticket, ArrowRight, ShoppingBag, ChevronLeft, Chev
 import { useCart } from "@/lib/store/CartContext";
 import { Button } from "@/components/ui/Button";
 import { supabase } from "@/lib/supabase";
+import { useCurrency } from "@/lib/store/CurrencyContext";
 
 const QUICK_NAV = [
   { label: "Bestsellers", href: "/products?sort=best-selling" },
@@ -26,6 +27,7 @@ export default function CartPage() {
     removeCoupon,
     addItem,
   } = useCart();
+  const { formatPrice } = useCurrency();
 
   const [couponInput, setCouponInput] = useState("");
   const [couponError, setCouponError] = useState("");
@@ -187,9 +189,9 @@ export default function CartPage() {
                           {[1,2,3,4,5].map(s => <Star key={s} className="w-2.5 h-2.5 fill-accent text-accent" />)}
                         </div>
                         <div className="flex items-baseline gap-2 mb-2.5">
-                          <span className="text-sm font-semibold text-[#1A1A1A]">₹{displayPrice}</span>
+                          <span className="text-sm font-semibold text-[#1A1A1A]">{formatPrice(displayPrice)}</span>
                           {isSale && (
-                            <span className="text-xs text-neutral-400 line-through">₹{product.price}</span>
+                            <span className="text-xs text-neutral-400 line-through">{formatPrice(product.price)}</span>
                           )}
                         </div>
 
@@ -275,7 +277,7 @@ export default function CartPage() {
                           <div className="text-right">
                             <span className="text-[10px] text-neutral-400 block mb-0.5 font-medium uppercase tracking-wider">Subtotal</span>
                             <span className="font-bold text-sm font-mono text-[#1A1A1A]">
-                              ₹{(item.price * item.quantity).toLocaleString()}
+                              {formatPrice(item.price * item.quantity)}
                             </span>
                           </div>
                         </div>
@@ -302,7 +304,7 @@ export default function CartPage() {
                     <div>
                       <p className="text-[10px] text-green-700 uppercase tracking-widest font-bold">Coupon Applied</p>
                       <p className="text-xs font-bold text-green-900 mt-0.5">
-                        {appliedCoupon.code} (-₹{discount.toLocaleString()})
+                        {appliedCoupon.code} (-{formatPrice(discount)})
                       </p>
                     </div>
                     <button
@@ -337,7 +339,7 @@ export default function CartPage() {
                       <p className="text-[10px] text-red-600 font-medium">{couponError}</p>
                     )}
                     <p className="text-[9px] text-neutral-400 leading-normal">
-                      Try codes <strong>WELCOME10</strong> (10% off above ₹500) or <strong>FLAT500</strong> (Flat ₹500 off above ₹2,000).
+                      Try codes <strong>WELCOME10</strong> (10% off above {formatPrice(500)}) or <strong>FLAT500</strong> (Flat {formatPrice(500)} off above {formatPrice(2000)}).
                     </p>
                   </form>
                 )}
@@ -352,33 +354,33 @@ export default function CartPage() {
                 <div className="space-y-2 text-xs uppercase tracking-wider font-semibold text-neutral-500">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span className="font-mono text-[#1A1A1A]">₹{subtotal.toLocaleString()}</span>
+                    <span className="font-mono text-[#1A1A1A]">{formatPrice(subtotal)}</span>
                   </div>
                   
                   {appliedCoupon && (
                     <div className="flex justify-between text-green-700 font-bold">
                       <span>Discount ({appliedCoupon.code})</span>
-                      <span className="font-mono">-₹{discount.toLocaleString()}</span>
+                      <span className="font-mono">-{formatPrice(discount)}</span>
                     </div>
                   )}
 
                   <div className="flex justify-between">
                     <span>Shipping</span>
                     <span className="font-mono text-[#1A1A1A]">
-                      {shippingCost === 0 ? "FREE" : `₹${shippingCost}`}
+                      {shippingCost === 0 ? "FREE" : formatPrice(shippingCost)}
                     </span>
                   </div>
 
                   {shippingCost > 0 && (
                     <p className="text-[9px] text-neutral-400 lowercase tracking-normal font-normal text-right">
-                      Add ₹{(999 - subtotal).toLocaleString()} more for free shipping
+                      Add {formatPrice(999 - subtotal)} more for free shipping
                     </p>
                   )}
                 </div>
 
                 <div className="border-t border-neutral-150 pt-4 flex justify-between items-baseline font-bold uppercase tracking-wider text-[#1A1A1A]">
                   <span className="text-xs">Estimated Total</span>
-                  <span className="text-xl font-mono">₹{grandTotal.toLocaleString()}</span>
+                  <span className="text-xl font-mono">{formatPrice(grandTotal)}</span>
                 </div>
 
                 <Link href="/checkout" className="block pt-2">

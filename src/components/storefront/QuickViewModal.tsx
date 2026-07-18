@@ -8,6 +8,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { useCart } from "@/lib/store/CartContext";
 import { useToast } from "@/components/ui/Toast";
+import { useCurrency } from "@/lib/store/CurrencyContext";
 
 interface QuickViewModalProps {
   product: any;
@@ -18,6 +19,7 @@ interface QuickViewModalProps {
 export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps) {
   const { addItem } = useCart();
   const { addToast } = useToast();
+  const { formatPrice } = useCurrency();
   
   const [selectedSize, setSelectedSize] = useState<"50ml" | "100ml">(
     product?.title?.toLowerCase()?.includes("50ml") ? "50ml" : "100ml"
@@ -129,9 +131,9 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
 
           {/* Pricing */}
           <div className="flex items-baseline gap-2.5 mb-4">
-            <span className="text-xl font-bold font-mono">₹{finalPrice.toLocaleString()}</span>
+            <span className="text-xl font-bold font-mono">{formatPrice(finalPrice)}</span>
             {isSale && (
-              <span className="text-sm text-gray-400 line-through">₹{displayPrice.toLocaleString()}</span>
+              <span className="text-sm text-gray-400 line-through">{formatPrice(displayPrice)}</span>
             )}
           </div>
 

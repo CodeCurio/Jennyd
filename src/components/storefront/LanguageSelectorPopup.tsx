@@ -3,12 +3,14 @@
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { Globe, X, Loader2 } from "lucide-react";
+import { useCurrency, SUPPORTED_CURRENCIES } from "@/lib/store/CurrencyContext";
 
 declare global {
   interface Window {
     googleTranslateElementInit?: () => void;
     google?: any;
     showLanguageSelector?: () => void;
+    showCurrencySelector?: () => void;
   }
 }
 
@@ -16,6 +18,7 @@ export function LanguageSelectorPopup() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [isTranslateLoaded, setIsTranslateLoaded] = useState(false);
+  const { currency, setCurrency } = useCurrency();
 
   // Helper to set cookie for Google Translate (keeps state preserved on hard refreshes)
   const setLanguageCookie = (langCode: string) => {
@@ -45,6 +48,10 @@ export function LanguageSelectorPopup() {
   useEffect(() => {
     // 1. Register global trigger callback for header and footer icons
     window.showLanguageSelector = () => {
+      setIsOpen(true);
+    };
+
+    window.showCurrencySelector = () => {
       setIsOpen(true);
     };
 
@@ -134,7 +141,7 @@ export function LanguageSelectorPopup() {
       
       {/* Card Dialog */}
       <div 
-        className={`relative z-10 bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full border border-[#D4AF37]/35 shadow-2xl flex flex-col items-center gap-6 transition-all duration-300 transform ${
+        className={`relative z-10 bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full border border-[#D4AF37]/35 shadow-2xl flex flex-col items-center gap-5 transition-all duration-300 transform ${
           isOpen ? "scale-100" : "scale-95"
         }`}
       >
@@ -151,33 +158,70 @@ export function LanguageSelectorPopup() {
           <div className="mx-auto w-12 h-12 rounded-full bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37] mb-2">
             <Globe className="w-6 h-6" />
           </div>
-          <h3 className="text-2xl font-serif font-normal text-gray-900 tracking-wide text-center">Select Language</h3>
+          <h3 className="text-2xl font-serif font-normal text-gray-900 tracking-wide text-center">Preferences</h3>
           <p className="text-xs text-gray-400 font-light max-w-[280px] leading-relaxed text-center">
-            Choose your preferred language from the dropdown menu to translate the page.
+            Choose your preferred language and currency options below.
           </p>
         </div>
 
-        {/* Dropdown Container */}
-        <div className="w-full flex flex-col items-center justify-center min-h-[70px] border border-neutral-100 rounded-2xl p-4 bg-neutral-50/50">
-          {!isTranslateLoaded && (
-            <div className="flex items-center justify-center gap-2 text-xs text-gray-400 font-light animate-pulse">
-              <Loader2 className="w-4 h-4 animate-spin text-[#D4AF37]" />
-              Configuring translation options...
+        {/* Language Dropdown Container */}
+        <div className="w-full flex flex-col gap-1.5">
+          <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+            Select Language
+          </label>
+          <div className="w-full flex flex-col items-center justify-center min-h-[60px] border border-neutral-100 rounded-2xl p-3 bg-neutral-50/50">
+            {!isTranslateLoaded && (
+              <div className="flex items-center justify-center gap-2 text-xs text-gray-400 font-light animate-pulse">
+                <Loader2 className="w-4 h-4 animate-spin text-[#D4AF37]" />
+                Configuring translation options...
+              </div>
+            )}
+            {/* Mount point for Google Translate dropdown */}
+            <div 
+              id="google_translate_element" 
+              className={`w-full flex justify-center transition-opacity duration-300 ${
+                isTranslateLoaded ? "opacity-100" : "opacity-0 pointer-events-none h-0"
+              }`} 
+            />
+          </div>
+        </div>
+
+        {/* Currency selection block */}
+        <div className="w-full flex flex-col gap-1.5">
+          <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+            Select Currency
+          </label>
+          <div className="relative w-full">
+            <select
+              value={currency}
+              onChange={(e) => {
+                setCurrency(e.target.value);
+                // Close modal automatically after selection
+                setTimeout(() => {
+                  setIsOpen(false);
+                }, 800);
+              }}
+              className="w-full px-4 py-3 bg-neutral-50/50 border border-neutral-150 rounded-2xl text-xs font-semibold text-gray-800 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all appearance-none cursor-pointer"
+            >
+              {SUPPORTED_CURRENCIES.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            {/* Custom arrow icon for the select */}
+            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+              </svg>
             </div>
-          )}
-          {/* Mount point for Google Translate dropdown */}
-          <div 
-            id="google_translate_element" 
-            className={`w-full flex justify-center transition-opacity duration-300 ${
-              isTranslateLoaded ? "opacity-100" : "opacity-0 pointer-events-none h-0"
-            }`} 
-          />
+          </div>
         </div>
 
         {/* Continue Button */}
         <button
           onClick={() => setIsOpen(false)}
-          className="w-full py-3 bg-black hover:bg-neutral-900 text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-all duration-300 active:scale-[0.98] shadow-xs cursor-pointer"
+          className="w-full py-3 bg-black hover:bg-neutral-900 text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-all duration-300 active:scale-[0.98] shadow-xs cursor-pointer mt-2"
         >
           Continue Shopping
         </button>
@@ -185,3 +229,4 @@ export function LanguageSelectorPopup() {
     </div>
   );
 }
+
