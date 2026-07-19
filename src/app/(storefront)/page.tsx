@@ -115,6 +115,25 @@ const REVIEWS = [
   }
 ];
 
+const DELIVERY_PARTNERS = [
+  { name: "DHL Express", short: "DHL", desc: "Fast international express delivery", color: "bg-[#FFCC00] text-[#D00000] font-black italic border-y-4 border-[#D00000]" },
+  { name: "FedEx", short: "FedEx", desc: "International shipping & freight", color: "bg-white text-[#4D148C] font-black border border-gray-200" },
+  { name: "UPS", short: "UPS", desc: "Worldwide parcel & supply chain", color: "bg-[#351C15] text-[#FFB500] font-bold border border-[#FFB500]" },
+  { name: "Aramex", short: "aramex", desc: "Middle East, Asia & Africa", color: "bg-white text-[#E31B23] font-black tracking-tighter uppercase border border-gray-200" },
+  { name: "TNT Express", short: "TNT", desc: "International express services", color: "bg-[#FF6600] text-black font-black uppercase border border-[#FF6600]" },
+  { name: "EMS", short: "EMS", desc: "International postal express", color: "bg-[#005A9C] text-white font-extrabold italic border border-[#005A9C]" },
+  { name: "India Post", short: "India Post", desc: "Affordable Speed Post & EMS", color: "bg-[#F39C12] text-[#C0392B] font-extrabold border-l-8 border-[#C0392B]" },
+  { name: "Blue Dart", short: "BLUE DART", desc: "Premium domestic & international", color: "bg-[#003399] text-[#FFCC00] font-black italic border border-[#003399]" },
+  { name: "DTDC", short: "DTDC", desc: "International courier networks", color: "bg-white text-[#002B7A] font-extrabold border border-gray-200" },
+  { name: "Delhivery", short: "DELHIVERY", desc: "Cross-border e-commerce logistics", color: "bg-black text-white font-black tracking-widest uppercase border border-neutral-800" },
+  { name: "Xpressbees", short: "xpressbees", desc: "Business shipping solutions", color: "bg-[#E67E22] text-white font-extrabold uppercase border border-[#E67E22]" },
+  { name: "SF Express", short: "SF Express", desc: "Asia & international express", color: "bg-[#E74C3C] text-white font-bold border border-[#E74C3C]" },
+  { name: "YunExpress", short: "YunExpress", desc: "Popular e-commerce exports", color: "bg-[#2980B9] text-white font-extrabold border border-[#2980B9]" },
+  { name: "DB Schenker", short: "DB SCHENKER", desc: "Air, sea, and land freight", color: "bg-[#005C53] text-white font-bold uppercase border border-[#005C53]" },
+  { name: "Kuehne+Nagel", short: "KUEHNE+NAGEL", desc: "Global freight & supply chain", color: "bg-[#0D2C54] text-white font-semibold uppercase border border-[#0D2C54]" },
+  { name: "Maersk", short: "MAERSK", desc: "Ocean freight & logistics", color: "bg-[#009FD9] text-white font-black tracking-wider uppercase border border-[#009FD9]" }
+];
+
 export default function Home() {
   const { addItem } = useCart();
   const { addToast } = useToast();
@@ -648,6 +667,52 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Our Delivery Partners Section */}
+      <section className="py-12 sm:py-16 md:py-20 border-t border-b border-gray-100 bg-white overflow-hidden w-full">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8 text-center mb-10">
+          <span className="text-accent uppercase tracking-[0.3em] text-[10px] md:text-xs font-bold block mb-3">Global Logistics</span>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-normal text-foreground">Our Delivery Partners</h2>
+          <p className="text-gray-500 text-xs sm:text-sm mt-2 max-w-xl mx-auto">
+            Fast, secure, and reliable express shipping to over 220+ countries worldwide through our global networks.
+          </p>
+        </div>
+
+        <div className="w-full relative overflow-hidden bg-gray-50/50 py-8 border-y border-gray-100">
+          {/* Fade overlays for smooth edges */}
+          <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-white via-white/80 to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-white via-white/80 to-transparent z-10 pointer-events-none" />
+
+          <div className="w-full overflow-x-auto no-scrollbar">
+            <div className="animate-marquee flex items-center gap-10">
+              {[...Array(3)].map((_, listIndex) => (
+                <div key={listIndex} className="flex items-center gap-10 shrink-0">
+                  {DELIVERY_PARTNERS.map((partner, idx) => (
+                    <div
+                      key={`${listIndex}-${idx}`}
+                      className="flex flex-col items-center justify-center shrink-0 group"
+                    >
+                      {/* Logo Badge */}
+                      <div className={`w-36 h-16 rounded-xl flex flex-col items-center justify-center p-3 transition-transform duration-300 group-hover:scale-105 shadow-sm hover:shadow-md ${partner.color} select-none`}>
+                        {partner.short === "FedEx" ? (
+                          <span className="text-xl tracking-tight">
+                            Fed<span className="text-[#FF6600]">Ex</span>
+                          </span>
+                        ) : (
+                          <span className="text-xl tracking-tight text-center">{partner.short}</span>
+                        )}
+                      </div>
+                      {/* Subtext description below badge */}
+                      <span className="text-[10px] text-gray-400 font-medium mt-2 max-w-[140px] text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        {partner.desc}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* 8. Customer Reviews */}
       <section className="py-16 sm:py-20 md:py-24 bg-secondary-background">
