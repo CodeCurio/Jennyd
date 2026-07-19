@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Mail, Phone, MapPin, Send, Loader2 } from "lucide-react";
+import { Mail, Phone, MapPin, Send, Loader2, Building, Plane, FlaskConical, Factory } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 
 export default function ContactPage() {
@@ -198,70 +198,102 @@ export default function ContactPage() {
       </section>
 
       {/* French Establishments Section */}
-      <section className="bg-secondary-background py-16 px-4 md:px-8 border-t border-gray-100 w-full">
-        <div className="max-w-[1200px] mx-auto">
-          <div className="text-center mb-12">
-            <span className="text-accent uppercase tracking-[0.2em] text-[10px] font-bold block mb-2">Nos Sites</span>
-            <h2 className="text-3xl font-serif text-foreground">Établissements en France</h2>
+      <section className="bg-neutral-950 py-20 px-4 md:px-8 border-t border-neutral-900 w-full">
+        <div className="max-w-[1100px] mx-auto">
+          <div className="text-center mb-16 flex flex-col items-center">
+            <span className="text-[#D4AF37] uppercase tracking-[0.3em] text-[10px] font-bold block mb-3">Nos Établissements</span>
+            <h2 className="text-3xl sm:text-4xl font-serif text-white tracking-wide">Jennyd en France</h2>
+            <div className="h-0.5 w-16 bg-[#D4AF37]/50 mt-4 rounded" />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
             {/* Siège social */}
-            <div className="bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] rounded-xl border border-gray-100 flex flex-col justify-between">
+            <div className="bg-neutral-900/40 backdrop-blur-md p-8 rounded-2xl border border-neutral-800/80 hover:border-[#D4AF37]/40 hover:shadow-[0_0_30px_rgba(212,175,55,0.05)] transition-all duration-500 flex flex-col justify-between group">
               <div>
-                <h3 className="text-xs font-bold uppercase tracking-widest text-accent mb-4">Siège social</h3>
-                <p className="text-sm font-bold text-gray-800 leading-snug">JENNYD SCENTS France</p>
-                <p className="text-sm text-gray-500 mt-2 leading-relaxed font-light">
-                  18 Avenue des Parfums<br />
-                  06130 Grasse<br />
+                <div className="flex items-center justify-between mb-6">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D4AF37]">Siège social</span>
+                  <div className="w-10 h-10 rounded-full bg-neutral-800/50 border border-neutral-700/50 flex items-center justify-center text-[#D4AF37] group-hover:scale-110 transition-transform duration-500">
+                    <Building className="w-4 h-4" />
+                  </div>
+                </div>
+                <h3 className="text-lg font-bold text-white leading-tight">
+                  JENNYD SCENTS<br />
                   France
-                </p>
+                </h3>
+                <div className="mt-6 border-t border-neutral-800/80 pt-6 text-[13px] text-neutral-400 leading-relaxed font-light space-y-1.5">
+                  <p>18 Avenue des Parfums</p>
+                  <p>06130 Grasse</p>
+                  <p>France</p>
+                </div>
               </div>
             </div>
 
             {/* Division Export */}
-            <div className="bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] rounded-xl border border-gray-100 flex flex-col justify-between">
+            <div className="bg-neutral-900/40 backdrop-blur-md p-8 rounded-2xl border border-neutral-800/80 hover:border-[#D4AF37]/40 hover:shadow-[0_0_30px_rgba(212,175,55,0.05)] transition-all duration-500 flex flex-col justify-between group">
               <div>
-                <h3 className="text-xs font-bold uppercase tracking-widest text-accent mb-4">Division Export</h3>
-                <p className="text-sm font-bold text-gray-800 leading-snug">JENNYD SCENTS France</p>
-                <p className="text-sm text-gray-500 mt-2 leading-relaxed font-light">
-                  Entrepôt de Distribution Internationale<br />
-                  Zone de Fret Aéroportuaire<br />
-                  95700 Roissy-en-France<br />
-                  Île-de-France<br />
+                <div className="flex items-center justify-between mb-6">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D4AF37]">Division Export</span>
+                  <div className="w-10 h-10 rounded-full bg-neutral-800/50 border border-neutral-700/50 flex items-center justify-center text-[#D4AF37] group-hover:scale-110 transition-transform duration-500">
+                    <Plane className="w-4 h-4" />
+                  </div>
+                </div>
+                <h3 className="text-lg font-bold text-white leading-tight">
+                  JENNYD SCENTS<br />
                   France
-                </p>
+                </h3>
+                <div className="mt-6 border-t border-neutral-800/80 pt-6 text-[13px] text-neutral-400 leading-relaxed font-light space-y-1.5">
+                  <p>Entrepôt de Distribution Internationale</p>
+                  <p>Zone de Fret Aéroportuaire</p>
+                  <p className="whitespace-nowrap">95700 Roissy-en-France</p>
+                  <p>Île-de-France</p>
+                  <p>France</p>
+                </div>
               </div>
             </div>
 
-            {/* Site de Fabrication */}
-            <div className="bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] rounded-xl border border-gray-100 flex flex-col justify-between">
+            {/* Site de fabrication */}
+            <div className="bg-neutral-900/40 backdrop-blur-md p-8 rounded-2xl border border-neutral-800/80 hover:border-[#D4AF37]/40 hover:shadow-[0_0_30px_rgba(212,175,55,0.05)] transition-all duration-500 flex flex-col justify-between group">
               <div>
-                <h3 className="text-xs font-bold uppercase tracking-widest text-accent mb-4">Site de Fabrication</h3>
-                <p className="text-sm font-bold text-gray-800 leading-snug">JENNYD SCENTS France</p>
-                <p className="text-sm text-gray-500 mt-2 leading-relaxed font-light">
-                  Parc Industriel des Parfumeurs<br />
-                  145 Boulevard de la Création<br />
-                  06130 Grasse<br />
-                  Provence-Alpes-Côte d'Azur<br />
+                <div className="flex items-center justify-between mb-6">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D4AF37]">Site de fabrication</span>
+                  <div className="w-10 h-10 rounded-full bg-neutral-800/50 border border-neutral-700/50 flex items-center justify-center text-[#D4AF37] group-hover:scale-110 transition-transform duration-500">
+                    <FlaskConical className="w-4 h-4" />
+                  </div>
+                </div>
+                <h3 className="text-lg font-bold text-white leading-tight">
+                  JENNYD SCENTS<br />
                   France
-                </p>
+                </h3>
+                <div className="mt-6 border-t border-neutral-800/80 pt-6 text-[13px] text-neutral-400 leading-relaxed font-light space-y-1.5">
+                  <p>Parc Industriel des Parfumeurs</p>
+                  <p className="whitespace-nowrap">145 Boulevard de la Création</p>
+                  <p>06130 Grasse</p>
+                  <p>Provence-Alpes-Côte d'Azur</p>
+                  <p>France</p>
+                </div>
               </div>
             </div>
 
-            {/* Usine */}
-            <div className="bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] rounded-xl border border-gray-100 flex flex-col justify-between">
+            {/* Usine de fabrication n°01 */}
+            <div className="bg-neutral-900/40 backdrop-blur-md p-8 rounded-2xl border border-neutral-800/80 hover:border-[#D4AF37]/40 hover:shadow-[0_0_30px_rgba(212,175,55,0.05)] transition-all duration-500 flex flex-col justify-between group">
               <div>
-                <h3 className="text-xs font-bold uppercase tracking-widest text-accent mb-4">Usine</h3>
-                <p className="text-sm font-bold text-gray-800 leading-snug">Usine de Fabrication n°01</p>
-                <p className="text-sm text-gray-500 mt-2 leading-relaxed font-light">
-                  JENNYD SCENTS France<br />
-                  Parc Industriel des Parfumeurs<br />
-                  145 Boulevard de la Création<br />
-                  06130 Grasse<br />
-                  Provence-Alpes-Côte d'Azur<br />
+                <div className="flex items-center justify-between mb-6">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D4AF37]">Usine de fabrication n°01</span>
+                  <div className="w-10 h-10 rounded-full bg-neutral-800/50 border border-neutral-700/50 flex items-center justify-center text-[#D4AF37] group-hover:scale-110 transition-transform duration-500">
+                    <Factory className="w-4 h-4" />
+                  </div>
+                </div>
+                <h3 className="text-lg font-bold text-white leading-tight">
+                  JENNYD SCENTS<br />
                   France
-                </p>
+                </h3>
+                <div className="mt-6 border-t border-neutral-800/80 pt-6 text-[13px] text-neutral-400 leading-relaxed font-light space-y-1.5">
+                  <p>Parc Industriel des Parfumeurs</p>
+                  <p className="whitespace-nowrap">145 Boulevard de la Création</p>
+                  <p>06130 Grasse</p>
+                  <p>Provence-Alpes-Côte d'Azur</p>
+                  <p>France</p>
+                </div>
               </div>
             </div>
           </div>
