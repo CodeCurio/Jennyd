@@ -196,6 +196,77 @@ export default function ContactPage() {
 
         </div>
       </section>
+
+      {/* French Establishments Section */}
+      <section className="bg-secondary-background py-16 px-4 md:px-8 border-t border-gray-100 w-full">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="text-center mb-12">
+            <span className="text-accent uppercase tracking-[0.2em] text-[10px] font-bold block mb-2">Nos Sites</span>
+            <h2 className="text-3xl font-serif text-foreground">Établissements en France</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {/* Siège social */}
+            <div className="bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] rounded-xl border border-gray-100 flex flex-col justify-between">
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-widest text-accent mb-4">Siège social</h3>
+                <p className="text-sm font-bold text-gray-800 leading-snug">JENNYD SCENTS France</p>
+                <p className="text-sm text-gray-500 mt-2 leading-relaxed font-light">
+                  18 Avenue des Parfums<br />
+                  06130 Grasse<br />
+                  France
+                </p>
+              </div>
+            </div>
+
+            {/* Division Export */}
+            <div className="bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] rounded-xl border border-gray-100 flex flex-col justify-between">
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-widest text-accent mb-4">Division Export</h3>
+                <p className="text-sm font-bold text-gray-800 leading-snug">JENNYD SCENTS France</p>
+                <p className="text-sm text-gray-500 mt-2 leading-relaxed font-light">
+                  Entrepôt de Distribution Internationale<br />
+                  Zone de Fret Aéroportuaire<br />
+                  95700 Roissy-en-France<br />
+                  Île-de-France<br />
+                  France
+                </p>
+              </div>
+            </div>
+
+            {/* Site de Fabrication */}
+            <div className="bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] rounded-xl border border-gray-100 flex flex-col justify-between">
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-widest text-accent mb-4">Site de Fabrication</h3>
+                <p className="text-sm font-bold text-gray-800 leading-snug">JENNYD SCENTS France</p>
+                <p className="text-sm text-gray-500 mt-2 leading-relaxed font-light">
+                  Parc Industriel des Parfumeurs<br />
+                  145 Boulevard de la Création<br />
+                  06130 Grasse<br />
+                  Provence-Alpes-Côte d'Azur<br />
+                  France
+                </p>
+              </div>
+            </div>
+
+            {/* Usine */}
+            <div className="bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] rounded-xl border border-gray-100 flex flex-col justify-between">
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-widest text-accent mb-4">Usine</h3>
+                <p className="text-sm font-bold text-gray-800 leading-snug">Usine de Fabrication n°01</p>
+                <p className="text-sm text-gray-500 mt-2 leading-relaxed font-light">
+                  JENNYD SCENTS France<br />
+                  Parc Industriel des Parfumeurs<br />
+                  145 Boulevard de la Création<br />
+                  06130 Grasse<br />
+                  Provence-Alpes-Côte d'Azur<br />
+                  France
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
       
     </div>
   );
