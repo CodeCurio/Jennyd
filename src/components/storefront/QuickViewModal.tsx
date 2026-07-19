@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Star, Plus, Minus, Eye, ShoppingBag } from "lucide-react";
@@ -21,11 +21,21 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
   const { addToast } = useToast();
   const { formatPrice } = useCurrency();
   
-  const [selectedSize, setSelectedSize] = useState<"50ml" | "100ml">(
-    product?.title?.toLowerCase()?.includes("50ml") ? "50ml" : "100ml"
-  );
+  const [selectedSize, setSelectedSize] = useState<string>("");
   const [quantity, setQuantity] = useState(1);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+
+  useEffect(() => {
+    if (!product) return;
+    const sizes = product.metadata?.sizes || [];
+    if (sizes.length > 0) {
+      setSelectedSize(sizes[0].size);
+    } else if (product.title?.toLowerCase()?.includes("50ml")) {
+      setSelectedSize("50ml");
+    } else {
+      setSelectedSize("100ml");
+    }
+  }, [product]);
 
   if (!product) return null;
 
@@ -34,15 +44,26 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
 
   // Compute price dynamically based on size selection
   const isBase50ml = product.title?.toLowerCase()?.includes("50ml");
+  const customSizes = product.metadata?.sizes || [];
+  const hasCustomSizes = customSizes.length > 0;
+
   let displayPrice = basePrice;
   let displaySalePrice = baseSalePrice;
 
-  if (selectedSize === "50ml" && !isBase50ml) {
-    displayPrice = Math.round(basePrice * 0.75);
-    if (baseSalePrice) displaySalePrice = Math.round(baseSalePrice * 0.75);
-  } else if (selectedSize === "100ml" && isBase50ml) {
-    displayPrice = Math.round(basePrice * 1.4);
-    if (baseSalePrice) displaySalePrice = Math.round(baseSalePrice * 1.4);
+  if (hasCustomSizes) {
+    const matchedSize = customSizes.find((s: any) => s.size === selectedSize);
+    if (matchedSize) {
+      displayPrice = matchedSize.price;
+      displaySalePrice = undefined;
+    }
+  } else {
+    if (selectedSize === "50ml" && !isBase50ml) {
+      displayPrice = Math.round(basePrice * 0.75);
+      if (baseSalePrice) displaySalePrice = Math.round(baseSalePrice * 0.75);
+    } else if (selectedSize === "100ml" && isBase50ml) {
+      displayPrice = Math.round(basePrice * 1.4);
+      if (baseSalePrice) displaySalePrice = Math.round(baseSalePrice * 1.4);
+    }
   }
 
   const isSale = !!displaySalePrice;
@@ -146,7 +167,10 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
           <div className="mb-6 space-y-2">
             <span className="text-xs font-bold uppercase tracking-widest text-gray-500 block">Select Size</span>
             <div className="flex gap-3">
-              {(["50ml", "100ml"] as const).map((size) => (
+              {(hasCustomSizes 
+                ? customSizes.map((s: any) => s.size)
+                : ["50ml", "100ml"]
+              ).map((size: string) => (
                 <button
                   key={size}
                   onClick={() => setSelectedSize(size)}

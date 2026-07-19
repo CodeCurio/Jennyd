@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Image as ImageIcon, Check, Loader2, UploadCloud, Search } from "lucide-react";
+import { ArrowLeft, Save, Image as ImageIcon, Check, Loader2, UploadCloud, Search, Plus, Trash } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { supabase } from "@/lib/supabase";
 
@@ -29,6 +29,7 @@ export default function AddProductPage() {
   const [mrp, setMrp] = useState("");
   const [discountTag, setDiscountTag] = useState("");
   const [stock, setStock] = useState("");
+  const [sizeRows, setSizeRows] = useState<{ size: string; price: string; stock: string }[]>([]);
   
   // Complex State
   const [selectedNotes, setSelectedNotes] = useState<Note[]>([]);
@@ -103,6 +104,14 @@ export default function AddProductPage() {
         }
       }
 
+      const formattedSizes = sizeRows
+        .map(row => ({
+          size: row.size.trim(),
+          price: parseFloat(row.price),
+          stock: row.stock ? parseInt(row.stock) : 0
+        }))
+        .filter(row => row.size !== "" && !isNaN(row.price));
+
       // 2. Format Metadata
       const metadata = {
         badge,
@@ -110,6 +119,7 @@ export default function AddProductPage() {
         discountTag,
         notes: selectedNotes.map(n => ({ name: n.name, image: n.image_url })),
         images: uploadedImageUrls,
+        sizes: formattedSizes,
         accordion: {
           description,
           feelings,
@@ -224,6 +234,90 @@ export default function AddProductPage() {
               <label className="text-sm font-medium">Stock Quantity</label>
               <input type="number" value={stock} onChange={e => setStock(e.target.value)} placeholder="100" className="w-full md:w-1/3 border border-gray-300 rounded-md p-2.5 text-sm focus:ring-black focus:border-black" />
             </div>
+          </div>
+        </div>
+
+        {/* Size Variants (ml) */}
+        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm space-y-6">
+          <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+            <h2 className="text-lg font-bold">Size Variants (ml)</h2>
+            <button
+              type="button"
+              onClick={() => setSizeRows([...sizeRows, { size: "", price: "", stock: "" }])}
+              className="text-xs font-bold uppercase tracking-wider bg-black text-white hover:bg-gray-800 px-3 py-1.5 rounded flex items-center gap-1 cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" /> Add Size Variant
+            </button>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="grid grid-cols-12 gap-4 text-xs font-bold uppercase tracking-wider text-gray-400">
+              <div className="col-span-5">Size (e.g. 50ml)</div>
+              <div className="col-span-3">Price (₹)</div>
+              <div className="col-span-3">Stock</div>
+              <div className="col-span-1"></div>
+            </div>
+
+            {sizeRows.map((row, idx) => (
+              <div key={idx} className="grid grid-cols-12 gap-4 items-center">
+                <div className="col-span-5">
+                  <input
+                    type="text"
+                    placeholder="e.g. 50ml"
+                    value={row.size}
+                    onChange={(e) => {
+                      const newRows = [...sizeRows];
+                      newRows[idx].size = e.target.value;
+                      setSizeRows(newRows);
+                    }}
+                    className="w-full border border-gray-300 rounded-md p-2.5 text-sm focus:ring-black focus:border-black font-semibold text-gray-850"
+                  />
+                </div>
+                <div className="col-span-3">
+                  <input
+                    type="number"
+                    placeholder="999"
+                    value={row.price}
+                    onChange={(e) => {
+                      const newRows = [...sizeRows];
+                      newRows[idx].price = e.target.value;
+                      setSizeRows(newRows);
+                    }}
+                    className="w-full border border-gray-300 rounded-md p-2.5 text-sm focus:ring-black focus:border-black font-mono text-gray-850"
+                  />
+                </div>
+                <div className="col-span-3">
+                  <input
+                    type="number"
+                    placeholder="100"
+                    value={row.stock}
+                    onChange={(e) => {
+                      const newRows = [...sizeRows];
+                      newRows[idx].stock = e.target.value;
+                      setSizeRows(newRows);
+                    }}
+                    className="w-full border border-gray-300 rounded-md p-2.5 text-sm focus:ring-black focus:border-black font-mono text-gray-850"
+                  />
+                </div>
+                <div className="col-span-1 text-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newRows = sizeRows.filter((_, i) => i !== idx);
+                      setSizeRows(newRows);
+                    }}
+                    className="text-gray-400 hover:text-red-600 transition-colors p-1.5 cursor-pointer"
+                    title="Remove"
+                  >
+                    <Trash className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            {sizeRows.length === 0 && (
+              <p className="text-xs text-gray-400 text-center py-4">No custom size variants added yet. Use the add button above to define specific volume pricing.</p>
+            )}
           </div>
         </div>
 

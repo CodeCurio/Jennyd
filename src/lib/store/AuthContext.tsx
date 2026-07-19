@@ -65,13 +65,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Get initial session
     const initSession = async () => {
-      const { data: { session: currentSession } } = await supabase.auth.getSession();
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-      if (currentSession?.user) {
-        await fetchProfile(currentSession.user.id);
+      try {
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+        if (currentSession?.user) {
+          await fetchProfile(currentSession.user.id);
+        }
+      } catch (err) {
+        console.warn("Supabase Auth session initialization failed (likely network error or blocked by adblocker):", err);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     initSession();

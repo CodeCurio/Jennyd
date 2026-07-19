@@ -37,7 +37,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [zoomStyle, setZoomStyle] = useState<React.CSSProperties>({ display: "none" });
 
-  const [selectedSize, setSelectedSize] = useState<"50ml" | "100ml">("100ml");
+  const [selectedSize, setSelectedSize] = useState<string>("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,9 +51,14 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
 
       if (pData && !error) {
         setProductData(pData);
-        // Default size based on product title
-        if (pData.title?.toLowerCase()?.includes("50ml")) {
+        // Set default size based on metadata sizes or product title
+        const sizes = pData.metadata?.sizes || [];
+        if (sizes.length > 0) {
+          setSelectedSize(sizes[0].size);
+        } else if (pData.title?.toLowerCase()?.includes("50ml")) {
           setSelectedSize("50ml");
+        } else {
+          setSelectedSize("100ml");
         }
         
         // Fetch related products
@@ -108,30 +113,40 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
   const uniqueImages = Array.from(new Set(rawImages)) as string[];
 
   const isBase50ml = productData.title?.toLowerCase()?.includes("50ml");
+  const customSizes = m.sizes || [];
+  const hasCustomSizes = customSizes.length > 0;
 
-  // Determine stock availability for sizes
-  const productStock = productData.stock_quantity || 0;
-  const is50mlAvailable = productStock > 0;
-  // If stock is low (e.g. < 30), let's mock 100ml out of stock to demonstrate swathes styling
-  const is100mlAvailable = productStock >= 30;
-
-  // Calculate pricing based on selection
+  // Determine stock and pricing based on selection
   let displayPrice = productData.price;
   let displayMrp = productData.sale_price;
+  let isSelectedSizeAvailable = true;
 
-  if (selectedSize === "50ml" && !isBase50ml) {
-    displayPrice = Math.round(productData.price * 0.75);
-    if (productData.sale_price) displayMrp = Math.round(productData.sale_price * 0.75);
-  } else if (selectedSize === "100ml" && isBase50ml) {
-    displayPrice = Math.round(productData.price * 1.4);
-    if (productData.sale_price) displayMrp = Math.round(productData.sale_price * 1.4);
+  if (hasCustomSizes) {
+    const matchedSize = customSizes.find((s: any) => s.size === selectedSize);
+    if (matchedSize) {
+      displayPrice = matchedSize.price;
+      displayMrp = undefined; // Price configured is final selling price for sizes
+      isSelectedSizeAvailable = (matchedSize.stock !== undefined) ? matchedSize.stock > 0 : (productData.stock_quantity > 0);
+    }
+  } else {
+    // Fallback to default mathematical calculations
+    const productStock = productData.stock_quantity || 0;
+    const is50mlAvailable = productStock > 0;
+    const is100mlAvailable = productStock >= 30;
+
+    if (selectedSize === "50ml" && !isBase50ml) {
+      displayPrice = Math.round(productData.price * 0.75);
+      if (productData.sale_price) displayMrp = Math.round(productData.sale_price * 0.75);
+    } else if (selectedSize === "100ml" && isBase50ml) {
+      displayPrice = Math.round(productData.price * 1.4);
+      if (productData.sale_price) displayMrp = Math.round(productData.sale_price * 1.4);
+    }
+    isSelectedSizeAvailable = selectedSize === "50ml" ? is50mlAvailable : is100mlAvailable;
   }
 
   const isSale = !!displayMrp;
   const finalPrice = isSale ? displayMrp : displayPrice;
   const originalPriceForDisplay = isSale ? displayPrice : undefined;
-
-  const isSelectedSizeAvailable = selectedSize === "50ml" ? is50mlAvailable : is100mlAvailable;
 
   const PRODUCT = {
     id: productData.id,
@@ -319,10 +334,16 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             <div className="mb-8 space-y-3">
               <span className="text-xs font-bold uppercase tracking-widest text-gray-500 block">Select Size</span>
               <div className="flex gap-3">
-                {[
-                  { size: "50ml" as const, isAvailable: is50mlAvailable },
-                  { size: "100ml" as const, isAvailable: is100mlAvailable }
-                ].map(({ size, isAvailable }) => {
+                {(hasCustomSizes 
+                  ? customSizes.map((s: any) => ({
+                      size: s.size,
+                      isAvailable: s.stock !== undefined ? s.stock > 0 : (productData.stock_quantity > 0)
+                    }))
+                  : [
+                      { size: "50ml", isAvailable: productData.stock_quantity > 0 },
+                      { size: "100ml", isAvailable: productData.stock_quantity >= 30 }
+                    ]
+                ).map(({ size, isAvailable }: { size: string; isAvailable: boolean }) => {
                   const isSelected = selectedSize === size;
                   return (
                     <button
@@ -354,7 +375,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
               <div className="text-xs mt-2">
                 {!isSelectedSizeAvailable ? (
                   <span className="text-red-600 font-bold">Sold Out / Out of Stock</span>
-                ) : productStock < 30 && selectedSize === "100ml" ? (
+                ) : !hasCustomSizes && (productData.stock_quantity || 0) < 30 && selectedSize === "100ml" ? (
                   <span className="text-orange-600 font-bold">Only a few left in stock!</span>
                 ) : (
                   <span className="text-green-700 font-bold">✓ In Stock</span>
