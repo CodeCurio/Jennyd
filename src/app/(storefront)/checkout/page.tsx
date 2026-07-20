@@ -39,12 +39,7 @@ export default function CheckoutPage() {
   const [shippingMethod, setShippingMethod] = useState<"standard" | "express">("standard");
 
   // Payment Method
-  const [paymentMethod, setPaymentMethod] = useState<"cod" | "card" | "upi">("cod");
-  const [cardHolder, setCardHolder] = useState("");
-  const [cardNumber, setCardNumber] = useState("");
-  const [cardExpiry, setCardExpiry] = useState("");
-  const [cardCvv, setCardCvv] = useState("");
-  const [upiId, setUpiId] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<"online" | "cod">("online");
 
   // Terms agreement
   const [agreeTerms, setAgreeTerms] = useState(false);
@@ -83,23 +78,111 @@ export default function CheckoutPage() {
     setActiveStep("payment");
   };
 
+  // Helper to load Razorpay SDK dynamically
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      if ((window as any).Razorpay) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
   const handlePaymentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (paymentMethod === "card") {
-      if (!cardHolder || !cardNumber || !cardExpiry || !cardCvv) {
-        addToast({ title: "Validation Error", message: "Please enter your card details.", type: "error" });
-        return;
-      }
-    } else if (paymentMethod === "upi") {
-      if (!upiId || !upiId.includes("@")) {
-        addToast({ title: "Validation Error", message: "Please enter a valid UPI ID (e.g. user@okaxis).", type: "error" });
-        return;
-      }
-    }
     setActiveStep("review");
   };
 
-  // Database Order placement
+  // Save order to database helper
+  const saveOrderToDatabase = async (orderNumber: string, razorpayPaymentId?: string, razorpayOrderId?: string) => {
+    const fullAddress = {
+      fullName: `${firstName} ${lastName}`,
+      addressLine1,
+      addressLine2,
+      city,
+      state,
+      zip,
+      phone,
+      country: "India"
+    };
+
+    if (userId && email) {
+      const profileRes = await fetch("/api/profile/upsert", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, email, fullName: `${firstName} ${lastName}`, phone })
+      });
+      if (!profileRes.ok) {
+        const profileErrData = await profileRes.json();
+        throw new Error(profileErrData.error || "Failed to sync user profile");
+      }
+    }
+
+    const { data: orderData, error: orderError } = await supabase
+      .from("orders")
+      .insert([
+        {
+          order_number: orderNumber,
+          user_id: userId,
+          email,
+          shipping_address: fullAddress,
+          billing_address: fullAddress,
+          shipping_method: shippingMethod === "express" ? "Express Delivery" : "Standard Delivery",
+          shipping_cost: shippingCost,
+          subtotal: subtotal,
+          discount_amount: discount,
+          tax_amount: 0,
+          total: grandTotal,
+          coupon_code: appliedCoupon ? appliedCoupon.code : null,
+          payment_status: paymentMethod === "cod" ? "pending" : "paid",
+          fulfillment_status: "pending",
+          metadata: razorpayPaymentId ? { razorpay_payment_id: razorpayPaymentId, razorpay_order_id: razorpayOrderId } : null
+        }
+      ])
+      .select()
+      .single();
+
+    if (orderError || !orderData) {
+      throw new Error(orderError?.message || "Failed to create order");
+    }
+
+    const orderItemsPayload = items.map((item) => {
+      const cleanProductId = item.productId.substring(0, 36);
+      const sizeInfo = item.productId.length > 36 ? item.productId.substring(37) : "100ml";
+      return {
+        order_id: orderData.id,
+        product_id: cleanProductId,
+        variant_id: item.variantId || null,
+        title: item.title,
+        quantity: item.quantity,
+        unit_price: item.price,
+        line_total: item.price * item.quantity,
+        variant_info: { size: sizeInfo }
+      };
+    });
+
+    const { error: itemsError } = await supabase.from("order_items").insert(orderItemsPayload);
+    if (itemsError) throw new Error(itemsError.message);
+
+    if (appliedCoupon) {
+      await supabase.from("coupons").update({ times_used: (appliedCoupon.times_used || 0) + 1 }).eq("id", appliedCoupon.id);
+    }
+
+    orderPlacedRef.current = true;
+    clearCart();
+    setOrderSuccess({ orderNumber });
+
+    setTimeout(() => {
+      router.push(`/checkout/success?orderNumber=${orderNumber}`);
+    }, 2500);
+  };
+
+  // Main Order Placement Action
   const handlePlaceOrder = async () => {
     if (!agreeTerms) {
       addToast({ title: "Required Check", message: "Please agree to the Terms & Conditions.", type: "error" });
@@ -107,115 +190,80 @@ export default function CheckoutPage() {
     }
 
     setIsSubmitting(true);
+    const orderNumber = `JD-${Math.floor(100000 + Math.random() * 900000)}`;
+
     try {
-      // 1. Generate Order Number
-      const orderNumber = `JD-${Math.floor(100000 + Math.random() * 900000)}`;
-
-      // 2. Format Address objects
-      const fullAddress = {
-        fullName: `${firstName} ${lastName}`,
-        addressLine1,
-        addressLine2,
-        city,
-        state,
-        zip,
-        phone,
-        country: "India"
-      };
-
-      // 3. Upsert Profile via secure API to ensure reference key constraint is satisfied (bypassing client-side RLS)
-      if (userId && email) {
-        const profileRes = await fetch("/api/profile/upsert", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId,
-            email,
-            fullName: `${firstName} ${lastName}`,
-            phone
-          })
-        });
-        if (!profileRes.ok) {
-          const profileErrData = await profileRes.json();
-          throw new Error(profileErrData.error || "Failed to sync user profile");
+      if (paymentMethod === "online") {
+        const isLoaded = await loadRazorpayScript();
+        if (!isLoaded) {
+          throw new Error("Razorpay SDK failed to load. Please check your internet connection.");
         }
-      }
 
-      // 4. Insert main Order row
-      const { data: orderData, error: orderError } = await supabase
-        .from("orders")
-        .insert([
-          {
-            order_number: orderNumber,
-            user_id: userId,
-            email,
-            shipping_address: fullAddress,
-            billing_address: fullAddress,
-            shipping_method: shippingMethod === "express" ? "Express Delivery" : "Standard Delivery",
-            shipping_cost: shippingCost,
-            subtotal: subtotal,
-            discount_amount: discount,
-            tax_amount: 0,
-            total: grandTotal,
-            coupon_code: appliedCoupon ? appliedCoupon.code : null,
-            payment_status: paymentMethod === "cod" ? "pending" : "paid",
-            fulfillment_status: "pending"
+        // 1. Create Razorpay order on server
+        const createOrderRes = await fetch("/api/razorpay/create-order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amount: grandTotal, receipt: orderNumber })
+        });
+        const createOrderData = await createOrderRes.json();
+        if (!createOrderData.success || !createOrderData.order) {
+          throw new Error(createOrderData.error || "Failed to initialize Razorpay payment");
+        }
+
+        const razorpayOrder = createOrderData.order;
+
+        // 2. Open Razorpay Checkout Modal
+        const options = {
+          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+          amount: razorpayOrder.amount,
+          currency: razorpayOrder.currency,
+          name: "Jennyd Parfums",
+          description: `Order #${orderNumber}`,
+          image: "/logo.png",
+          order_id: razorpayOrder.id,
+          handler: async function (response: any) {
+            try {
+              // 3. Verify Payment Signature
+              const verifyRes = await fetch("/api/razorpay/verify-payment", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(response)
+              });
+              const verifyData = await verifyRes.json();
+              if (verifyData.success) {
+                await saveOrderToDatabase(orderNumber, response.razorpay_payment_id, response.razorpay_order_id);
+              } else {
+                throw new Error(verifyData.error || "Payment verification failed.");
+              }
+            } catch (vErr: any) {
+              addToast({ title: "Payment Failed", message: vErr.message, type: "error" });
+              setIsSubmitting(false);
+            }
+          },
+          prefill: {
+            name: `${firstName} ${lastName}`,
+            email: email,
+            contact: phone,
+          },
+          theme: {
+            color: "#1A1A1A",
+          },
+          modal: {
+            ondismiss: function () {
+              setIsSubmitting(false);
+              addToast({ title: "Payment Cancelled", message: "Razorpay payment window closed.", type: "error" });
+            }
           }
-        ])
-        .select()
-        .single();
-
-      if (orderError || !orderData) {
-        throw new Error(orderError?.message || "Failed to create order");
-      }
-
-      // 4. Insert Order items rows
-      const orderItemsPayload = items.map((item) => {
-        const cleanProductId = item.productId.substring(0, 36);
-        const sizeInfo = item.productId.length > 36 ? item.productId.substring(37) : "100ml";
-
-        return {
-          order_id: orderData.id,
-          product_id: cleanProductId,
-          variant_id: item.variantId || null,
-          title: item.title,
-          quantity: item.quantity,
-          unit_price: item.price,
-          line_total: item.price * item.quantity,
-          variant_info: { size: sizeInfo }
         };
-      });
 
-      const { error: itemsError } = await supabase
-        .from("order_items")
-        .insert(orderItemsPayload);
-
-      if (itemsError) {
-        throw new Error(itemsError.message);
+        const razorpayInstance = new (window as any).Razorpay(options);
+        razorpayInstance.open();
+      } else {
+        // Cash on Delivery
+        await saveOrderToDatabase(orderNumber);
       }
-
-      // 5. Update coupon times_used count if coupon applied
-      if (appliedCoupon) {
-        await supabase
-          .from("coupons")
-          .update({ times_used: (appliedCoupon.times_used || 0) + 1 })
-          .eq("id", appliedCoupon.id);
-      }
-
-      // Success — set ref before clearing cart to prevent empty-cart redirect
-      orderPlacedRef.current = true;
-      clearCart();
-      setOrderSuccess({ orderNumber });
-
-      // Auto-redirect to success page after 2.5 seconds
-      setTimeout(() => {
-        router.push(`/checkout/success?orderNumber=${orderNumber}`);
-      }, 2500);
     } catch (err: any) {
       addToast({ title: "Order Placement Failed", message: err.message || "Something went wrong.", type: "error" });
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -486,9 +534,31 @@ export default function CheckoutPage() {
 
                 <div className="space-y-4">
                   
-                  {/* Option 1: COD */}
-                  <label className={`flex items-start gap-3 p-4 border rounded cursor-pointer transition-all ${
-                    paymentMethod === "cod" ? "border-black bg-gray-50/50" : "border-gray-200 bg-white"
+                  {/* Option 1: Razorpay Online Payment */}
+                  <label className={`flex items-start gap-3.5 p-5 border rounded cursor-pointer transition-all ${
+                    paymentMethod === "online" ? "border-black bg-gray-50/50 shadow-xs" : "border-gray-200 bg-white"
+                  }`}>
+                    <input
+                      type="radio"
+                      name="payment_radio"
+                      checked={paymentMethod === "online"}
+                      onChange={() => setPaymentMethod("online")}
+                      className="w-4 h-4 accent-black cursor-pointer mt-0.5"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-900 font-bold block text-sm">Online Payment (Razorpay Secure)</span>
+                        <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold px-2 py-0.5 rounded uppercase">Recommended</span>
+                      </div>
+                      <span className="text-[11px] text-gray-500 lowercase font-medium tracking-normal block mt-1 leading-normal">
+                        Instant payment via UPI (Google Pay, PhonePe, Paytm), Credit/Debit Cards, Netbanking & Wallets.
+                      </span>
+                    </div>
+                  </label>
+
+                  {/* Option 2: COD */}
+                  <label className={`flex items-start gap-3.5 p-5 border rounded cursor-pointer transition-all ${
+                    paymentMethod === "cod" ? "border-black bg-gray-50/50 shadow-xs" : "border-gray-200 bg-white"
                   }`}>
                     <input
                       type="radio"
@@ -498,130 +568,12 @@ export default function CheckoutPage() {
                       className="w-4 h-4 accent-black cursor-pointer mt-0.5"
                     />
                     <div>
-                      <span className="text-gray-900 font-bold block">Cash on Delivery (COD)</span>
-                      <span className="text-[10px] text-gray-450 lowercase font-medium tracking-normal block mt-1 leading-normal">
-                        Pay in cash upon physical delivery. No extra COD fees applied.
+                      <span className="text-gray-900 font-bold block text-sm">Cash on Delivery (COD)</span>
+                      <span className="text-[11px] text-gray-500 lowercase font-medium tracking-normal block mt-1 leading-normal">
+                        Pay cash upon physical delivery at your doorstep.
                       </span>
                     </div>
                   </label>
-
-                  {/* Option 2: Card */}
-                  <div className={`border rounded overflow-hidden transition-all ${
-                    paymentMethod === "card" ? "border-black" : "border-gray-200"
-                  }`}>
-                    <label className={`flex items-start gap-3 p-4 cursor-pointer ${
-                      paymentMethod === "card" ? "bg-gray-50/50" : "bg-white"
-                    }`}>
-                      <input
-                        type="radio"
-                        name="payment_radio"
-                        checked={paymentMethod === "card"}
-                        onChange={() => setPaymentMethod("card")}
-                        className="w-4 h-4 accent-black cursor-pointer mt-0.5"
-                      />
-                      <div>
-                        <span className="text-gray-900 font-bold block">Credit / Debit Card (Simulated)</span>
-                        <span className="text-[10px] text-gray-450 lowercase font-medium tracking-normal block mt-1 leading-normal">
-                          Pay securely with Visa, Mastercard or RuPay.
-                        </span>
-                      </div>
-                    </label>
-
-                    {paymentMethod === "card" && (
-                      <div className="p-5 bg-white border-t border-gray-100 space-y-4">
-                        <div className="space-y-1.5">
-                          <label className="block">Cardholder Name *</label>
-                          <input
-                            type="text"
-                            required
-                            placeholder="John Doe"
-                            value={cardHolder}
-                            onChange={(e) => setCardHolder(e.target.value)}
-                            className="w-full border border-gray-300 rounded px-3 py-2 bg-white text-gray-900 text-sm font-semibold focus:outline-none focus:border-black uppercase"
-                          />
-                        </div>
-                        
-                        <div className="space-y-1.5">
-                          <label className="block">Card Number *</label>
-                          <input
-                            type="text"
-                            required
-                            placeholder="4111 2222 3333 4444"
-                            maxLength={19}
-                            value={cardNumber}
-                            onChange={(e) => setCardNumber(e.target.value)}
-                            className="w-full border border-gray-300 rounded px-3 py-2 bg-white text-gray-900 text-sm font-semibold focus:outline-none focus:border-black font-mono"
-                          />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-1.5">
-                            <label className="block">Expiration Date *</label>
-                            <input
-                              type="text"
-                              required
-                              placeholder="MM/YY"
-                              maxLength={5}
-                              value={cardExpiry}
-                              onChange={(e) => setCardExpiry(e.target.value)}
-                              className="w-full border border-gray-300 rounded px-3 py-2 bg-white text-gray-900 text-sm font-semibold focus:outline-none focus:border-black font-mono"
-                            />
-                          </div>
-                          <div className="space-y-1.5">
-                            <label className="block">CVV/CVC *</label>
-                            <input
-                              type="password"
-                              required
-                              placeholder="123"
-                              maxLength={3}
-                              value={cardCvv}
-                              onChange={(e) => setCardCvv(e.target.value)}
-                              className="w-full border border-gray-300 rounded px-3 py-2 bg-white text-gray-900 text-sm font-semibold focus:outline-none focus:border-black font-mono"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Option 3: UPI */}
-                  <div className={`border rounded overflow-hidden transition-all ${
-                    paymentMethod === "upi" ? "border-black" : "border-gray-200"
-                  }`}>
-                    <label className={`flex items-start gap-3 p-4 cursor-pointer ${
-                      paymentMethod === "upi" ? "bg-gray-50/50" : "bg-white"
-                    }`}>
-                      <input
-                        type="radio"
-                        name="payment_radio"
-                        checked={paymentMethod === "upi"}
-                        onChange={() => setPaymentMethod("upi")}
-                        className="w-4 h-4 accent-black cursor-pointer mt-0.5"
-                      />
-                      <div>
-                        <span className="text-gray-900 font-bold block">UPI ID (Google Pay, PhonePe, Paytm)</span>
-                        <span className="text-[10px] text-gray-450 lowercase font-medium tracking-normal block mt-1 leading-normal">
-                          Pay instantly using your UPI app.
-                        </span>
-                      </div>
-                    </label>
-
-                    {paymentMethod === "upi" && (
-                      <div className="p-5 bg-white border-t border-gray-100 space-y-4">
-                        <div className="space-y-1.5">
-                          <label className="block">Virtual Payment Address (VPA) / UPI ID *</label>
-                          <input
-                            type="text"
-                            required
-                            placeholder="username@okaxis"
-                            value={upiId}
-                            onChange={(e) => setUpiId(e.target.value)}
-                            className="w-full border border-gray-300 rounded px-3 py-2 bg-white text-gray-900 text-sm font-semibold focus:outline-none focus:border-black lowercase font-mono"
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
 
                 </div>
 
@@ -666,7 +618,7 @@ export default function CheckoutPage() {
                         {shippingMethod === "express" ? "1-2 Business Days" : "3-5 Business Days"}
                       </p>
                       <p className="pt-2 border-t border-gray-200 mt-2">
-                        Payment: {paymentMethod === "cod" ? "Cash on Delivery" : paymentMethod === "card" ? "Credit Card" : "UPI ID"}
+                        Payment: {paymentMethod === "cod" ? "Cash on Delivery" : "Online Payment (Razorpay)"}
                       </p>
                     </div>
                   </div>
