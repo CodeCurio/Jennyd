@@ -44,16 +44,11 @@ export function ProductCard({ product, onQuickAdd, onQuickView }: ProductCardPro
       className="group flex flex-col w-full h-full relative"
     >
       {/* Image Wrapper */}
-      <div className="relative w-full aspect-[3/4] sm:aspect-[4/5] bg-[#F9F9F6] overflow-hidden mb-4 border border-neutral-100 shadow-[0_4px_12px_rgba(0,0,0,0.02)]">
+      <div className="relative w-full aspect-[3/4] bg-[#F9F9F6] overflow-hidden mb-3.5 border border-neutral-100 shadow-[0_2px_8px_rgba(0,0,0,0.03)] group-hover:shadow-[0_8px_20px_rgba(0,0,0,0.06)] transition-shadow duration-300">
         <Link href={`/products/${product.slug}`} className="block w-full h-full">
-          {/* Elegant Sticker Badges */}
-          {isSale && (
-            <div className="absolute top-3 left-3 z-10 border border-[#D4AF37] bg-white/95 backdrop-blur-xs text-[#D4AF37] text-[8px] uppercase font-bold px-2 py-0.5 tracking-widest shadow-xs">
-              Discount
-            </div>
-          )}
-          {badge && !isSale && (
-            <div className="absolute top-3 left-3 z-10 border border-neutral-200 bg-white/95 backdrop-blur-xs text-[#1A1A1A] text-[8px] uppercase font-bold px-2 py-0.5 tracking-widest shadow-xs">
+          {/* Elegant Sticker Badges (Only for special custom labels like BESTSELLER or NEW) */}
+          {badge && (
+            <div className="absolute top-3 left-3 z-10 border border-neutral-200 bg-white/95 backdrop-blur-xs text-[#1A1A1A] text-[9px] uppercase font-bold px-2.5 py-1 tracking-widest shadow-xs">
               {badge}
             </div>
           )}
@@ -63,7 +58,7 @@ export function ProductCard({ product, onQuickAdd, onQuickView }: ProductCardPro
             alt={product.title}
             fill
             unoptimized
-            className={`object-cover object-center transition-all duration-[1s] ease-out ${hoverImage ? 'group-hover:opacity-0' : 'group-hover:scale-105'}`}
+            className={`object-cover object-center transition-all duration-700 ease-out ${hoverImage ? 'group-hover:opacity-0' : 'group-hover:scale-105'}`}
           />
           {hoverImage && (
             <Image
@@ -71,7 +66,7 @@ export function ProductCard({ product, onQuickAdd, onQuickView }: ProductCardPro
               alt={`${product.title} alternative view`}
               fill
               unoptimized
-              className="object-cover object-center absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-[1s] ease-out group-hover:scale-105"
+              className="object-cover object-center absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-700 ease-out group-hover:scale-105"
             />
           )}
         </Link>
@@ -108,30 +103,35 @@ export function ProductCard({ product, onQuickAdd, onQuickView }: ProductCardPro
       {/* Product Information */}
       <div className="flex flex-col flex-1 px-1 text-center sm:text-left">
         <Link href={`/products/${product.slug}`} className="block group/title">
-          <h3 className="font-serif text-sm sm:text-base md:text-lg text-[#1A1A1A] group-hover/title:text-[#D4AF37] transition-colors duration-300 line-clamp-1">
+          <h3 className="font-serif text-base sm:text-lg text-[#1A1A1A] group-hover/title:text-[#D4AF37] transition-colors duration-300 line-clamp-1">
             {product.title}
           </h3>
         </Link>
         
         {/* Rating stars and review count */}
-        <div className="flex items-center justify-center sm:justify-start gap-1 mt-1.5 mb-2">
+        <div className="flex items-center justify-center sm:justify-start gap-1.5 mt-1 mb-2">
           <div className="flex gap-0.5 text-[#D4AF37]">
             {[1, 2, 3, 4, 5].map((star) => (
               <Star key={star} className="w-3 h-3 fill-current text-current" />
             ))}
           </div>
-          <span className="text-[10px] text-neutral-400 font-mono font-medium">(42)</span>
+          <span className="text-[11px] text-neutral-400 font-sans font-medium">(42)</span>
         </div>
 
         {/* Pricing */}
         <div className="flex items-baseline justify-center sm:justify-start gap-2 mb-1">
-          <span className="text-sm sm:text-base font-bold text-[#1A1A1A]">
+          <span className="text-base font-bold text-[#1A1A1A] font-sans">
             {formatPrice(displayPrice)}
           </span>
           {isSale && (
-            <span className="text-xs text-neutral-400 line-through font-normal font-mono">
-              {formatPrice(product.price)}
-            </span>
+            <>
+              <span className="text-xs text-neutral-400 line-through font-normal font-sans">
+                {formatPrice(product.price)}
+              </span>
+              <span className="text-[10px] font-semibold text-emerald-700 font-sans">
+                ({Math.round(((product.price - displayPrice) / product.price) * 100)}% OFF)
+              </span>
+            </>
           )}
         </div>
       </div>

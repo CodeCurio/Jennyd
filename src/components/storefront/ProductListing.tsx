@@ -203,7 +203,7 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
     searchQuery;
 
   return (
-    <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-10 flex flex-col lg:flex-row gap-10 font-sans">
+    <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-10 flex flex-col lg:flex-row gap-10 font-sans">
       
       {/* Mobile Filter Header Button */}
       <div className="lg:hidden flex items-center justify-between pb-4 border-b border-gray-200">
@@ -349,7 +349,7 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
               />
             </div>
             {/* Display Values */}
-            <div className="flex items-center justify-between text-[11px] font-bold text-gray-500 font-mono">
+            <div className="flex items-center justify-between text-[11px] font-medium text-gray-500 font-sans">
               <span>{formatPrice(priceMin)}</span>
               <span>{formatPrice(priceMax)}</span>
             </div>
@@ -480,7 +480,7 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
                         style={{ zIndex: 4 }}
                       />
                     </div>
-                    <div className="flex items-center justify-between text-[11px] font-bold text-gray-500 font-mono">
+                    <div className="flex items-center justify-between text-[11px] font-medium text-gray-500 font-sans">
                       <span>{formatPrice(priceMin)}</span>
                       <span>{formatPrice(priceMax)}</span>
                     </div>
