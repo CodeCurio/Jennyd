@@ -43,13 +43,58 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
     const fetchData = async () => {
       setIsLoading(true);
       const decodedSlug = decodeURIComponent(slug);
-      const { data: pData, error } = await supabase
+      
+      // 1. Try exact slug match
+      let { data: pData } = await supabase
         .from("products")
         .select("*")
         .eq("slug", decodedSlug)
-        .single();
+        .maybeSingle();
 
-      if (pData && !error) {
+      // 2. Try case-insensitive match
+      if (!pData) {
+        const { data: pDataIlike } = await supabase
+          .from("products")
+          .select("*")
+          .ilike("slug", decodedSlug)
+          .maybeSingle();
+        if (pDataIlike) pData = pDataIlike;
+      }
+
+      // 3. Try replacing hyphens with spaces (e.g., "royal-oud" -> "royal oud")
+      if (!pData) {
+        const spaceSlug = decodedSlug.replace(/-/g, " ");
+        const { data: pDataSpace } = await supabase
+          .from("products")
+          .select("*")
+          .ilike("slug", spaceSlug)
+          .maybeSingle();
+        if (pDataSpace) pData = pDataSpace;
+      }
+
+      // 4. Try replacing spaces with hyphens (e.g., "royal oud" -> "royal-oud")
+      if (!pData) {
+        const hyphenSlug = decodedSlug.replace(/ /g, "-");
+        const { data: pDataHyphen } = await supabase
+          .from("products")
+          .select("*")
+          .ilike("slug", hyphenSlug)
+          .maybeSingle();
+        if (pDataHyphen) pData = pDataHyphen;
+      }
+
+      // 5. Fallback: try matching product title
+      if (!pData) {
+        const titleSearch = decodedSlug.replace(/-/g, " ");
+        const { data: pDataTitle } = await supabase
+          .from("products")
+          .select("*")
+          .ilike("title", titleSearch)
+          .maybeSingle();
+        if (pDataTitle) pData = pDataTitle;
+      }
+
+      if (pData) {
         setProductData(pData);
         // Set default size based on metadata sizes or product title
         const sizes = pData.metadata?.sizes || [];

@@ -183,10 +183,18 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+const DEFAULT_CURRENCY_CONTEXT: CurrencyContextType = {
+  currency: "INR",
+  setCurrency: () => {},
+  rates: FALLBACK_RATES,
+  formatPrice: (amountInINR: number) => `₹${Math.round(amountInINR).toLocaleString("en-IN")}`,
+  convertPrice: (amountInINR: number) => amountInINR,
+};
+
 export function useCurrency() {
   const context = useContext(CurrencyContext);
   if (!context) {
-    throw new Error("useCurrency must be used within a CurrencyProvider");
+    return DEFAULT_CURRENCY_CONTEXT;
   }
   return context;
 }

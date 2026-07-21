@@ -256,7 +256,7 @@ export function Header() {
                               className="object-cover"
                             />
                             <div className="absolute inset-0 bg-black/30 flex items-end p-5">
-                              <Link href="/products/oud-royale">
+                              <Link href="/products/royal-oud">
                                 <button className="bg-white text-black px-6 py-2 text-xs font-bold uppercase tracking-widest hover:bg-[#D4AF37] hover:text-white transition-colors rounded-sm">
                                   View
                                 </button>
