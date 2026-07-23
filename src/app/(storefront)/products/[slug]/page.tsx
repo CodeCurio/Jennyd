@@ -199,7 +199,6 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
     badge: m.badge || "",
     type: m.type || "EAU DE PARFUM",
     categories: productData.tags || [],
-    reviewsCount: 42,
     price: finalPrice,
     mrp: originalPriceForDisplay,
     discount: m.discountTag || (isSale ? `${Math.round(((displayPrice - displayMrp) / displayPrice) * 100)}% OFF` : ""),
@@ -341,23 +340,14 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
               </h1>
             </div>
 
-            {/* Ratings & Categories */}
-            <div className="flex items-center gap-3 mb-6">
-              <div className="flex gap-1 text-[#D4AF37]">
-                {[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-current text-current" />)}
-              </div>
-              <span className="text-xs text-neutral-500 font-medium font-sans">
-                4.9 ★ ({PRODUCT.reviewsCount} reviews)
-              </span>
-              {PRODUCT.categories.length > 0 && (
-                <span className="text-xs text-neutral-300 font-sans">|</span>
-              )}
-              {PRODUCT.categories.length > 0 && (
+            {/* Categories */}
+            {PRODUCT.categories.length > 0 && (
+              <div className="flex items-center gap-3 mb-6">
                 <span className="text-xs text-neutral-500 tracking-wider">
                   {PRODUCT.categories.join(" • ")}
                 </span>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Pricing Section (Clean Luxury Typography - No loud green boxes) */}
             <div className="flex items-baseline gap-3 mb-1">

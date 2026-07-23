@@ -4,7 +4,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Button } from "./Button";
 import Link from "next/link";
-import { Star, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useCurrency } from "@/lib/store/CurrencyContext";
 
 interface ProductCardProps {
@@ -102,21 +102,11 @@ export function ProductCard({ product, onQuickAdd, onQuickView }: ProductCardPro
       
       {/* Product Information */}
       <div className="flex flex-col flex-1 px-1 text-center sm:text-left">
-        <Link href={`/products/${product.slug}`} className="block group/title">
+        <Link href={`/products/${product.slug}`} className="block group/title mb-1.5">
           <h3 className="font-serif text-base sm:text-lg text-[#1A1A1A] group-hover/title:text-[#D4AF37] transition-colors duration-300 line-clamp-1">
             {product.title}
           </h3>
         </Link>
-        
-        {/* Rating stars and review count */}
-        <div className="flex items-center justify-center sm:justify-start gap-1.5 mt-1 mb-2">
-          <div className="flex gap-0.5 text-[#D4AF37]">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <Star key={star} className="w-3 h-3 fill-current text-current" />
-            ))}
-          </div>
-          <span className="text-[11px] text-neutral-400 font-sans font-medium">(42)</span>
-        </div>
 
         {/* Pricing */}
         <div className="flex items-baseline justify-center sm:justify-start gap-2 mb-1">

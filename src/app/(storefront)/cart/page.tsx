@@ -181,13 +181,10 @@ export default function CartPage() {
 
                         {/* Product Info */}
                         <Link href={`/products/${product.slug}`}>
-                          <h4 className="font-serif text-sm text-[#1A1A1A] group-hover:text-[#D4AF37] transition-colors duration-300 line-clamp-1 mb-1">
+                          <h4 className="font-serif text-sm text-[#1A1A1A] group-hover:text-[#D4AF37] transition-colors duration-300 line-clamp-1 mb-2">
                             {product.title}
                           </h4>
                         </Link>
-                        <div className="flex items-center gap-0.5 mb-1.5">
-                          {[1,2,3,4,5].map(s => <Star key={s} className="w-2.5 h-2.5 fill-accent text-accent" />)}
-                        </div>
                         <div className="flex items-baseline gap-2 mb-2.5">
                           <span className="text-sm font-semibold text-[#1A1A1A]">{formatPrice(displayPrice)}</span>
                           {isSale && (

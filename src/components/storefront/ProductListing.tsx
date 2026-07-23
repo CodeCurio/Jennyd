@@ -25,6 +25,7 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
   const noteParam = searchParams.get("note");
   const sortParam = searchParams.get("sort");
   const sizeParam = searchParams.get("size");
+  const priceParam = searchParams.get("price");
   const minPriceParam = searchParams.get("minPrice");
   const maxPriceParam = searchParams.get("maxPrice");
 
@@ -58,32 +59,48 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
     return "100ml";
   };
 
-  // Sync states with URL parameters on mount
+  // Helper to parse price range parameter strings
+  const parsePriceRange = (param: string | null) => {
+    if (!param) return null;
+    const lower = param.toLowerCase();
+    if (lower === "under-999") return { min: 0, max: 999 };
+    if (lower === "1000-1999") return { min: 1000, max: 1999 };
+    if (lower === "2000-2999") return { min: 2000, max: 2999 };
+    if (lower === "above-3000") return { min: 3000, max: 100000 };
+    if (lower.includes("-")) {
+      const parts = lower.split("-");
+      const min = Number(parts[0]);
+      const max = Number(parts[1]);
+      if (!isNaN(min) && !isNaN(max)) return { min, max };
+    }
+    return null;
+  };
+
+  // Sync states with URL parameters on mount / change
   useEffect(() => {
     if (categoryParam) setActiveCategory(categoryParam);
+    else setActiveCategory("All");
+
     if (noteParam) setActiveNote(noteParam);
+    else setActiveNote("All");
+
     if (sizeParam) setActiveSize(sizeParam);
+    else setActiveSize("All");
+
     if (sortParam) setSortOrder(sortParam);
-    if (minPriceParam) setPriceMin(Number(minPriceParam));
-    else setPriceMin(absoluteMinPrice);
-    if (maxPriceParam) setPriceMax(Number(maxPriceParam));
-    else setPriceMax(absoluteMaxPrice);
-  }, [categoryParam, noteParam, sizeParam, sortParam, minPriceParam, maxPriceParam, absoluteMinPrice, absoluteMaxPrice]);
+    else setSortOrder("featured");
 
-  // Sync state changes back to the browser's URL search parameters
-  useEffect(() => {
-    const params = new URLSearchParams();
-    if (activeCategory !== "All") params.set("category", activeCategory);
-    if (activeNote !== "All") params.set("note", activeNote);
-    if (activeSize !== "All") params.set("size", activeSize);
-    if (priceMin > absoluteMinPrice) params.set("minPrice", priceMin.toString());
-    if (priceMax < absoluteMaxPrice) params.set("maxPrice", priceMax.toString());
-    if (sortOrder !== "featured") params.set("sort", sortOrder);
-    if (searchQuery) params.set("q", searchQuery);
-
-    const qs = params.toString();
-    router.push(`${pathname}${qs ? `?${qs}` : ""}`, { scroll: false });
-  }, [activeCategory, activeNote, activeSize, priceMin, priceMax, sortOrder, searchQuery, absoluteMinPrice, absoluteMaxPrice]);
+    const range = parsePriceRange(priceParam);
+    if (range) {
+      setPriceMin(range.min);
+      setPriceMax(range.max);
+    } else {
+      if (minPriceParam) setPriceMin(Number(minPriceParam));
+      else setPriceMin(absoluteMinPrice);
+      if (maxPriceParam) setPriceMax(Number(maxPriceParam));
+      else setPriceMax(absoluteMaxPrice);
+    }
+  }, [categoryParam, noteParam, sizeParam, sortParam, priceParam, minPriceParam, maxPriceParam, absoluteMinPrice, absoluteMaxPrice]);
 
   // Extract unique categories (from tags)
   const categories = useMemo(() => {
@@ -191,7 +208,27 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
     setPriceMin(absoluteMinPrice);
     setPriceMax(absoluteMaxPrice);
     setSortOrder("featured");
-    router.push(pathname);
+    router.push(pathname, { scroll: false });
+  };
+
+  const handlePricePreset = (presetValue: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("minPrice");
+    params.delete("maxPrice");
+    if (presetValue === "all") {
+      params.delete("price");
+      setPriceMin(absoluteMinPrice);
+      setPriceMax(absoluteMaxPrice);
+    } else {
+      params.set("price", presetValue);
+      const range = parsePriceRange(presetValue);
+      if (range) {
+        setPriceMin(range.min);
+        setPriceMax(range.max);
+      }
+    }
+    const qs = params.toString();
+    router.push(`${pathname}${qs ? `?${qs}` : ""}`, { scroll: false });
   };
 
   const hasActiveFilters = 
@@ -200,7 +237,8 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
     activeSize !== "All" || 
     priceMin > absoluteMinPrice || 
     priceMax < absoluteMaxPrice || 
-    searchQuery;
+    !!priceParam ||
+    !!searchQuery;
 
   return (
     <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-10 flex flex-col lg:flex-row gap-10 font-sans">
@@ -306,9 +344,37 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
           </div>
         </div>
 
-        {/* Dual-Thumb Price Slider */}
+        {/* Dual-Thumb Price Slider & Presets */}
         <div className="border-t border-gray-100 pt-6">
-          <h4 className="font-bold text-xs uppercase tracking-widest mb-4 text-gray-700">Price ({currency})</h4>
+          <h4 className="font-bold text-[10px] uppercase tracking-[0.2em] mb-3 text-[#1A1A1A]">Shop By Price</h4>
+          
+          {/* Quick Price Preset Options */}
+          <div className="flex flex-col gap-1.5 mb-5">
+            {[
+              { label: "All Prices", value: "all" },
+              { label: `Under ${formatPrice(999)}`, value: "under-999" },
+              { label: `${formatPrice(1000)} to ${formatPrice(1999)}`, value: "1000-1999" },
+              { label: `${formatPrice(2000)} to ${formatPrice(2999)}`, value: "2000-2999" },
+              { label: `Above ${formatPrice(3000)}`, value: "above-3000" },
+            ].map((p) => {
+              const isSelected = (p.value === "all" && !priceParam && priceMin <= absoluteMinPrice && priceMax >= absoluteMaxPrice) || priceParam === p.value;
+              return (
+                <button
+                  key={p.value}
+                  onClick={() => handlePricePreset(p.value)}
+                  className={`text-left text-xs py-1.5 px-2 font-medium transition-all duration-200 cursor-pointer rounded ${
+                    isSelected 
+                      ? "bg-[#D4AF37] text-white font-bold" 
+                      : "text-neutral-600 hover:bg-neutral-100 hover:text-black"
+                  }`}
+                >
+                  {p.label}
+                </button>
+              );
+            })}
+          </div>
+
+          <h5 className="font-bold text-[9px] uppercase tracking-widest text-neutral-400 mb-2">Custom Price Range</h5>
           <div className="space-y-4 px-1">
             <div className="relative w-full h-6 flex items-center">
               {/* Slider Track background */}
@@ -444,7 +510,33 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
                 </div>
 
                 <div>
-                  <h4 className="font-bold text-xs uppercase tracking-widest mb-4 text-gray-500">Price ({currency})</h4>
+                  <h4 className="font-bold text-xs uppercase tracking-widest mb-3 text-gray-500">Shop By Price</h4>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {[
+                      { label: "All", value: "all" },
+                      { label: `Under ${formatPrice(999)}`, value: "under-999" },
+                      { label: `${formatPrice(1000)} - ${formatPrice(1999)}`, value: "1000-1999" },
+                      { label: `${formatPrice(2000)} - ${formatPrice(2999)}`, value: "2000-2999" },
+                      { label: `Above ${formatPrice(3000)}`, value: "above-3000" },
+                    ].map((p) => {
+                      const isSelected = (p.value === "all" && !priceParam && priceMin <= absoluteMinPrice && priceMax >= absoluteMaxPrice) || priceParam === p.value;
+                      return (
+                        <button
+                          key={p.value}
+                          onClick={() => handlePricePreset(p.value)}
+                          className={`text-xs px-3 py-1.5 border transition-all cursor-pointer ${
+                            isSelected
+                              ? "border-black bg-black text-white font-bold"
+                              : "border-gray-200 text-gray-700 bg-white"
+                          }`}
+                        >
+                          {p.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <h5 className="font-bold text-[10px] uppercase tracking-widest text-gray-400 mb-2">Custom Price Range ({currency})</h5>
                   <div className="space-y-4 px-1">
                     <div className="relative w-full h-6 flex items-center">
                       <div className="absolute left-0 right-0 h-1 bg-gray-200 rounded-full" />
@@ -556,14 +648,17 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
                 <button onClick={() => setActiveSize("All")} className="hover:text-red-600 ml-1 cursor-pointer"><X className="w-3 h-3" /></button>
               </span>
             )}
-            {(priceMin > absoluteMinPrice || priceMax < absoluteMaxPrice) && (
+            {(!!priceParam || priceMin > absoluteMinPrice || priceMax < absoluteMaxPrice) && (
               <span className="inline-flex items-center gap-1 bg-gray-100 text-black text-xs font-medium px-3 py-1 rounded-full border border-gray-200">
-                Price: {formatPrice(priceMin)} - {formatPrice(priceMax)}
+                Price: {
+                  priceParam === "under-999" ? `Under ${formatPrice(999)}` :
+                  priceParam === "1000-1999" ? `${formatPrice(1000)} to ${formatPrice(1999)}` :
+                  priceParam === "2000-2999" ? `${formatPrice(2000)} to ${formatPrice(2999)}` :
+                  priceParam === "above-3000" ? `Above ${formatPrice(3000)}` :
+                  `${formatPrice(priceMin)} - ${formatPrice(priceMax)}`
+                }
                 <button 
-                  onClick={() => {
-                    setPriceMin(absoluteMinPrice);
-                    setPriceMax(absoluteMaxPrice);
-                  }} 
+                  onClick={() => handlePricePreset("all")} 
                   className="hover:text-red-600 ml-1 cursor-pointer"
                 >
                   <X className="w-3 h-3" />

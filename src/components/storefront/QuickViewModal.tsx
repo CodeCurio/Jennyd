@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Star, Plus, Minus, Eye, ShoppingBag } from "lucide-react";
+import { Plus, Minus, Eye, ShoppingBag } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { useCart } from "@/lib/store/CartContext";
@@ -142,12 +142,6 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
             </span>
             <h2 className="text-2xl font-serif text-gray-900 leading-tight">{product.title}</h2>
             
-            <div className="flex items-center gap-1.5 mt-2">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-3.5 h-3.5 fill-black text-black" />
-              ))}
-              <span className="text-xs text-gray-500 font-medium">(4.8/5)</span>
-            </div>
           </div>
 
           {/* Pricing */}
