@@ -161,6 +161,17 @@ const REVIEWS = [
   }
 ];
 
+const DELIVERY_PARTNERS = [
+  { name: "FedEx Express", short: "FedEx", logoText: "FedEx", color: "bg-[#4D148C] text-white", desc: "Priority Express Shipping" },
+  { name: "DHL Express", short: "DHL", logoText: "DHL", color: "bg-[#FFCC00] text-[#D40511] font-extrabold italic", desc: "Global Air Freight" },
+  { name: "UPS Worldwide", short: "UPS", logoText: "UPS", color: "bg-[#351C15] text-[#FFB500] font-bold", desc: "Global Logistics Leader" },
+  { name: "Aramex Express", short: "Aramex", logoText: "aramex", color: "bg-[#E31837] text-white font-bold tracking-tight", desc: "Middle East & Asia Express" },
+  { name: "Blue Dart", short: "Blue Dart", logoText: "BLUE DART", color: "bg-[#003399] text-[#FFCC00] font-extrabold italic", desc: "South Asia Express" },
+  { name: "India Post EMS", short: "India Post", logoText: "India Post", color: "bg-[#D2232A] text-white font-bold", desc: "Speed Post International" },
+  { name: "Delhivery", short: "Delhivery", logoText: "DELHIVERY", color: "bg-[#111111] text-white font-bold tracking-wider", desc: "Express Surface & Air" },
+  { name: "DTDC Express", short: "DTDC", logoText: "DTDC", color: "bg-[#0A2540] text-[#E31837] font-extrabold", desc: "Global Courier Network" }
+];
+
 export default function Home() {
   const { addItem } = useCart();
   const { addToast } = useToast();
@@ -804,25 +815,59 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── 10. Subtle Global Logistics Marquee Strip ── */}
-      <section className="py-8 bg-[#FAF8F5] border-t border-[#EAE7E1] overflow-hidden">
-        <div className="max-w-[1440px] mx-auto px-4 text-center mb-4">
-          <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-neutral-400">
-            Express Global Delivery Partners
+      {/* ── 10. Global Logistics & Delivery Partners (Infinite Auto-Scrolling Marquee) ── */}
+      <section className="py-14 sm:py-20 bg-white border-t border-[#EAE7E1] overflow-hidden w-full">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 text-center mb-8 sm:mb-10">
+          <span className="text-[#D4AF37] uppercase tracking-[0.3em] text-[10px] sm:text-xs font-bold font-sans block mb-1">
+            Global Fulfillment & Express Shipping
           </span>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif text-[#121212]">
+            Our Global Delivery Partners
+          </h2>
+          <p className="text-neutral-500 text-xs sm:text-sm mt-2 max-w-xl mx-auto font-sans leading-relaxed">
+            Fast, insured, and trackable express shipping to over 220+ countries worldwide through our trusted courier networks.
+          </p>
+          <div className="w-12 h-[2px] bg-[#D4AF37] mx-auto mt-3" />
         </div>
-        <div className="flex items-center justify-center gap-8 md:gap-16 text-neutral-400 font-bold text-xs uppercase tracking-widest flex-wrap px-4">
-          <span>DHL Express</span>
-          <span>•</span>
-          <span>FedEx</span>
-          <span>•</span>
-          <span>UPS Worldwide</span>
-          <span>•</span>
-          <span>Aramex</span>
-          <span>•</span>
-          <span>Blue Dart</span>
-          <span>•</span>
-          <span>India Post EMS</span>
+
+        {/* Auto-Scrolling Infinite Marquee */}
+        <div className="w-full relative overflow-hidden bg-[#FAF8F5] py-8 border-y border-[#EAE7E1]">
+          {/* Fade overlays for smooth edge transition */}
+          <div className="absolute left-0 top-0 bottom-0 w-20 sm:w-36 bg-gradient-to-r from-[#FAF8F5] via-[#FAF8F5]/80 to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-20 sm:w-36 bg-gradient-to-l from-[#FAF8F5] via-[#FAF8F5]/80 to-transparent z-10 pointer-events-none" />
+
+          <div className="w-full overflow-x-auto no-scrollbar">
+            <div className="animate-marquee flex items-center gap-8 sm:gap-12">
+              {[...Array(3)].map((_, listIdx) => (
+                <div key={listIdx} className="flex items-center gap-8 sm:gap-12 shrink-0">
+                  {DELIVERY_PARTNERS.map((partner, idx) => (
+                    <div
+                      key={`${listIdx}-${idx}-${partner.short}`}
+                      className="flex flex-col items-center justify-center shrink-0 group cursor-pointer"
+                    >
+                      {/* Logo Card Badge */}
+                      <div className={`w-36 sm:w-44 h-16 sm:h-18 rounded-xl flex items-center justify-center p-4 transition-all duration-300 group-hover:scale-108 shadow-2xs group-hover:shadow-lg ${partner.color} border border-black/5`}>
+                        {partner.short === "FedEx" ? (
+                          <span className="text-xl sm:text-2xl tracking-tight font-extrabold font-sans">
+                            Fed<span className="text-[#FF6600]">Ex</span>
+                          </span>
+                        ) : (
+                          <span className="text-lg sm:text-xl tracking-tight font-extrabold text-center font-sans">
+                            {partner.logoText}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Subtext description below badge */}
+                      <span className="text-[10px] text-neutral-500 font-medium font-sans mt-2 text-center group-hover:text-[#D4AF37] transition-colors">
+                        {partner.desc}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
