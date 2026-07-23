@@ -205,7 +205,8 @@ export default function Home() {
           .from("hero_slides")
           .select("*")
           .eq("is_active", true)
-          .order("sort_order", { ascending: true });
+          .order("sort_order", { ascending: true })
+          .catch(() => ({ data: null, error: null }));
         
         if (data && data.length > 0 && !error) {
           const mappedSlides = data.map(slide => ({
@@ -220,7 +221,7 @@ export default function Home() {
           setSlides(mappedSlides);
         }
       } catch (err) {
-        console.error("Error fetching hero slides:", err);
+        // Fallback to static HERO_SLIDES
       }
     };
     fetchSlides();
@@ -233,13 +234,14 @@ export default function Home() {
         const { data, error } = await supabase
           .from("fragrance_notes")
           .select("*")
-          .order("name", { ascending: true });
+          .order("name", { ascending: true })
+          .catch(() => ({ data: null, error: null }));
         
         if (data && data.length > 0 && !error) {
           setFragranceNotes(data);
         }
       } catch (err) {
-        console.error("Error fetching fragrance notes:", err);
+        // Fallback to static DEFAULT_NOTES
       }
     };
     fetchFragranceNotes();
@@ -251,7 +253,8 @@ export default function Home() {
       try {
         const { data, error } = await supabase
           .from("products")
-          .select("*, product_images(*)");
+          .select("*, product_images(*)")
+          .catch(() => ({ data: null, error: null }));
         
         if (data && !error) {
           const productsWithImages = data.map(p => ({
@@ -274,7 +277,7 @@ export default function Home() {
           }
         }
       } catch (err) {
-        console.error("Error fetching home products:", err);
+        // Fallback to static MOCK_BEST_SELLERS
       }
     };
     fetchHomeProducts();
@@ -289,7 +292,8 @@ export default function Home() {
           .from("products")
           .select("*, product_images(*)")
           .eq("slug", selectedSign.slug)
-          .single();
+          .single()
+          .catch(() => ({ data: null, error: null }));
         
         if (data && !error) {
           setZodiacProduct({
@@ -307,7 +311,14 @@ export default function Home() {
           });
         }
       } catch (err) {
-        console.error("Error fetching zodiac product:", err);
+        setZodiacProduct({
+          id: selectedSign.slug,
+          title: selectedSign.name,
+          price: 1999,
+          image: `/assets/zodiacs/${selectedSign.slug}.jpeg`,
+          slug: selectedSign.slug,
+          description: selectedSign.description
+        });
       } finally {
         setLoadingZodiac(false);
       }

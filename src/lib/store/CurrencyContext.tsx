@@ -123,16 +123,24 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     }
 
     const fetchRates = async () => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
       try {
-        const res = await fetch("https://open.er-api.com/v6/latest/INR");
-        if (res.ok) {
-          const data = await res.json();
+        const res = await fetch("https://open.er-api.com/v6/latest/INR", {
+          signal: controller.signal,
+          headers: { "Accept": "application/json" }
+        }).catch(() => null);
+        
+        if (res && res.ok) {
+          const data = await res.json().catch(() => null);
           if (data && data.rates) {
             setRates(data.rates);
           }
         }
       } catch (err) {
-        console.error("Failed to fetch exchange rates, using fallbacks:", err);
+        // Fail gracefully to default FALLBACK_RATES on network drop/adblocker
+      } finally {
+        clearTimeout(timeoutId);
       }
     };
     fetchRates();
