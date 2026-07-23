@@ -205,8 +205,7 @@ export default function Home() {
           .from("hero_slides")
           .select("*")
           .eq("is_active", true)
-          .order("sort_order", { ascending: true })
-          .catch(() => ({ data: null, error: null }));
+          .order("sort_order", { ascending: true });
         
         if (data && data.length > 0 && !error) {
           const mappedSlides = data.map(slide => ({
@@ -234,8 +233,7 @@ export default function Home() {
         const { data, error } = await supabase
           .from("fragrance_notes")
           .select("*")
-          .order("name", { ascending: true })
-          .catch(() => ({ data: null, error: null }));
+          .order("name", { ascending: true });
         
         if (data && data.length > 0 && !error) {
           setFragranceNotes(data);
@@ -253,8 +251,7 @@ export default function Home() {
       try {
         const { data, error } = await supabase
           .from("products")
-          .select("*, product_images(*)")
-          .catch(() => ({ data: null, error: null }));
+          .select("*, product_images(*)");
         
         if (data && !error) {
           const productsWithImages = data.map(p => ({
@@ -292,8 +289,7 @@ export default function Home() {
           .from("products")
           .select("*, product_images(*)")
           .eq("slug", selectedSign.slug)
-          .single()
-          .catch(() => ({ data: null, error: null }));
+          .single();
         
         if (data && !error) {
           setZodiacProduct({
