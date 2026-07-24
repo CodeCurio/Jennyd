@@ -497,11 +497,23 @@ export default function CheckoutPage() {
                     />
                   </div>
                 </div>
+                <div className="pt-6 flex justify-end w-full">
+                  <Button type="submit" className="w-full sm:w-auto bg-black text-white hover:bg-gray-800 text-xs font-bold uppercase tracking-widest py-4 px-8 rounded-none flex items-center justify-center gap-1.5">
+                    Continue to Shipping & Payment <ArrowRight className="w-4 h-4 shrink-0" />
+                  </Button>
+                </div>
+              </form>
+            )}
 
-                {/* Shipping Method Selector */}
-                <div className="border-t border-gray-100 pt-6 space-y-4">
-                  <h3 className="text-sm font-serif text-gray-900 uppercase tracking-widest">Shipping Method</h3>
-                  
+            {/* Step 2: Shipping & Payment Selector */}
+            {activeStep === "payment" && (
+              <form onSubmit={handlePaymentSubmit} className="bg-white border border-gray-100 rounded-lg p-6 md:p-8 shadow-xs space-y-8 text-xs font-bold uppercase tracking-wider text-gray-500">
+                
+                {/* Shipping Method (Dynamic based on address country) */}
+                <div className="space-y-4">
+                  <h2 className="text-lg font-serif text-gray-900 uppercase tracking-widest border-b border-gray-100 pb-3">
+                    Shipping Method
+                  </h2>
                   <div className="space-y-3">
                     {country === "India" ? (
                       <>
@@ -566,77 +578,69 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                <div className="pt-4 flex justify-end">
-                  <Button type="submit" className="bg-black text-white hover:bg-gray-800 text-xs font-bold uppercase tracking-widest py-3.5 px-8 rounded-none flex items-center gap-1.5">
-                    Continue to Payment <ArrowRight className="w-4 h-4" />
-                  </Button>
-                </div>
-
-              </form>
-            )}
-
-            {/* Step 2: Payment Selector */}
-            {activeStep === "payment" && (
-              <form onSubmit={handlePaymentSubmit} className="bg-white border border-gray-100 rounded-lg p-6 md:p-8 shadow-xs space-y-6 text-xs font-bold uppercase tracking-wider text-gray-500">
-                <h2 className="text-lg font-serif text-gray-900 uppercase tracking-widest border-b border-gray-100 pb-3">
-                  Payment Method
-                </h2>
-
+                {/* Payment Method */}
                 <div className="space-y-4">
-                  
-                  {/* Option 1: Razorpay Online Payment */}
-                  <label className={`flex items-start gap-3.5 p-5 border rounded cursor-pointer transition-all ${
-                    paymentMethod === "online" ? "border-black bg-gray-50/50 shadow-xs" : "border-gray-200 bg-white"
-                  }`}>
-                    <input
-                      type="radio"
-                      name="payment_radio"
-                      checked={paymentMethod === "online"}
-                      onChange={() => setPaymentMethod("online")}
-                      className="w-4 h-4 accent-black cursor-pointer mt-0.5"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-900 font-bold block text-sm">Online Payment (Razorpay Secure)</span>
-                        <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold px-2 py-0.5 rounded uppercase">Recommended</span>
+                  <h2 className="text-lg font-serif text-gray-900 uppercase tracking-widest border-b border-gray-100 pb-3">
+                    Payment Method
+                  </h2>
+
+                  <div className="space-y-4">
+                    
+                    {/* Option 1: Razorpay Online Payment */}
+                    <label className={`flex items-start gap-3.5 p-5 border rounded cursor-pointer transition-all ${
+                      paymentMethod === "online" ? "border-black bg-gray-50/50 shadow-xs" : "border-gray-200 bg-white"
+                    }`}>
+                      <input
+                        type="radio"
+                        name="payment_radio"
+                        checked={paymentMethod === "online"}
+                        onChange={() => setPaymentMethod("online")}
+                        className="w-4 h-4 accent-black cursor-pointer mt-0.5"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-950 font-bold block text-sm">Online Payment (Razorpay Secure)</span>
+                          <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold px-2 py-0.5 rounded uppercase">Recommended</span>
+                        </div>
+                        <span className="text-[11px] text-gray-500 lowercase font-medium tracking-normal block mt-1 leading-normal">
+                          Instant payment via UPI (Google Pay, PhonePe, Paytm), Credit/Debit Cards, Netbanking & Wallets.
+                        </span>
                       </div>
-                      <span className="text-[11px] text-gray-500 lowercase font-medium tracking-normal block mt-1 leading-normal">
-                        Instant payment via UPI (Google Pay, PhonePe, Paytm), Credit/Debit Cards, Netbanking & Wallets.
-                      </span>
-                    </div>
-                  </label>
+                    </label>
 
-                  {/* Option 2: COD */}
-                  <label className={`flex items-start gap-3.5 p-5 border rounded cursor-pointer transition-all ${
-                    paymentMethod === "cod" ? "border-black bg-gray-50/50 shadow-xs" : "border-gray-200 bg-white"
-                  }`}>
-                    <input
-                      type="radio"
-                      name="payment_radio"
-                      checked={paymentMethod === "cod"}
-                      onChange={() => setPaymentMethod("cod")}
-                      className="w-4 h-4 accent-black cursor-pointer mt-0.5"
-                    />
-                    <div>
-                      <span className="text-gray-900 font-bold block text-sm">Cash on Delivery (COD)</span>
-                      <span className="text-[11px] text-gray-500 lowercase font-medium tracking-normal block mt-1 leading-normal">
-                        Pay cash upon physical delivery at your doorstep.
-                      </span>
-                    </div>
-                  </label>
+                    {/* Option 2: COD */}
+                    <label className={`flex items-start gap-3.5 p-5 border rounded cursor-pointer transition-all ${
+                      paymentMethod === "cod" ? "border-black bg-gray-50/50 shadow-xs" : "border-gray-200 bg-white"
+                    }`}>
+                      <input
+                        type="radio"
+                        name="payment_radio"
+                        checked={paymentMethod === "cod"}
+                        onChange={() => setPaymentMethod("cod")}
+                        className="w-4 h-4 accent-black cursor-pointer mt-0.5"
+                      />
+                      <div>
+                        <span className="text-gray-905 font-bold block text-sm">Cash on Delivery (COD)</span>
+                        <span className="text-[11px] text-gray-500 lowercase font-medium tracking-normal block mt-1 leading-normal">
+                          Pay cash upon physical delivery at your doorstep.
+                        </span>
+                      </div>
+                    </label>
 
+                  </div>
                 </div>
 
-                <div className="pt-4 flex justify-between gap-4">
+                {/* Back / Next Buttons */}
+                <div className="pt-6 flex flex-col-reverse sm:flex-row justify-between gap-3 w-full border-t border-gray-100">
                   <button
                     type="button"
                     onClick={() => setActiveStep("shipping")}
-                    className="py-3 px-6 border border-gray-250 hover:bg-gray-50 text-xs font-bold uppercase tracking-widest text-gray-600 transition-all cursor-pointer rounded-none"
+                    className="w-full sm:w-auto py-3.5 px-6 border border-gray-250 hover:bg-gray-50 text-xs font-bold uppercase tracking-widest text-gray-600 transition-all cursor-pointer rounded-none text-center"
                   >
                     ← Back
                   </button>
-                  <Button type="submit" className="bg-black text-white hover:bg-gray-800 text-xs font-bold uppercase tracking-widest py-3.5 px-8 rounded-none flex items-center gap-1.5">
-                    Continue to Review <ArrowRight className="w-4 h-4" />
+                  <Button type="submit" className="w-full sm:w-auto bg-black text-white hover:bg-gray-800 text-xs font-bold uppercase tracking-widest py-4 px-8 rounded-none flex items-center justify-center gap-1.5">
+                    Continue to Review <ArrowRight className="w-4 h-4 shrink-0" />
                   </Button>
                 </div>
               </form>
@@ -688,32 +692,31 @@ export default function CheckoutPage() {
                   </label>
                 </div>
 
-                <div className="pt-4 flex justify-between gap-4 border-t border-gray-100">
+                <div className="pt-4 flex flex-col-reverse sm:flex-row justify-between gap-3 border-t border-gray-100 w-full">
                   <button
                     type="button"
                     disabled={isSubmitting}
                     onClick={() => setActiveStep("payment")}
-                    className="py-3 px-6 border border-gray-255 hover:bg-gray-50 text-xs font-bold uppercase tracking-widest text-gray-600 transition-all cursor-pointer rounded-none disabled:opacity-50"
+                    className="w-full sm:w-auto py-3.5 px-6 border border-gray-255 hover:bg-gray-50 text-xs font-bold uppercase tracking-widest text-gray-600 transition-all cursor-pointer rounded-none disabled:opacity-50 text-center"
                   >
                     ← Back
                   </button>
                   <button
                     onClick={handlePlaceOrder}
                     disabled={isSubmitting || !agreeTerms}
-                    className="bg-black hover:bg-gray-800 text-white text-xs font-bold uppercase tracking-widest py-3.5 px-10 rounded-none flex items-center justify-center gap-2 cursor-pointer transition-all disabled:bg-gray-300 disabled:cursor-not-allowed min-w-[180px]"
+                    className="w-full sm:w-auto bg-black hover:bg-gray-800 text-white text-xs font-bold uppercase tracking-widest py-4 px-10 rounded-none flex items-center justify-center gap-2 cursor-pointer transition-all disabled:bg-gray-300 disabled:cursor-not-allowed text-center"
                   >
                     {isSubmitting ? (
                       <>
-                        <Loader2 className="w-4 h-4 animate-spin" /> Placing Order...
+                        <Loader2 className="w-4 h-4 animate-spin shrink-0" /> Placing Order...
                       </>
                     ) : (
                       <>
-                        Place Order ({formatPrice(grandTotal)}) <ArrowRight className="w-4 h-4" />
+                        Place Order ({formatPrice(grandTotal)}) <ArrowRight className="w-4 h-4 shrink-0" />
                       </>
                     )}
                   </button>
                 </div>
-
               </div>
             )}
 
