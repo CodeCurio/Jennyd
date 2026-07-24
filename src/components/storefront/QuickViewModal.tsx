@@ -53,8 +53,16 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
   if (hasCustomSizes) {
     const matchedSize = customSizes.find((s: any) => s.size === selectedSize);
     if (matchedSize) {
-      displayPrice = matchedSize.price;
-      displaySalePrice = undefined;
+      const sellingPrice = matchedSize.price;
+      let mrpPrice = undefined;
+      
+      if (baseSalePrice && basePrice && basePrice > baseSalePrice) {
+        const discountRatio = baseSalePrice / basePrice;
+        mrpPrice = Math.round(sellingPrice / discountRatio);
+      }
+      
+      displayPrice = mrpPrice || sellingPrice;
+      displaySalePrice = sellingPrice;
     }
   } else {
     if (selectedSize === "50ml" && !isBase50ml) {
@@ -66,7 +74,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
     }
   }
 
-  const isSale = !!displaySalePrice;
+  const isSale = !!displaySalePrice && displaySalePrice < displayPrice;
   const finalPrice = isSale ? displaySalePrice : displayPrice;
   const badge = product.badge || product.metadata?.badge;
   

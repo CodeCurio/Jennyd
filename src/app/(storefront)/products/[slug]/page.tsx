@@ -170,8 +170,16 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
   if (hasCustomSizes) {
     const matchedSize = customSizes.find((s: any) => s.size === selectedSize);
     if (matchedSize) {
-      displayPrice = matchedSize.price;
-      displayMrp = undefined;
+      const sellingPrice = matchedSize.price;
+      let mrpPrice = undefined;
+      
+      if (productData.sale_price && productData.price && productData.price > productData.sale_price) {
+        const discountRatio = productData.sale_price / productData.price;
+        mrpPrice = Math.round(sellingPrice / discountRatio);
+      }
+      
+      displayPrice = mrpPrice || sellingPrice;
+      displayMrp = sellingPrice;
       isSelectedSizeAvailable = (matchedSize.stock !== undefined) ? matchedSize.stock > 0 : (productData.stock_quantity > 0);
     }
   } else {
@@ -189,7 +197,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
     isSelectedSizeAvailable = selectedSize === "50ml" ? is50mlAvailable : is100mlAvailable;
   }
 
-  const isSale = !!displayMrp;
+  const isSale = !!displayMrp && displayMrp < displayPrice;
   const finalPrice = isSale ? displayMrp : displayPrice;
   const originalPriceForDisplay = isSale ? displayPrice : undefined;
 
