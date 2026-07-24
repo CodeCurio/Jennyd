@@ -241,13 +241,14 @@ export function Header() {
                             <Link href="/products?collection=woody" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors">Woody Series</Link>
                             <Link href="/products?collection=premium" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors">Premium Line</Link>
                           </div>
-                          <div className="flex flex-col gap-3">
-                            <h3 className="text-xs font-bold uppercase tracking-widest text-[#D4AF37] mb-1 pb-2 border-b border-gray-100">By Price</h3>
-                            <Link href="/products?price=under-999" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors">Under {formatPrice(999)}</Link>
-                            <Link href="/products?price=1000-1999" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors">{formatPrice(1000)} to {formatPrice(1999)}</Link>
-                            <Link href="/products?price=2000-2999" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors">{formatPrice(2000)} to {formatPrice(2999)}</Link>
-                            <Link href="/products?price=above-3000" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors">Above {formatPrice(3000)}</Link>
-                          </div>
+                           <div className="flex flex-col gap-3">
+                             <h3 className="text-xs font-bold uppercase tracking-widest text-[#D4AF37] mb-1 pb-2 border-b border-gray-100">By Price</h3>
+                             <Link href="/products?price=under-499" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors whitespace-nowrap">Under {formatPrice(499)}</Link>
+                             <Link href="/products?price=500-999" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors whitespace-nowrap">{formatPrice(500)} to {formatPrice(999)}</Link>
+                             <Link href="/products?price=1000-1999" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors whitespace-nowrap">{formatPrice(1000)} to {formatPrice(1999)}</Link>
+                             <Link href="/products?price=2000-4999" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors whitespace-nowrap">{formatPrice(2000)} to {formatPrice(4999)}</Link>
+                             <Link href="/products?price=above-5000" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors whitespace-nowrap">Above {formatPrice(5000)}</Link>
+                           </div>
                           <div className="relative rounded-lg overflow-hidden">
                             <Image
                               src="/assets/product image 1.jpeg"
