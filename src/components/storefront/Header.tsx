@@ -379,10 +379,11 @@ export function Header() {
                   <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
                     <span className="text-[11px] font-bold uppercase tracking-widest text-[#D4AF37] block mb-2">Shop By Price</span>
                     <div className="flex flex-col gap-2">
-                      <Link href="/products?price=under-999" onClick={() => setIsMobileMenuOpen(false)} className="text-xs font-medium text-gray-600 hover:text-[#D4AF37]">Under {formatPrice(999)}</Link>
-                      <Link href="/products?price=1000-1999" onClick={() => setIsMobileMenuOpen(false)} className="text-xs font-medium text-gray-600 hover:text-[#D4AF37]">{formatPrice(1000)} to {formatPrice(1999)}</Link>
-                      <Link href="/products?price=2000-2999" onClick={() => setIsMobileMenuOpen(false)} className="text-xs font-medium text-gray-600 hover:text-[#D4AF37]">{formatPrice(2000)} to {formatPrice(2999)}</Link>
-                      <Link href="/products?price=above-3000" onClick={() => setIsMobileMenuOpen(false)} className="text-xs font-medium text-gray-600 hover:text-[#D4AF37]">Above {formatPrice(3000)}</Link>
+                      <Link href="/products?price=under-499" onClick={() => setIsMobileMenuOpen(false)} className="text-xs font-medium text-gray-600 hover:text-[#D4AF37]">Under <span>{formatPrice(499)}</span></Link>
+                      <Link href="/products?price=500-999" onClick={() => setIsMobileMenuOpen(false)} className="text-xs font-medium text-gray-600 hover:text-[#D4AF37]"><span>{formatPrice(500)}</span> to <span>{formatPrice(999)}</span></Link>
+                      <Link href="/products?price=1000-1999" onClick={() => setIsMobileMenuOpen(false)} className="text-xs font-medium text-gray-600 hover:text-[#D4AF37]"><span>{formatPrice(1000)}</span> to <span>{formatPrice(1999)}</span></Link>
+                      <Link href="/products?price=2000-4999" onClick={() => setIsMobileMenuOpen(false)} className="text-xs font-medium text-gray-600 hover:text-[#D4AF37]"><span>{formatPrice(2000)}</span> to <span>{formatPrice(4999)}</span></Link>
+                      <Link href="/products?price=above-5000" onClick={() => setIsMobileMenuOpen(false)} className="text-xs font-medium text-gray-600 hover:text-[#D4AF37]">Above <span>{formatPrice(5000)}</span></Link>
                     </div>
                   </div>
                 </div>
