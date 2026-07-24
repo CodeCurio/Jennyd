@@ -71,8 +71,23 @@ export function ProductCard({ product, onQuickAdd, onQuickView }: ProductCardPro
           )}
         </Link>
 
-        {/* Premium bottom-sliding dual action bar on hover */}
-        <div className="absolute bottom-0 left-0 right-0 h-11 bg-[#1A1A1A]/95 backdrop-blur-xs flex items-center justify-between text-white overflow-hidden transition-all duration-300 translate-y-full group-hover:translate-y-0 z-20">
+        {/* Floating Quick Add for Mobile/Tablet (Touch Screens) */}
+        {onQuickAdd && (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onQuickAdd();
+            }}
+            className="lg:hidden absolute bottom-3 right-3 z-20 w-8 h-8 rounded-full bg-[#1A1A1A]/90 hover:bg-[#D4AF37] text-white flex items-center justify-center shadow-md active:scale-95 transition-all duration-200 cursor-pointer"
+            title="Quick Add"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+        )}
+
+        {/* Premium bottom-sliding dual action bar on hover (Desktop only) */}
+        <div className="hidden lg:flex absolute bottom-0 left-0 right-0 h-11 bg-[#1A1A1A]/95 backdrop-blur-xs items-center justify-between text-white overflow-hidden transition-all duration-300 translate-y-full group-hover:translate-y-0 z-20">
           {onQuickAdd && (
             <button
               onClick={(e) => {
