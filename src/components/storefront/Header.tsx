@@ -117,11 +117,11 @@ export function Header() {
                 className="hover:underline underline-offset-2"
               >
                 {settings.announcement_bar_text ||
-                  `Free Shipping on all orders above ${formatPrice(999)} | COD Available`}
+                  `Worldwide Shipping | Cash on Delivery (COD) Available`}
               </Link>
             ) : (
               settings?.announcement_bar_text ||
-              `Free Shipping on all orders above ${formatPrice(999)} | COD Available`
+              `Worldwide Shipping | Cash on Delivery (COD) Available`
             )}
           </p>
         </div>

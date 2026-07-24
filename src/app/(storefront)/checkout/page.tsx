@@ -654,7 +654,7 @@ export default function CheckoutPage() {
                     <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest block">Shipping Details</span>
                     <p className="font-bold text-gray-950">{firstName} {lastName}</p>
                     <p className="text-[11px] font-medium text-gray-650 leading-relaxed font-sans normal-case">
-                      {addressLine1}, {addressLine2 ? `${addressLine2}, ` : ""}{city}, {state} - {zip}
+                      {addressLine1}, {addressLine2 ? `${addressLine2}, ` : ""}{city}, {state} - {zip}, {country}
                     </p>
                     <p className="text-[11px] font-medium text-gray-600 font-mono">Ph: {phone}</p>
                     <p className="text-[11px] font-medium text-gray-600 lowercase">{email}</p>
@@ -663,9 +663,9 @@ export default function CheckoutPage() {
                   <div className="space-y-2 border border-gray-100 p-4 rounded bg-gray-50/50">
                     <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest block">Shipping & Payment Methods</span>
                     <div className="space-y-1 font-bold text-gray-900">
-                      <p>Method: {shippingMethod === "express" ? "Express Delivery" : "Standard Delivery"}</p>
+                      <p>Method: {country === "India" ? (shippingMethod === "express" ? "Express Delivery" : "Standard Delivery") : "International Shipping"}</p>
                       <p className="font-sans lowercase font-normal text-[11px] text-gray-500">
-                        {shippingMethod === "express" ? "1-2 Business Days" : "3-5 Business Days"}
+                        {country === "India" ? (shippingMethod === "express" ? "1-2 Business Days" : "3-5 Business Days") : "7-14 Business Days"}
                       </p>
                       <p className="pt-2 border-t border-gray-200 mt-2">
                         Payment: {paymentMethod === "cod" ? "Cash on Delivery" : "Online Payment (Razorpay)"}

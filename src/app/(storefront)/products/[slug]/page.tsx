@@ -373,7 +373,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                 </span>
               )}
             </div>
-            <p className="text-[11px] text-neutral-400 mb-8 font-medium">Inclusive of all taxes. Free shipping applied at checkout.</p>
+            <p className="text-[11px] text-neutral-400 mb-8 font-medium">Inclusive of all taxes.</p>
 
             {/* Variant Size Swatches */}
             <div className="mb-8 space-y-3">
