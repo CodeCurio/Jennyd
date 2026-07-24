@@ -27,7 +27,7 @@ export default function CartPage() {
     removeCoupon,
     addItem,
   } = useCart();
-  const { formatPrice } = useCurrency();
+  const { formatPrice, currency, rates } = useCurrency();
 
   const [couponInput, setCouponInput] = useState("");
   const [couponError, setCouponError] = useState("");
@@ -80,7 +80,8 @@ export default function CartPage() {
     scrollRef.current.scrollBy({ left: dir === "left" ? -amount : amount, behavior: "smooth" });
   };
 
-  const shippingCost = subtotal >= 999 || subtotal === 0 ? 0 : 99;
+  const usdRate = rates["USD"] || 0.012;
+  const shippingCost = currency === "INR" || subtotal === 0 ? 0 : Math.round(10 / usdRate);
   const grandTotal = subtotal - discount + shippingCost;
 
   return (
@@ -367,12 +368,6 @@ export default function CartPage() {
                       {shippingCost === 0 ? "FREE" : formatPrice(shippingCost)}
                     </span>
                   </div>
-
-                  {shippingCost > 0 && (
-                    <p className="text-[9px] text-neutral-400 lowercase tracking-normal font-normal text-right">
-                      Add {formatPrice(999 - subtotal)} more for free shipping
-                    </p>
-                  )}
                 </div>
 
                 <div className="border-t border-neutral-150 pt-4 flex justify-between items-baseline font-bold uppercase tracking-wider text-[#1A1A1A]">

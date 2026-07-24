@@ -15,7 +15,7 @@ type Step = "shipping" | "payment" | "review";
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, subtotal, discount, appliedCoupon, clearCart } = useCart();
-  const { formatPrice } = useCurrency();
+  const { formatPrice, rates } = useCurrency();
   const { addToast } = useToast();
 
   const [activeStep, setActiveStep] = useState<Step>("shipping");
@@ -25,6 +25,7 @@ export default function CheckoutPage() {
   const [userId, setUserId] = useState<string | null>(null);
 
   // Form State - Shipping Info
+  const [country, setCountry] = useState("India");
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -64,8 +65,10 @@ export default function CheckoutPage() {
   }, [items, router, isSubmitting]);
 
   // Derived costs
-  const baseShippingCost = subtotal >= 999 || subtotal === 0 ? 0 : 99;
-  const shippingCost = shippingMethod === "express" ? 150 : baseShippingCost;
+  const usdRate = rates["USD"] || 0.012;
+  const internationalShippingCost = subtotal === 0 ? 0 : Math.round(10 / usdRate);
+  const baseShippingCost = country === "India" ? 0 : internationalShippingCost;
+  const shippingCost = (country === "India" && shippingMethod === "express") ? 150 : baseShippingCost;
   const grandTotal = subtotal - discount + shippingCost;
 
   // Form Validations
@@ -108,7 +111,7 @@ export default function CheckoutPage() {
       state,
       zip,
       phone,
-      country: "India"
+      country
     };
 
     if (userId && email) {
@@ -436,6 +439,32 @@ export default function CheckoutPage() {
                   />
                 </div>
 
+                <div className="space-y-1.5">
+                  <label className="block">Country *</label>
+                  <select
+                    value={country}
+                    onChange={(e) => {
+                      setCountry(e.target.value);
+                      if (e.target.value !== "India") {
+                        setShippingMethod("standard");
+                      }
+                    }}
+                    className="w-full border border-gray-300 rounded px-3 py-2.5 bg-white text-gray-900 text-sm font-semibold focus:outline-none focus:border-black appearance-none cursor-pointer"
+                  >
+                    <option value="India">India</option>
+                    <option value="United States">United States</option>
+                    <option value="United Kingdom">United Kingdom</option>
+                    <option value="United Arab Emirates">United Arab Emirates</option>
+                    <option value="Canada">Canada</option>
+                    <option value="Australia">Australia</option>
+                    <option value="Germany">Germany</option>
+                    <option value="France">France</option>
+                    <option value="Singapore">Singapore</option>
+                    <option value="Saudi Arabia">Saudi Arabia</option>
+                    <option value="Other Country">Other Country</option>
+                  </select>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-1.5">
                     <label className="block">City *</label>
@@ -474,45 +503,66 @@ export default function CheckoutPage() {
                   <h3 className="text-sm font-serif text-gray-900 uppercase tracking-widest">Shipping Method</h3>
                   
                   <div className="space-y-3">
-                    <label className={`flex items-center justify-between p-4 border rounded cursor-pointer transition-all ${
-                      shippingMethod === "standard" ? "border-black bg-gray-50/50" : "border-gray-200 bg-white"
-                    }`}>
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="radio"
-                          name="shipping_radio"
-                          checked={shippingMethod === "standard"}
-                          onChange={() => setShippingMethod("standard")}
-                          className="w-4 h-4 accent-black cursor-pointer"
-                        />
-                        <div>
-                          <span className="text-gray-900 font-bold block">Standard Delivery</span>
-                          <span className="text-[10px] text-gray-450 lowercase font-medium tracking-normal block mt-0.5">3-5 Business Days</span>
-                        </div>
-                      </div>
-                      <span className="font-mono text-gray-950 font-bold">
-                        {baseShippingCost === 0 ? "FREE" : formatPrice(baseShippingCost)}
-                      </span>
-                    </label>
+                    {country === "India" ? (
+                      <>
+                        <label className={`flex items-center justify-between p-4 border rounded cursor-pointer transition-all ${
+                          shippingMethod === "standard" ? "border-black bg-gray-50/50" : "border-gray-200 bg-white"
+                        }`}>
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="radio"
+                              name="shipping_radio"
+                              checked={shippingMethod === "standard"}
+                              onChange={() => setShippingMethod("standard")}
+                              className="w-4 h-4 accent-black cursor-pointer"
+                            />
+                            <div>
+                              <span className="text-gray-900 font-bold block">Standard Delivery</span>
+                              <span className="text-[10px] text-gray-450 lowercase font-medium tracking-normal block mt-0.5">3-5 Business Days</span>
+                            </div>
+                          </div>
+                          <span className="font-mono text-gray-950 font-bold">
+                            FREE
+                          </span>
+                        </label>
 
-                    <label className={`flex items-center justify-between p-4 border rounded cursor-pointer transition-all ${
-                      shippingMethod === "express" ? "border-black bg-gray-50/50" : "border-gray-200 bg-white"
-                    }`}>
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="radio"
-                          name="shipping_radio"
-                          checked={shippingMethod === "express"}
-                          onChange={() => setShippingMethod("express")}
-                          className="w-4 h-4 accent-black cursor-pointer"
-                        />
-                        <div>
-                          <span className="text-gray-900 font-bold block">Express Delivery</span>
-                          <span className="text-[10px] text-gray-450 lowercase font-medium tracking-normal block mt-0.5">1-2 Business Days</span>
+                        <label className={`flex items-center justify-between p-4 border rounded cursor-pointer transition-all ${
+                          shippingMethod === "express" ? "border-black bg-gray-50/50" : "border-gray-200 bg-white"
+                        }`}>
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="radio"
+                              name="shipping_radio"
+                              checked={shippingMethod === "express"}
+                              onChange={() => setShippingMethod("express")}
+                              className="w-4 h-4 accent-black cursor-pointer"
+                            />
+                            <div>
+                              <span className="text-gray-900 font-bold block">Express Delivery</span>
+                              <span className="text-[10px] text-gray-450 lowercase font-medium tracking-normal block mt-0.5">1-2 Business Days</span>
+                            </div>
+                          </div>
+                          <span className="font-mono text-gray-950 font-bold">{formatPrice(150)}</span>
+                        </label>
+                      </>
+                    ) : (
+                      <label className="flex items-center justify-between p-4 border border-black bg-gray-50/50 rounded cursor-default">
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="radio"
+                            name="shipping_radio"
+                            checked={true}
+                            readOnly
+                            className="w-4 h-4 accent-black cursor-default"
+                          />
+                          <div>
+                            <span className="text-gray-900 font-bold block">International Shipping</span>
+                            <span className="text-[10px] text-gray-450 lowercase font-medium tracking-normal block mt-0.5">7-14 Business Days</span>
+                          </div>
                         </div>
-                      </div>
-                      <span className="font-mono text-gray-950 font-bold">{formatPrice(150)}</span>
-                    </label>
+                        <span className="font-mono text-gray-950 font-bold">{formatPrice(baseShippingCost)}</span>
+                      </label>
+                    )}
                   </div>
                 </div>
 

@@ -30,11 +30,11 @@ const FAQ_CATEGORIES = [
     items: [
       {
         question: "What are your shipping charges and delivery timelines?",
-        answer: "We offer complimentary Express Shipping on all orders above ₹999 across India. Standard delivery typically takes 3–5 business days depending on your location."
+        answer: "We offer complimentary standard shipping on all orders across India. Standard delivery typically takes 3–5 business days. Express domestic delivery is available for ₹150 (1-2 business days)."
       },
       {
         question: "Do you ship internationally?",
-        answer: "Currently we deliver across all pin codes in India. We are working on expanding our international shipping soon."
+        answer: "Yes, we ship to over 220+ countries worldwide! International shipping has a flat rate of $10 USD (or equivalent in your active currency). Delivery timelines range between 7 to 14 business days."
       }
     ]
   },
