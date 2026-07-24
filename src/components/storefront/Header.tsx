@@ -243,11 +243,11 @@ export function Header() {
                           </div>
                            <div className="flex flex-col gap-3">
                              <h3 className="text-xs font-bold uppercase tracking-widest text-[#D4AF37] mb-1 pb-2 border-b border-gray-100">By Price</h3>
-                             <Link href="/products?price=under-499" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors whitespace-nowrap">Under {formatPrice(499)}</Link>
-                             <Link href="/products?price=500-999" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors whitespace-nowrap">{formatPrice(500)} to {formatPrice(999)}</Link>
-                             <Link href="/products?price=1000-1999" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors whitespace-nowrap">{formatPrice(1000)} to {formatPrice(1999)}</Link>
-                             <Link href="/products?price=2000-4999" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors whitespace-nowrap">{formatPrice(2000)} to {formatPrice(4999)}</Link>
-                             <Link href="/products?price=above-5000" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors whitespace-nowrap">Above {formatPrice(5000)}</Link>
+                             <Link href="/products?price=under-499" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors whitespace-nowrap">Under <span>{formatPrice(499)}</span></Link>
+                             <Link href="/products?price=500-999" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors whitespace-nowrap"><span>{formatPrice(500)}</span> to <span>{formatPrice(999)}</span></Link>
+                             <Link href="/products?price=1000-1999" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors whitespace-nowrap"><span>{formatPrice(1000)}</span> to <span>{formatPrice(1999)}</span></Link>
+                             <Link href="/products?price=2000-4999" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors whitespace-nowrap"><span>{formatPrice(2000)}</span> to <span>{formatPrice(4999)}</span></Link>
+                             <Link href="/products?price=above-5000" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors whitespace-nowrap">Above <span>{formatPrice(5000)}</span></Link>
                            </div>
                           <div className="relative rounded-lg overflow-hidden">
                             <Image
