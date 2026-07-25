@@ -411,22 +411,22 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── 2. Brand Value Proposition Bar (USPs) ── */}
+      {/* ── 2. Brand Value Proposition Bar (USPs - Mobile Optimized) ── */}
       <section className="bg-white border-y border-[#EAE7E1]">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+        <div className="max-w-[1440px] mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-10">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-8">
             {VALUE_PROPOSITIONS.map((usp, idx) => {
               const Icon = usp.icon;
               return (
-                <div key={idx} className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-3.5 group">
-                  <div className="w-11 h-11 rounded-full bg-[#FAF8F5] border border-[#EAE7E1] flex items-center justify-center text-[#D4AF37] group-hover:bg-[#D4AF37] group-hover:text-white transition-colors duration-300 shrink-0">
-                    <Icon className="w-5 h-5" strokeWidth={1.75} />
+                <div key={idx} className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-2.5 p-3 sm:p-0 rounded-2xl bg-[#FAF8F5] sm:bg-transparent border border-[#EAE7E1] sm:border-none shadow-2xs sm:shadow-none group">
+                  <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white sm:bg-[#FAF8F5] border border-[#EAE7E1] flex items-center justify-center text-[#D4AF37] group-hover:bg-[#D4AF37] group-hover:text-white transition-colors duration-300 shrink-0">
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={1.75} />
                   </div>
                   <div>
-                    <h3 className="font-serif font-bold text-xs sm:text-sm text-[#121212] uppercase tracking-wider mb-1">
+                    <h3 className="font-serif font-bold text-[11px] sm:text-sm text-[#121212] uppercase tracking-wider mb-0.5">
                       {usp.title}
                     </h3>
-                    <p className="text-[11px] text-neutral-500 font-sans leading-relaxed">
+                    <p className="text-[10px] sm:text-[11px] text-neutral-500 font-sans leading-relaxed">
                       {usp.desc}
                     </p>
                   </div>
@@ -537,24 +537,55 @@ export default function Home() {
           <div className="w-12 h-[2px] bg-[#D4AF37] mx-auto mt-2" />
         </div>
 
-        {/* Infinite Marquee Container */}
-        <div className="w-full relative overflow-hidden py-4">
-          {/* Subtle Fade Edge Overlays */}
-          <div className="absolute left-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-r from-white via-white/80 to-transparent z-10 pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-l from-white via-white/80 to-transparent z-10 pointer-events-none" />
+        {/* Mobile View: High Density 5-Note Scroll Row (< md) */}
+        <div className="md:hidden w-full overflow-hidden py-2 px-3">
+          <div className="flex overflow-x-auto no-scrollbar gap-3.5 pb-2 pt-1 scroll-smooth">
+            {displayNotes.map((note) => (
+              <Link
+                key={`mobile-note-${note.id || note.name}`}
+                href={`/products?note=${encodeURIComponent(note.name.toLowerCase())}`}
+                className="flex flex-col items-center gap-1.5 group shrink-0 w-[68px] cursor-pointer"
+              >
+                <div className="relative w-16 h-16 rounded-full border-2 border-[#EAE7E1] p-0.5 bg-[#FAF8F5] group-active:scale-95 group-hover:border-[#D4AF37] transition-all duration-300 shadow-2xs flex items-center justify-center">
+                  <div className="relative w-full h-full rounded-full overflow-hidden">
+                    {note.image_url ? (
+                      <img
+                        src={note.image_url}
+                        alt={note.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-[#FAF8F5] flex items-center justify-center text-[#D4AF37] font-serif text-sm font-bold">
+                        {note.name[0]}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <span className="font-serif text-[11px] font-bold uppercase tracking-wider text-[#121212] group-hover:text-[#D4AF37] transition-colors text-center line-clamp-1">
+                  {note.name}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Desktop View: Infinite Marquee Container (>= md) */}
+        <div className="hidden md:block w-full relative overflow-hidden py-4">
+          <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white via-white/80 to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white via-white/80 to-transparent z-10 pointer-events-none" />
 
           <div className="w-full overflow-x-auto no-scrollbar">
-            <div className="animate-marquee-medium flex items-center gap-8 sm:gap-12">
+            <div className="animate-marquee-medium flex items-center gap-12">
               {[...Array(2)].map((_, listIdx) => (
-                <div key={listIdx} className="flex items-center gap-8 sm:gap-12 shrink-0">
+                <div key={listIdx} className="flex items-center gap-12 shrink-0">
                   {displayNotes.map((note, noteIdx) => (
                     <Link
                       key={`${listIdx}-${noteIdx}-${note.id || note.name}`}
                       href={`/products?note=${encodeURIComponent(note.name.toLowerCase())}`}
                       className="flex flex-col items-center gap-3 group shrink-0 cursor-pointer"
                     >
-                      {/* Circle Image Frame */}
-                      <div className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full border-2 border-[#EAE7E1] p-1 bg-[#FAF8F5] group-hover:border-[#D4AF37] group-hover:scale-108 transition-all duration-300 shadow-2xs group-hover:shadow-md flex items-center justify-center">
+                      <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-full border-2 border-[#EAE7E1] p-1 bg-[#FAF8F5] group-hover:border-[#D4AF37] group-hover:scale-108 transition-all duration-300 shadow-2xs group-hover:shadow-md flex items-center justify-center">
                         <div className="relative w-full h-full rounded-full overflow-hidden">
                           {note.image_url ? (
                             <img
@@ -570,8 +601,7 @@ export default function Home() {
                         </div>
                       </div>
 
-                      {/* Label */}
-                      <span className="font-serif text-xs sm:text-sm font-bold uppercase tracking-wider text-[#121212] group-hover:text-[#D4AF37] transition-colors text-center">
+                      <span className="font-serif text-sm font-bold uppercase tracking-wider text-[#121212] group-hover:text-[#D4AF37] transition-colors text-center">
                         {note.name}
                       </span>
                     </Link>
@@ -613,33 +643,33 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── 6. Celestial Scent Matcher (Zodiac Finder) ── */}
-      <section className="py-16 md:py-24 bg-[#121212] text-white relative overflow-hidden">
+      {/* ── 6. Celestial Scent Matcher (Zodiac Finder - Mobile Optimized) ── */}
+      <section className="py-10 md:py-24 bg-[#121212] text-white relative overflow-hidden">
         {/* Gold Radial Glow Grid Overlay */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(212,175,55,0.08),transparent_70%)] pointer-events-none" />
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:80px_80px] pointer-events-none opacity-50" />
 
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-[1440px] mx-auto px-3.5 sm:px-6 lg:px-8 relative z-10">
           
-          <div className="text-center max-w-2xl mx-auto mb-12 md:mb-16 flex flex-col gap-2">
-            <span className="text-[#D4AF37] uppercase tracking-[0.3em] text-xs font-bold flex items-center justify-center gap-2">
-              <Sparkles className="w-4 h-4" /> Celestial Scent Matcher
+          <div className="text-center max-w-2xl mx-auto mb-8 md:mb-16 flex flex-col gap-2">
+            <span className="text-[#D4AF37] uppercase tracking-[0.3em] text-[10px] sm:text-xs font-bold flex items-center justify-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5" /> Celestial Scent Matcher
             </span>
             <h2 className="text-2xl sm:text-3xl md:text-5xl font-serif">Discover Your Zodiac Signature</h2>
-            <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed font-sans">
+            <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed font-sans max-w-lg mx-auto">
               Every zodiac sign carries a unique energetic vibration. Explore our cosmic collection and find the exact fragrance profile written in the stars.
             </p>
           </div>
 
           {/* Zodiac Pills Horizontal Bar */}
-          <div className="flex overflow-x-auto no-scrollbar gap-2.5 mb-10 pb-2 justify-start lg:justify-center">
+          <div className="flex overflow-x-auto no-scrollbar gap-2 mb-6 sm:mb-10 pb-2 justify-start lg:justify-center">
             {ZODIAC_SIGNS.map((sign) => {
               const isActive = selectedSign.name === sign.name;
               return (
                 <button
                   key={sign.name}
                   onClick={() => setSelectedSign(sign)}
-                  className={`px-4 py-2.5 border transition-all duration-300 shrink-0 cursor-pointer flex flex-col items-center ${
+                  className={`px-3.5 py-2 border rounded-xl transition-all duration-300 shrink-0 cursor-pointer flex flex-col items-center ${
                     isActive 
                       ? "border-[#D4AF37] bg-[#D4AF37]/15 text-[#D4AF37]" 
                       : "border-neutral-800 bg-black/40 text-neutral-400 hover:border-neutral-600 hover:text-white"
@@ -653,13 +683,13 @@ export default function Home() {
           </div>
 
           {/* Zodiac Details Panel */}
-          <div className="bg-black/60 border border-[#D4AF37]/30 p-6 sm:p-10 shadow-2xl backdrop-blur-md relative">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center">
+          <div className="bg-black/60 border border-[#D4AF37]/30 p-4 sm:p-8 md:p-10 rounded-2xl shadow-2xl backdrop-blur-md relative">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-14 items-center">
               
               {/* Artwork */}
               <div className="lg:col-span-5 flex justify-center">
-                <div className="relative aspect-square w-full max-w-[320px] border border-[#D4AF37]/30 p-2 bg-black/50">
-                  <div className="relative w-full h-full overflow-hidden">
+                <div className="relative aspect-square w-full max-w-[260px] sm:max-w-[320px] border border-[#D4AF37]/30 p-2 bg-black/50 rounded-xl overflow-hidden">
+                  <div className="relative w-full h-full rounded-lg overflow-hidden">
                     <Image
                       src={`/assets/zodiacs/${selectedSign.slug}.jpeg`}
                       alt={`${selectedSign.name} Scent Match`}
@@ -672,28 +702,28 @@ export default function Home() {
               </div>
 
               {/* Details */}
-              <div className="lg:col-span-7 flex flex-col gap-6 text-left">
-                <div className="border-b border-neutral-800 pb-4">
+              <div className="lg:col-span-7 flex flex-col gap-5 text-left">
+                <div className="border-b border-neutral-800 pb-3">
                   <div className="flex items-baseline justify-between flex-wrap gap-2 mb-1">
-                    <h3 className="text-3xl sm:text-4xl font-serif text-white tracking-wide">{selectedSign.name}</h3>
-                    <span className="text-xs text-[#D4AF37] font-semibold tracking-widest uppercase">Element: {selectedSign.element}</span>
+                    <h3 className="text-2xl sm:text-4xl font-serif text-white tracking-wide">{selectedSign.name}</h3>
+                    <span className="text-[11px] text-[#D4AF37] font-semibold tracking-widest uppercase">Element: {selectedSign.element}</span>
                   </div>
-                  <span className="text-xs text-neutral-400 font-sans tracking-widest uppercase">{selectedSign.dates}</span>
+                  <span className="text-[11px] text-neutral-400 font-sans tracking-widest uppercase">{selectedSign.dates}</span>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div>
-                    <span className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold block mb-1">Fragrance Profile</span>
-                    <p className="text-[#D4AF37] text-sm sm:text-base font-semibold">{selectedSign.notes}</p>
+                    <span className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold block mb-0.5">Fragrance Profile</span>
+                    <p className="text-[#D4AF37] text-xs sm:text-base font-semibold">{selectedSign.notes}</p>
                   </div>
 
                   <div>
-                    <span className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold block mb-1">Cosmic Essence</span>
+                    <span className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold block mb-0.5">Cosmic Essence</span>
                     <p className="text-neutral-300 text-xs sm:text-sm leading-relaxed font-sans">{selectedSign.description}</p>
                   </div>
                 </div>
 
-                <div className="border-t border-neutral-800 pt-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+                <div className="border-t border-neutral-800 pt-5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
                   {loadingZodiac ? (
                     <div className="flex items-center gap-2 text-neutral-400">
                       <Loader2 className="w-4 h-4 animate-spin text-[#D4AF37]" />
@@ -703,18 +733,18 @@ export default function Home() {
                     <>
                       <div>
                         <span className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold block mb-0.5">Celestial Extract</span>
-                        <span className="text-2xl font-serif text-white">{formatPrice(zodiacProduct.sale_price || zodiacProduct.price)}</span>
+                        <span className="text-xl sm:text-2xl font-serif text-white">{formatPrice(zodiacProduct.sale_price || zodiacProduct.price)}</span>
                       </div>
 
-                      <div className="flex gap-3">
-                        <Link href={`/products/${zodiacProduct.slug}`}>
-                          <Button variant="outline" className="border-neutral-700 text-neutral-300 hover:border-white hover:text-white uppercase tracking-widest text-[10px] h-11 px-6 rounded-none font-bold">
+                      <div className="flex flex-col sm:flex-row gap-2.5 w-full sm:w-auto">
+                        <Link href={`/products/${zodiacProduct.slug}`} className="w-full sm:w-auto">
+                          <Button variant="outline" className="w-full sm:w-auto border-neutral-700 text-neutral-300 hover:border-white hover:text-white uppercase tracking-wider text-xs min-h-[44px] py-2.5 px-5 rounded-xl font-bold whitespace-nowrap">
                             View Details
                           </Button>
                         </Link>
                         <Button
                           onClick={() => handleQuickAdd(zodiacProduct)}
-                          className="bg-[#D4AF37] text-white hover:bg-white hover:text-black uppercase tracking-widest text-[10px] h-11 px-8 rounded-none font-bold transition-colors"
+                          className="w-full sm:w-auto bg-[#D4AF37] text-white hover:bg-white hover:text-black uppercase tracking-wider text-xs min-h-[44px] py-2.5 px-6 rounded-xl font-bold transition-colors whitespace-nowrap"
                         >
                           Acquire Scent
                         </Button>

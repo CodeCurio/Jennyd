@@ -287,37 +287,37 @@ export function Header() {
         </div>
 
         {/* ── Mobile Layout ── */}
-        <div className="flex md:hidden items-center justify-between px-3 sm:px-4 h-16 border-b border-gray-100 relative">
-          {/* Mobile Menu Trigger */}
+        <div className="flex md:hidden items-center justify-between px-3 h-16 border-b border-gray-100 relative w-full overflow-hidden">
+          {/* Left: Mobile Menu Trigger */}
           <button
-            className="p-2 -ml-1 text-gray-800 shrink-0 cursor-pointer"
+            className="p-2 text-gray-800 shrink-0 cursor-pointer z-10"
             onClick={() => setIsMobileMenuOpen(true)}
             aria-label="Open Navigation Menu"
           >
-            <Menu className="w-6 h-6" />
+            <Menu className="w-5 h-5" />
           </button>
 
-          {/* Centered Logo with Collision Protection */}
+          {/* Center: Perfectly Centered Logo */}
           <Link 
             href="/" 
-            className="flex-1 flex justify-center items-center px-1 min-w-0 overflow-hidden"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-0 flex items-center justify-center pointer-events-auto"
           >
-            <div className="relative w-[110px] min-[360px]:w-[125px] sm:w-[140px] h-[40px] shrink-0">
+            <div className="relative w-[118px] min-[360px]:w-[132px] sm:w-[150px] h-[42px] shrink-0">
               <Image
                 src={settings?.logo_url || "/logo.png"}
                 alt={settings?.site_name || "Jennyd Scents"}
                 fill
-                className="object-contain object-center drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)] contrast-125 brightness-90"
+                className="object-contain object-center drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)] contrast-125 brightness-90"
                 priority
               />
             </div>
           </Link>
 
-          {/* Right Action Icons (Compact & Strictly Bounded) */}
-          <div className="flex items-center gap-0.5 shrink-0">
+          {/* Right: Action Icons */}
+          <div className="flex items-center gap-0.5 shrink-0 z-10">
             <button
               onClick={() => window.showLanguageSelector?.()}
-              className="w-8.5 h-8.5 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors cursor-pointer"
+              className="w-8 h-8 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors cursor-pointer"
               title="Select Preferences"
               aria-label="Select Preferences"
             >
@@ -325,19 +325,19 @@ export function Header() {
             </button>
             <button
               onClick={() => setIsSearchOpen(true)}
-              className="w-8.5 h-8.5 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors cursor-pointer"
+              className="w-8 h-8 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors cursor-pointer"
               aria-label="Search"
             >
               <Search className="w-4.5 h-4.5" />
             </button>
             <button
-              className="w-8.5 h-8.5 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors relative cursor-pointer"
+              className="w-8 h-8 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors relative cursor-pointer"
               onClick={() => setIsDrawerOpen(true)}
               aria-label="Shopping Cart"
             >
               <ShoppingBag className="w-4.5 h-4.5" />
               {itemCount > 0 && (
-                <span className="absolute top-0.5 right-0.5 bg-[#D4AF37] text-white text-[8px] font-bold min-w-[14px] h-[14px] rounded-full flex items-center justify-center px-0.5 leading-none font-mono">
+                <span className="absolute top-0 right-0 bg-[#D4AF37] text-white text-[8px] font-bold min-w-[14px] h-[14px] rounded-full flex items-center justify-center px-0.5 leading-none font-mono">
                   {itemCount}
                 </span>
               )}
