@@ -43,9 +43,9 @@ export function ProductCard({ product, onQuickAdd, onQuickView }: ProductCardPro
       viewport={{ once: true }}
       className="group flex flex-col w-full h-full relative"
     >
-      {/* Image Container: Clean, un-obscured high-res display */}
+      {/* Image Container: Uniform 3:4 portrait frame for all products */}
       <div className="relative w-full aspect-[3/4] bg-[#FAF8F5] overflow-hidden mb-3 border border-[#EAE7E1] rounded-2xl shadow-2xs group-hover:shadow-md group-hover:border-[#D4AF37]/40 transition-all duration-500">
-        <Link href={`/products/${product.slug}`} className="block w-full h-full">
+        <Link href={`/products/${product.slug}`} className="block w-full h-full relative">
           {/* Badge */}
           {badge && (
             <div className="absolute top-2.5 left-2.5 z-10 border border-[#D4AF37] bg-white/95 backdrop-blur-xs text-[#121212] text-[8px] sm:text-[9px] uppercase font-bold px-2 py-0.5 tracking-wider rounded-md shadow-2xs">
@@ -58,7 +58,7 @@ export function ProductCard({ product, onQuickAdd, onQuickView }: ProductCardPro
             alt={product.title}
             fill
             unoptimized
-            className={`object-cover object-center transition-all duration-700 ease-out ${hoverImage ? 'group-hover:opacity-0' : 'group-hover:scale-108'}`}
+            className={`object-cover object-center transition-all duration-700 ease-out ${hoverImage ? 'group-hover:opacity-0' : 'group-hover:scale-105'}`}
           />
           {hoverImage && (
             <Image
@@ -66,7 +66,7 @@ export function ProductCard({ product, onQuickAdd, onQuickView }: ProductCardPro
               alt={`${product.title} alternative view`}
               fill
               unoptimized
-              className="object-cover object-center absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-700 ease-out group-hover:scale-108"
+              className="object-cover object-center absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-700 ease-out group-hover:scale-105"
             />
           )}
         </Link>
@@ -127,7 +127,7 @@ export function ProductCard({ product, onQuickAdd, onQuickView }: ProductCardPro
           </div>
         </div>
 
-        {/* Clean, un-obscured Add to Cart button below details for Mobile & Desktop */}
+        {/* Clean Add to Cart button */}
         {onQuickAdd && (
           <button
             onClick={(e) => {
