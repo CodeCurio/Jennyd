@@ -205,7 +205,21 @@ select.goog-te-combo:focus {
   animation: marquee 30s linear infinite;
 }
 
-.animate-marquee:hover {
+.animate-marquee-slow {
+  display: flex;
+  width: max-content;
+  animation: marquee 90s linear infinite;
+}
+
+.animate-marquee-medium {
+  display: flex;
+  width: max-content;
+  animation: marquee 75s linear infinite;
+}
+
+.animate-marquee:hover,
+.animate-marquee-slow:hover,
+.animate-marquee-medium:hover {
   animation-play-state: paused;
 }
 

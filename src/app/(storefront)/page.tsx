@@ -503,8 +503,8 @@ export default function Home() {
           <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-l from-white via-white/80 to-transparent z-10 pointer-events-none" />
 
           <div className="w-full overflow-x-auto no-scrollbar">
-            <div className="animate-marquee flex items-center gap-8 sm:gap-12">
-              {[...Array(4)].map((_, listIdx) => (
+            <div className="animate-marquee-medium flex items-center gap-8 sm:gap-12">
+              {[...Array(2)].map((_, listIdx) => (
                 <div key={listIdx} className="flex items-center gap-8 sm:gap-12 shrink-0">
                   {displayNotes.map((note, noteIdx) => (
                     <Link
@@ -844,8 +844,8 @@ export default function Home() {
           <div className="absolute right-0 top-0 bottom-0 w-20 sm:w-36 bg-gradient-to-l from-[#FAF8F5] via-[#FAF8F5]/80 to-transparent z-10 pointer-events-none" />
 
           <div className="w-full overflow-x-auto no-scrollbar">
-            <div className="animate-marquee flex items-center gap-8 sm:gap-12">
-              {[...Array(3)].map((_, listIdx) => (
+            <div className="animate-marquee-slow flex items-center gap-8 sm:gap-12">
+              {[...Array(2)].map((_, listIdx) => (
                 <div key={listIdx} className="flex items-center gap-8 sm:gap-12 shrink-0">
                   {DELIVERY_PARTNERS.map((partner, idx) => (
                     <div
