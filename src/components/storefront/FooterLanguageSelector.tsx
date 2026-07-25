@@ -47,10 +47,10 @@ export function FooterLanguageSelector() {
   return (
     <button
       onClick={handleClick}
-      className="flex items-center gap-2 text-xs text-secondary-foreground hover:text-[#D4AF37] hover:bg-[#D4AF37]/5 transition-colors cursor-pointer border border-neutral-350/50 rounded-full px-3.5 py-1.5 hover:border-[#D4AF37]/35 shadow-2xs"
+      className="flex items-center gap-2 text-xs text-neutral-300 hover:text-[#D4AF37] bg-[#161616] hover:bg-[#222222] transition-all cursor-pointer border border-neutral-700/80 rounded-full px-3.5 py-1.5 hover:border-[#D4AF37]/50 shadow-sm"
     >
       <Globe className="w-3.5 h-3.5 text-[#D4AF37]" />
-      <span className="font-light">Language: <span className="font-medium text-foreground">{langName}</span></span>
+      <span className="font-normal text-neutral-400">Language: <span className="font-semibold text-white">{langName}</span></span>
     </button>
   );
 }
@@ -68,10 +68,10 @@ export function FooterCurrencySelector() {
   return (
     <button
       onClick={handleClick}
-      className="flex items-center gap-2 text-xs text-secondary-foreground hover:text-[#D4AF37] hover:bg-[#D4AF37]/5 transition-colors cursor-pointer border border-neutral-350/50 rounded-full px-3.5 py-1.5 hover:border-[#D4AF37]/35 shadow-2xs animate-fade-in"
+      className="flex items-center gap-2 text-xs text-neutral-300 hover:text-[#D4AF37] bg-[#161616] hover:bg-[#222222] transition-all cursor-pointer border border-neutral-700/80 rounded-full px-3.5 py-1.5 hover:border-[#D4AF37]/50 shadow-sm"
     >
       <Coins className="w-3.5 h-3.5 text-[#D4AF37]" />
-      <span className="font-light">Currency: <span className="font-medium text-foreground">{activeCurrency.code} ({activeCurrency.symbol.trim()})</span></span>
+      <span className="font-normal text-neutral-400">Currency: <span className="font-semibold text-white">{activeCurrency.code} ({activeCurrency.symbol.trim()})</span></span>
     </button>
   );
 }

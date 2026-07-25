@@ -118,11 +118,11 @@ export function Header() {
                 className="hover:underline underline-offset-2"
               >
                 {settings.announcement_bar_text ||
-                  `Worldwide Shipping | Cash on Delivery (COD) Available`}
+                  `Worldwide Shipping | Express Delivery Available`}
               </Link>
             ) : (
               settings?.announcement_bar_text ||
-              `Worldwide Shipping | Cash on Delivery (COD) Available`
+              `Worldwide Shipping | Express Delivery Available`
             )}
           </p>
         </div>
