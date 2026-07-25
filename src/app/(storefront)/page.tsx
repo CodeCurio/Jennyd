@@ -526,19 +526,19 @@ export default function Home() {
       </section>
 
       {/* ── 4. Shop by Notes (Infinite Auto-Scrolling Marquee) ── */}
-      <section className="py-12 sm:py-16 bg-white border-y border-[#EAE7E1] overflow-hidden w-full">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 text-center mb-8">
+      <section className="py-7 sm:py-16 bg-white border-y border-[#EAE7E1] overflow-hidden w-full">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 text-center mb-3 sm:mb-8">
           <span className="text-[#D4AF37] uppercase tracking-[0.3em] text-[10px] sm:text-xs font-bold font-sans block mb-1">
             Olfactory Accords
           </span>
           <h2 className="text-2xl sm:text-3xl font-serif text-[#121212]">
             Shop by Notes
           </h2>
-          <div className="w-12 h-[2px] bg-[#D4AF37] mx-auto mt-2" />
+          <div className="w-12 h-[2px] bg-[#D4AF37] mx-auto mt-1.5" />
         </div>
 
         {/* Mobile View: High Density 5-Note Scroll Row (< md) */}
-        <div className="md:hidden w-full overflow-hidden py-2 px-3">
+        <div className="md:hidden w-full overflow-hidden py-1 px-3">
           <div className="flex overflow-x-auto no-scrollbar gap-3.5 pb-2 pt-1 scroll-smooth">
             {displayNotes.map((note) => (
               <Link
@@ -793,37 +793,51 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── 8. Artisanal Heritage Promo Banner ── */}
-      <section className="py-6 max-w-[1440px] mx-auto w-full px-4 sm:px-6 lg:px-8">
-        <div className="relative w-full bg-[#121212] text-white border border-[#EAE7E1] overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-12 items-center">
+      {/* ── 8. Artisanal Heritage Promo Banner (100% Mobile Optimized) ── */}
+      <section className="py-6 max-w-[1440px] mx-auto w-full px-3.5 sm:px-6 lg:px-8">
+        <div className="relative w-full bg-[#121212] text-white border border-[#EAE7E1] rounded-2xl overflow-hidden shadow-lg">
+          {/* Mobile Background Image & Overlay (< lg) */}
+          <div className="lg:hidden absolute inset-0 z-0">
+            <Image
+              src="https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?q=80&w=1600"
+              alt="Artisanal Attars"
+              fill
+              unoptimized
+              className="object-cover opacity-30 brightness-75"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#121212] via-[#121212]/85 to-[#121212]/60" />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 items-center relative z-10">
             
             {/* Promo Content */}
-            <div className="lg:col-span-7 p-8 sm:p-12 md:p-16 relative z-10">
-              <span className="bg-[#D4AF37] text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 mb-6 inline-block">
+            <div className="lg:col-span-7 p-6 sm:p-10 md:p-14 space-y-4">
+              <span className="bg-[#D4AF37] text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-md inline-block shadow-2xs">
                 Special Heritage Offer
               </span>
-              <h2 className="text-2xl sm:text-3xl md:text-5xl font-serif mb-4 leading-tight">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-serif text-white leading-tight">
                 Buy 2 Get 1 Free on all Signature Attars
               </h2>
-              <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed mb-8 max-w-lg font-sans">
+              <p className="text-neutral-300 text-xs sm:text-sm leading-relaxed max-w-lg font-sans">
                 Experience the rich heritage of Indian perfumery. Pure, hand-blended perfume oils crafted without alcohol for lasting projection.
               </p>
-              <Link href="/products?category=attar">
-                <Button className="bg-[#D4AF37] text-white hover:bg-white hover:text-black rounded-none px-8 py-4 uppercase tracking-widest text-xs font-bold transition-colors">
-                  Shop Attar Collection
-                </Button>
-              </Link>
+              <div className="pt-2">
+                <Link href="/products?category=attar" className="inline-block w-full sm:w-auto">
+                  <Button className="w-full sm:w-auto bg-[#D4AF37] text-white hover:bg-white hover:text-black rounded-xl px-6 py-3.5 uppercase tracking-wider text-xs font-bold transition-all shadow-md">
+                    Shop Attar Collection →
+                  </Button>
+                </Link>
+              </div>
             </div>
 
-            {/* Visual Image */}
-            <div className="lg:col-span-5 relative aspect-square lg:aspect-auto lg:h-full min-h-[300px]">
+            {/* Desktop Visual Image (>= lg) */}
+            <div className="hidden lg:block lg:col-span-5 relative lg:h-full min-h-[340px]">
               <Image
                 src="https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?q=80&w=1600"
                 alt="Artisanal Attars"
                 fill
                 unoptimized
-                className="object-cover opacity-80"
+                className="object-cover opacity-90"
               />
             </div>
 

@@ -10,7 +10,7 @@ import { useCart } from "@/lib/store/CartContext";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/store/AuthContext";
 import { SearchModal } from "./SearchModal";
-import { useCurrency } from "@/lib/store/CurrencyContext";
+import { useCurrency, SUPPORTED_CURRENCIES } from "@/lib/store/CurrencyContext";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -32,7 +32,8 @@ export function Header() {
   const [settings, setSettings] = useState<any>(null);
   const [currentAnnIndex, setCurrentAnnIndex] = useState(0);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const { formatPrice } = useCurrency();
+  const [showPicker, setShowPicker] = useState(false);
+  const { formatPrice, currency, setCurrency } = useCurrency();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -297,51 +298,85 @@ export function Header() {
             <Menu className="w-5 h-5" />
           </button>
 
-          {/* Center: Perfectly Centered Logo */}
+          {/* Center: Exactly Centered Logo */}
           <Link 
             href="/" 
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-0 flex items-center justify-center pointer-events-auto"
           >
-            <div className="relative w-[118px] min-[360px]:w-[132px] sm:w-[150px] h-[42px] shrink-0">
+            <div className="relative w-[120px] min-[360px]:w-[130px] sm:w-[155px] h-[44px] shrink-0">
               <Image
                 src={settings?.logo_url || "/logo.png"}
                 alt={settings?.site_name || "Jennyd Scents"}
                 fill
-                className="object-contain object-center drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)] contrast-125 brightness-90"
+                className="object-contain object-center drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)] contrast-125 brightness-90"
                 priority
               />
             </div>
           </Link>
 
-          {/* Right: Action Icons */}
-          <div className="flex items-center gap-0.5 shrink-0 z-10">
-            <button
-              onClick={() => window.showLanguageSelector?.()}
-              className="w-8 h-8 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors cursor-pointer"
-              title="Select Preferences"
-              aria-label="Select Preferences"
-            >
-              <Globe className="w-4.5 h-4.5" />
+            {/* Right: Action Icons (Search, Cart, Currency & Language) */}
+            <div className="flex items-center gap-4 shrink-0 z-10 relative pr-2">
+            {/* Search */}
+              <button
+                onClick={() => setIsSearchOpen(true)}
+                className="w-8 h-8 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors cursor-pointer"
+                aria-label="Search"
+              >
+                <Search className="w-4 h-4" />
             </button>
-            <button
-              onClick={() => setIsSearchOpen(true)}
-              className="w-8 h-8 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors cursor-pointer"
-              aria-label="Search"
-            >
-              <Search className="w-4.5 h-4.5" />
-            </button>
-            <button
-              className="w-8 h-8 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors relative cursor-pointer"
-              onClick={() => setIsDrawerOpen(true)}
-              aria-label="Shopping Cart"
-            >
-              <ShoppingBag className="w-4.5 h-4.5" />
+            {/* Cart */}
+              <button
+                className="w-8 h-8 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors relative cursor-pointer"
+                onClick={() => setIsDrawerOpen(true)}
+                aria-label="Shopping Cart"
+              >
+                <ShoppingBag className="w-4 h-4" />
               {itemCount > 0 && (
-                <span className="absolute top-0 right-0 bg-[#D4AF37] text-white text-[8px] font-bold min-w-[14px] h-[14px] rounded-full flex items-center justify-center px-0.5 leading-none font-mono">
+                <span className="absolute top-0.5 right-0.5 bg-[#D4AF37] text-white text-[8px] font-bold min-w-[15px] h-[15px] rounded-full flex items-center justify-center px-0.5 leading-none font-mono">
                   {itemCount}
                 </span>
               )}
             </button>
+              {/* Currency & Language Picker */}
+              <button
+                onClick={() => setShowPicker(prev => !prev)}
+                className="w-8 h-8 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors cursor-pointer"
+                aria-label="Currency & Language"
+              >
+                <Globe className="w-4 h-4" />
+            </button>
+            {/* Popover Panel */}
+            {showPicker && (
+              <div className="absolute right-0 top-full mt-2 w-56 bg-white shadow-lg rounded-md p-3 z-20 border border-gray-200">
+                {/* Language */}
+                <div className="mb-2">
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Language</label>
+                  <select
+                    className="w-full text-sm border border-gray-300 rounded-md p-1"
+                    onChange={() => window.showLanguageSelector?.()}
+                  >
+                    <option>English</option>
+                    <option>हिन्दी</option>
+                    <option>العربية</option>
+                  </select>
+                </div>
+                {/* Currency */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Currency</label>
+                  <select
+                    value={currency}
+                    onChange={(e) => setCurrency(e.target.value)}
+                    className="w-full text-sm border border-gray-300 rounded-md p-1"
+                  >
+                    {SUPPORTED_CURRENCIES.map((c) => (
+                      <option key={c.code} value={c.code}>
+                        {c.code} – {c.symbol}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -398,23 +433,36 @@ export function Header() {
                   </div>
                 </div>
 
-                <div className="p-5 border-t border-gray-100 bg-gray-50">
+                <div className="p-5 border-t border-gray-100 bg-gray-50 flex flex-col gap-4">
                   <Link
                     href={user ? "/account" : "/account/login"}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center gap-3 text-sm font-medium uppercase tracking-widest text-gray-700 hover:text-[#D4AF37] transition-colors"
+                    className="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-gray-700 hover:text-[#D4AF37] transition-colors"
                   >
                     {user && profile?.full_name ? (
                       <div className="w-8 h-8 rounded-full bg-[#D4AF37] flex items-center justify-center text-white text-xs font-bold shrink-0">
                         {profile.full_name[0].toUpperCase()}
                       </div>
                     ) : (
-                      <div className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center shrink-0">
-                        <User className="w-4 h-4" />
+                      <div className="w-8 h-8 rounded-full border border-gray-200 bg-white flex items-center justify-center shrink-0">
+                        <User className="w-4 h-4 text-gray-600" />
                       </div>
                     )}
-                    {user ? profile?.full_name?.split(" ")[0] || "My Account" : "Sign In"}
+                    {user ? profile?.full_name?.split(" ")[0] || "My Account" : "Sign In / Register"}
                   </Link>
+
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      window.showLanguageSelector?.();
+                    }}
+                    className="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-gray-700 hover:text-[#D4AF37] transition-colors pt-3 border-t border-gray-200/60 cursor-pointer"
+                  >
+                    <div className="w-8 h-8 rounded-full border border-gray-200 bg-white flex items-center justify-center shrink-0">
+                      <Globe className="w-4 h-4 text-[#D4AF37]" />
+                    </div>
+                    <span>Currency & Region</span>
+                  </button>
                 </div>
               </motion.div>
             </>
