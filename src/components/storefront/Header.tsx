@@ -144,7 +144,7 @@ export function Header() {
                   src={settings?.logo_url || "/logo.png"}
                   alt={settings?.site_name || "Jennyd"}
                   fill
-                  className="object-contain object-left"
+                  className="object-contain object-left drop-shadow-[0_1px_2px_rgba(0,0,0,0.18)] contrast-125 brightness-90"
                   priority
                 />
               </div>
@@ -287,47 +287,57 @@ export function Header() {
         </div>
 
         {/* ── Mobile Layout ── */}
-        <div className="flex md:hidden items-center justify-between px-4 h-16 border-b border-gray-100">
+        <div className="flex md:hidden items-center justify-between px-3 sm:px-4 h-16 border-b border-gray-100 relative">
+          {/* Mobile Menu Trigger */}
           <button
-            className="p-2 -ml-2 text-gray-700"
+            className="p-2 -ml-1 text-gray-800 shrink-0 cursor-pointer"
             onClick={() => setIsMobileMenuOpen(true)}
+            aria-label="Open Navigation Menu"
           >
             <Menu className="w-6 h-6" />
           </button>
 
-          <Link href="/" className="absolute left-1/2 -translate-x-1/2">
-            <div className="relative w-[130px] h-[44px]">
+          {/* Centered Logo with Collision Protection */}
+          <Link 
+            href="/" 
+            className="flex-1 flex justify-center items-center px-1 min-w-0 overflow-hidden"
+          >
+            <div className="relative w-[110px] min-[360px]:w-[125px] sm:w-[140px] h-[40px] shrink-0">
               <Image
                 src={settings?.logo_url || "/logo.png"}
-                alt={settings?.site_name || "Jennyd"}
+                alt={settings?.site_name || "Jennyd Scents"}
                 fill
-                className="object-contain"
+                className="object-contain object-center drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)] contrast-125 brightness-90"
                 priority
               />
             </div>
           </Link>
 
-          <div className="flex items-center gap-1">
+          {/* Right Action Icons (Compact & Strictly Bounded) */}
+          <div className="flex items-center gap-0.5 shrink-0">
             <button
               onClick={() => window.showLanguageSelector?.()}
-              className="w-9 h-9 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors cursor-pointer"
+              className="w-8.5 h-8.5 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors cursor-pointer"
               title="Select Preferences"
+              aria-label="Select Preferences"
             >
-              <Globe className="w-5 h-5" />
+              <Globe className="w-4.5 h-4.5" />
             </button>
             <button
               onClick={() => setIsSearchOpen(true)}
-              className="w-9 h-9 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors cursor-pointer"
+              className="w-8.5 h-8.5 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors cursor-pointer"
+              aria-label="Search"
             >
-              <Search className="w-5 h-5" />
+              <Search className="w-4.5 h-4.5" />
             </button>
             <button
-              className="w-9 h-9 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors relative"
+              className="w-8.5 h-8.5 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors relative cursor-pointer"
               onClick={() => setIsDrawerOpen(true)}
+              aria-label="Shopping Cart"
             >
-              <ShoppingBag className="w-5 h-5" />
+              <ShoppingBag className="w-4.5 h-4.5" />
               {itemCount > 0 && (
-                <span className="absolute top-1 right-1 bg-[#D4AF37] text-white text-[9px] font-bold min-w-[15px] h-[15px] rounded-full flex items-center justify-center px-0.5 leading-none">
+                <span className="absolute top-0.5 right-0.5 bg-[#D4AF37] text-white text-[8px] font-bold min-w-[14px] h-[14px] rounded-full flex items-center justify-center px-0.5 leading-none font-mono">
                   {itemCount}
                 </span>
               )}

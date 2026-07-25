@@ -437,9 +437,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── 3. Featured Collections (Editorial Portrait Cards) ── */}
-      <section className="py-16 md:py-24 max-w-[1440px] mx-auto w-full px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-12 md:mb-16 flex flex-col gap-2">
+      {/* ── 3. Featured Collections (Touch-Swipeable Carousel on Mobile) ── */}
+      <section className="py-12 md:py-24 max-w-[1440px] mx-auto w-full px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-2xl mx-auto mb-8 md:mb-16 flex flex-col gap-2">
           <span className="text-[#D4AF37] uppercase tracking-[0.3em] text-[10px] sm:text-xs font-bold font-sans">
             Explore Collections
           </span>
@@ -449,15 +449,56 @@ export default function Home() {
           <div className="w-12 h-[2px] bg-[#D4AF37] mx-auto mt-1" />
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
+        {/* Mobile View: Sleek Horizontal Swipeable Touch Carousel (< md) */}
+        <div className="md:hidden relative w-full overflow-hidden">
+          <div className="flex overflow-x-auto no-scrollbar gap-3.5 pb-3 pt-1 snap-x snap-mandatory scroll-smooth px-1">
+            {CATEGORY_TILES.map((cat) => (
+              <Link
+                key={cat.name}
+                href={cat.link}
+                className="group flex flex-col items-center cursor-pointer shrink-0 w-[140px] snap-start"
+              >
+                <div className="relative w-full aspect-[3/4] bg-white border border-[#EAE7E1] rounded-2xl overflow-hidden mb-2.5 shadow-2xs group-active:scale-98 transition-all">
+                  <Image
+                    src={cat.image}
+                    alt={cat.name}
+                    fill
+                    unoptimized
+                    className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-2.5">
+                    <span className="text-white text-[9px] uppercase font-bold tracking-wider flex items-center gap-0.5">
+                      Explore <ArrowRight className="w-2.5 h-2.5 text-[#D4AF37]" />
+                    </span>
+                  </div>
+                </div>
+
+                <h3 className="font-serif text-xs font-bold text-[#121212] uppercase tracking-wider text-center line-clamp-1">
+                  {cat.name}
+                </h3>
+                <span className="text-[9px] text-neutral-400 font-sans text-center mt-0.5 line-clamp-1">
+                  {cat.subtitle}
+                </span>
+              </Link>
+            ))}
+          </div>
+          {/* Subtle swipe hint */}
+          <div className="flex items-center justify-center gap-1.5 text-[10px] text-neutral-400 font-sans mt-2">
+            <span>Swipe to explore all collections</span>
+            <ArrowRight className="w-3 h-3 text-[#D4AF37] animate-pulse" />
+          </div>
+        </div>
+
+        {/* Desktop View: 6-Column Grid (>= md) */}
+        <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-6 gap-6">
           {CATEGORY_TILES.map((cat) => (
             <Link
               key={cat.name}
               href={cat.link}
               className="group flex flex-col items-center cursor-pointer"
             >
-              {/* Portrait Editorial Image Container (3:4 Ratio) */}
-              <div className="relative w-full aspect-[3/4] bg-white border border-[#EAE7E1] overflow-hidden mb-3.5 shadow-2xs group-hover:shadow-md transition-shadow duration-300">
+              {/* Portrait Editorial Image Container */}
+              <div className="relative w-full aspect-[3/4] bg-white border border-[#EAE7E1] rounded-2xl overflow-hidden mb-3.5 shadow-2xs group-hover:shadow-md transition-all duration-300">
                 <Image
                   src={cat.image}
                   alt={cat.name}
