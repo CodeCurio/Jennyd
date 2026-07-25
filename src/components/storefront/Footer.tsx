@@ -203,6 +203,11 @@ export async function Footer() {
                 Curated Gift Discovery Sets
               </Link>
             </li>
+            <li>
+              <Link href="/social-impact" className="hover:text-[#D4AF37] hover:translate-x-1 transition-all inline-block text-[#D4AF37] font-semibold">
+                Beauty with a Purpose ❤️
+              </Link>
+            </li>
           </ul>
         </div>
 

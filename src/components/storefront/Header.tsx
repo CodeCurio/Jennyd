@@ -18,6 +18,7 @@ const NAV_LINKS = [
   { href: "/products?category=men", label: "Men" },
   { href: "/products?category=women", label: "Women" },
   { href: "/products?category=unisex", label: "Unisex" },
+  { href: "/social-impact", label: "Beauty with a Purpose" },
   { href: "/about", label: "About Us" },
   { href: "/contact", label: "Contact Us" },
 ];
@@ -206,13 +207,13 @@ export function Header() {
         </div>
 
         {/* ── Row 2: Navigation Strip ── */}
-        <div className="hidden md:block border-b border-gray-100">
-          <div className="max-w-7xl mx-auto px-4 lg:px-6">
+        <div className="hidden md:block border-b border-gray-100 relative">
+          <div className="max-w-7xl mx-auto px-4 lg:px-6 relative">
             <nav className="flex items-center justify-center h-12">
               {NAV_LINKS.map((link, index) => (
                 <div
                   key={link.label}
-                  className="flex items-center group/nav relative"
+                  className="flex items-center group/nav"
                 >
                   {link.hasMegaMenu ? (
                     <>
@@ -223,8 +224,8 @@ export function Header() {
                         {link.label}
                       </Link>
 
-                      {/* Mega Menu */}
-                      <div className="absolute left-1/2 -translate-x-1/2 top-full w-[900px] bg-white shadow-2xl border-t-2 border-[#D4AF37] opacity-0 invisible group-hover/nav:opacity-100 group-hover/nav:visible transition-all duration-200 pointer-events-none group-hover/nav:pointer-events-auto z-50 rounded-b-lg">
+                      {/* Mega Menu Centered Relative to Container */}
+                      <div className="absolute left-1/2 -translate-x-1/2 top-full w-[850px] lg:w-[900px] bg-white shadow-2xl border-t-2 border-[#D4AF37] opacity-0 invisible group-hover/nav:opacity-100 group-hover/nav:visible transition-all duration-200 pointer-events-none group-hover/nav:pointer-events-auto z-50 rounded-b-lg">
                         <div className="grid grid-cols-4 gap-8 p-8">
                           <div className="flex flex-col gap-3">
                             <h3 className="text-xs font-bold uppercase tracking-widest text-[#D4AF37] mb-1 pb-2 border-b border-gray-100">By Category</h3>
