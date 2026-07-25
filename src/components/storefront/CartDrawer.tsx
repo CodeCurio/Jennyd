@@ -521,18 +521,18 @@ export function CartDrawer() {
                     onClick={() => setIsDrawerOpen(false)}
                     className="flex-1"
                   >
-                    <Button className="w-full h-11 text-xs uppercase tracking-widest font-bold bg-[#121212] hover:bg-[#D4AF37] text-white rounded-lg cursor-pointer transition-colors duration-300 flex items-center justify-center gap-1.5 shadow-md">
+                    <Button className="w-full min-h-[44px] py-2.5 px-3 text-[11px] sm:text-xs uppercase tracking-wider font-bold bg-[#121212] hover:bg-[#D4AF37] text-white rounded-lg cursor-pointer transition-colors duration-300 flex items-center justify-center gap-1 shadow-md whitespace-nowrap">
                       Proceed to Checkout →
                     </Button>
                   </Link>
                   <Link
                     href="/cart"
                     onClick={() => setIsDrawerOpen(false)}
-                    className="w-28"
+                    className="w-24 sm:w-28 shrink-0"
                   >
                     <Button
                       variant="outline"
-                      className="w-full h-11 text-[11px] rounded-lg uppercase tracking-widest font-bold border-[#121212] text-[#121212] hover:bg-[#121212] hover:text-white cursor-pointer transition-colors"
+                      className="w-full min-h-[44px] py-2.5 px-2 text-[10px] sm:text-[11px] rounded-lg uppercase tracking-wider font-bold border-[#121212] text-[#121212] hover:bg-[#121212] hover:text-white cursor-pointer transition-colors whitespace-nowrap"
                     >
                       View Cart
                     </Button>

@@ -461,7 +461,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                 <Button 
                   onClick={handleAddToCart}
                   disabled={!isSelectedSizeAvailable}
-                  className={`flex-1 rounded-none uppercase tracking-widest font-bold h-full text-xs transition-all duration-300 ${
+                  className={`flex-1 rounded-none uppercase tracking-wider font-bold min-h-[48px] py-3 text-xs sm:text-sm transition-all duration-300 whitespace-nowrap ${
                     !isSelectedSizeAvailable
                       ? "bg-neutral-100 text-neutral-400 border border-neutral-200 cursor-not-allowed"
                       : "bg-[#1A1A1A] text-white hover:bg-[#D4AF37] cursor-pointer shadow-xs"
@@ -475,7 +475,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
               <Button 
                 onClick={handleAddToCart}
                 disabled={!isSelectedSizeAvailable}
-                className={`w-full rounded-none uppercase tracking-widest font-bold h-13 text-xs transition-all duration-300 ${
+                className={`w-full rounded-none uppercase tracking-wider font-bold min-h-[48px] py-3 text-xs sm:text-sm transition-all duration-300 whitespace-nowrap ${
                   !isSelectedSizeAvailable
                     ? "bg-[#FAF9F6] text-neutral-300 border border-neutral-150 cursor-not-allowed"
                     : "bg-[#F5F5F0] hover:bg-[#1A1A1A] hover:text-white border border-neutral-300 text-[#1A1A1A] cursor-pointer"

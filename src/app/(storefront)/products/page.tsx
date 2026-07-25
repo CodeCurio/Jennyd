@@ -3,15 +3,12 @@ import { ProductListing } from "@/components/storefront/ProductListing";
 import Image from "next/image";
 import { Suspense } from "react";
 
-export const revalidate = 60; // Revalidate the page every 60 seconds
+export const revalidate = 60;
 
 export default async function ProductsPage() {
-  // Fetch active products from Supabase
   const { data: products, error } = await supabase
     .from("products")
     .select("*")
-    // If you only want active products:
-    // .eq("status", "active")
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -21,30 +18,34 @@ export default async function ProductsPage() {
   const initialProducts = products || [];
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col min-h-screen bg-[#FAF8F5] w-full max-w-full overflow-x-hidden font-sans">
       
       {/* Hero Section for Shop */}
-      <section className="relative w-full h-[40vh] md:h-[50vh] flex items-center justify-center overflow-hidden">
+      <section className="relative w-full h-[32vh] sm:h-[40vh] flex items-center justify-center overflow-hidden border-b border-[#EAE7E1]">
         <Image
           src="/assets/product image 3.jpeg"
-          alt="Shop Our Collection"
+          alt="Shop Our Luxury Collection"
           fill
-          className="object-cover"
+          className="object-cover object-center brightness-75"
           priority
         />
-        <div className="absolute inset-0 bg-black/40" />
-        <div className="relative z-10 text-center px-4">
-          <span className="text-accent uppercase tracking-[0.3em] text-xs font-bold mb-4 block">
-            Discover Your Signature
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
+        
+        <div className="relative z-10 text-center px-4 max-w-3xl mx-auto space-y-2">
+          <span className="text-[#D4AF37] uppercase tracking-[0.3em] text-xs sm:text-sm font-bold block font-sans">
+            Crafted Perfection
           </span>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif text-white">
-            Our Collection
+          <h1 className="text-3xl sm:text-5xl font-serif text-white tracking-wide">
+            Our Luxury Fragrances
           </h1>
+          <p className="text-neutral-300 text-xs sm:text-sm font-sans max-w-lg mx-auto leading-relaxed hidden sm:block">
+            Discover artisanal attars, long-lasting extraits de parfum, and opulent oriental blends formulated for extraordinary projection.
+          </p>
         </div>
       </section>
 
-      {/* Product Listing (Client Component with Filtering) */}
-      <Suspense fallback={<div className="h-96 flex items-center justify-center">Loading products...</div>}>
+      {/* Product Listing */}
+      <Suspense fallback={<div className="h-96 flex items-center justify-center text-xs uppercase tracking-widest text-neutral-400">Loading products...</div>}>
         <ProductListing initialProducts={initialProducts} />
       </Suspense>
       

@@ -498,8 +498,8 @@ export default function CheckoutPage() {
                   </div>
                 </div>
                 <div className="pt-6 flex justify-end w-full">
-                  <Button type="submit" className="w-full sm:w-auto bg-black text-white hover:bg-gray-800 text-xs font-bold uppercase tracking-widest py-4 px-8 rounded-none flex items-center justify-center gap-1.5">
-                    Continue to Shipping & Payment <ArrowRight className="w-4 h-4 shrink-0" />
+                  <Button type="submit" className="w-full sm:w-auto bg-black text-white hover:bg-gray-800 text-xs sm:text-sm font-bold uppercase tracking-wider py-3.5 px-6 rounded-none flex items-center justify-center gap-1.5 leading-snug">
+                    <span>Continue to Shipping & Payment</span> <ArrowRight className="w-4 h-4 shrink-0" />
                   </Button>
                 </div>
               </form>
@@ -639,8 +639,8 @@ export default function CheckoutPage() {
                   >
                     ← Back
                   </button>
-                  <Button type="submit" className="w-full sm:w-auto bg-black text-white hover:bg-gray-800 text-xs font-bold uppercase tracking-widest py-4 px-8 rounded-none flex items-center justify-center gap-1.5">
-                    Continue to Review <ArrowRight className="w-4 h-4 shrink-0" />
+                  <Button type="submit" className="w-full sm:w-auto bg-black text-white hover:bg-gray-800 text-xs sm:text-sm font-bold uppercase tracking-wider py-3.5 px-6 rounded-none flex items-center justify-center gap-1.5 leading-snug">
+                    <span>Continue to Review</span> <ArrowRight className="w-4 h-4 shrink-0" />
                   </Button>
                 </div>
               </form>
@@ -697,14 +697,14 @@ export default function CheckoutPage() {
                     type="button"
                     disabled={isSubmitting}
                     onClick={() => setActiveStep("payment")}
-                    className="w-full sm:w-auto py-3.5 px-6 border border-gray-255 hover:bg-gray-50 text-xs font-bold uppercase tracking-widest text-gray-600 transition-all cursor-pointer rounded-none disabled:opacity-50 text-center"
+                    className="w-full sm:w-auto py-3.5 px-6 border border-gray-255 hover:bg-gray-50 text-xs font-bold uppercase tracking-wider text-gray-600 transition-all cursor-pointer rounded-none disabled:opacity-50 text-center"
                   >
                     ← Back
                   </button>
                   <button
                     onClick={handlePlaceOrder}
                     disabled={isSubmitting || !agreeTerms}
-                    className="w-full sm:w-auto bg-black hover:bg-gray-800 text-white text-xs font-bold uppercase tracking-widest py-4 px-10 rounded-none flex items-center justify-center gap-2 cursor-pointer transition-all disabled:bg-gray-300 disabled:cursor-not-allowed text-center"
+                    className="w-full sm:w-auto bg-black hover:bg-gray-800 text-white text-xs sm:text-sm font-bold uppercase tracking-wider min-h-[48px] py-3.5 px-8 rounded-none flex items-center justify-center gap-2 cursor-pointer transition-all disabled:bg-gray-300 disabled:cursor-not-allowed text-center whitespace-nowrap"
                   >
                     {isSubmitting ? (
                       <>
@@ -712,7 +712,7 @@ export default function CheckoutPage() {
                       </>
                     ) : (
                       <>
-                        Place Order ({formatPrice(grandTotal)}) <ArrowRight className="w-4 h-4 shrink-0" />
+                        <span>Place Order ({formatPrice(grandTotal)})</span> <ArrowRight className="w-4 h-4 shrink-0" />
                       </>
                     )}
                   </button>
