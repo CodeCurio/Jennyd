@@ -875,50 +875,50 @@ export default function Home() {
       </section>
 
       {/* ── 10. Global Logistics & Delivery Partners (Infinite Auto-Scrolling Marquee) ── */}
-      <section className="py-14 sm:py-20 bg-white border-t border-[#EAE7E1] overflow-hidden w-full">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 text-center mb-8 sm:mb-10">
+      <section className="py-10 sm:py-20 bg-white border-t border-[#EAE7E1] overflow-hidden w-full">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 text-center mb-6 sm:mb-10">
           <span className="text-[#D4AF37] uppercase tracking-[0.3em] text-[10px] sm:text-xs font-bold font-sans block mb-1">
             Global Fulfillment & Express Shipping
           </span>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif text-[#121212]">
             Our Global Delivery Partners
           </h2>
-          <p className="text-neutral-500 text-xs sm:text-sm mt-2 max-w-xl mx-auto font-sans leading-relaxed">
+          <p className="text-neutral-500 text-xs sm:text-sm mt-1.5 max-w-xl mx-auto font-sans leading-relaxed">
             Fast, insured, and trackable express shipping to over 220+ countries worldwide through our trusted courier networks.
           </p>
-          <div className="w-12 h-[2px] bg-[#D4AF37] mx-auto mt-3" />
+          <div className="w-12 h-[2px] bg-[#D4AF37] mx-auto mt-2.5" />
         </div>
 
         {/* Auto-Scrolling Infinite Marquee */}
-        <div className="w-full relative overflow-hidden bg-[#FAF8F5] py-8 border-y border-[#EAE7E1]">
+        <div className="w-full relative overflow-hidden bg-[#FAF8F5] py-5 sm:py-8 border-y border-[#EAE7E1]">
           {/* Fade overlays for smooth edge transition */}
-          <div className="absolute left-0 top-0 bottom-0 w-20 sm:w-36 bg-gradient-to-r from-[#FAF8F5] via-[#FAF8F5]/80 to-transparent z-10 pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-0 w-20 sm:w-36 bg-gradient-to-l from-[#FAF8F5] via-[#FAF8F5]/80 to-transparent z-10 pointer-events-none" />
+          <div className="absolute left-0 top-0 bottom-0 w-12 sm:w-36 bg-gradient-to-r from-[#FAF8F5] via-[#FAF8F5]/80 to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-36 bg-gradient-to-l from-[#FAF8F5] via-[#FAF8F5]/80 to-transparent z-10 pointer-events-none" />
 
           <div className="w-full overflow-x-auto no-scrollbar">
-            <div className="animate-marquee-slow flex items-center gap-8 sm:gap-12">
-              {[...Array(2)].map((_, listIdx) => (
-                <div key={listIdx} className="flex items-center gap-8 sm:gap-12 shrink-0">
+            <div className="animate-marquee-medium flex items-center gap-4 sm:gap-10 md:gap-12">
+              {[...Array(3)].map((_, listIdx) => (
+                <div key={listIdx} className="flex items-center gap-4 sm:gap-10 md:gap-12 shrink-0">
                   {DELIVERY_PARTNERS.map((partner, idx) => (
                     <div
                       key={`${listIdx}-${idx}-${partner.short}`}
-                      className="flex flex-col items-center justify-center shrink-0 group cursor-pointer"
+                      className="flex flex-col items-center justify-center shrink-0 group cursor-pointer w-24 sm:w-36 md:w-44"
                     >
                       {/* Logo Card Badge */}
-                      <div className={`w-36 sm:w-44 h-16 sm:h-18 rounded-xl flex items-center justify-center p-4 transition-all duration-300 group-hover:scale-108 shadow-2xs group-hover:shadow-lg ${partner.color} border border-black/5`}>
+                      <div className={`w-24 sm:w-36 md:w-44 h-12 sm:h-16 md:h-18 rounded-lg sm:rounded-xl flex items-center justify-center p-2 sm:p-4 transition-all duration-300 group-hover:scale-105 shadow-2xs group-hover:shadow-lg ${partner.color} border border-black/5`}>
                         {partner.short === "FedEx" ? (
-                          <span className="text-xl sm:text-2xl tracking-tight font-extrabold font-sans">
+                          <span className="text-sm sm:text-xl md:text-2xl tracking-tight font-extrabold font-sans">
                             Fed<span className="text-[#FF6600]">Ex</span>
                           </span>
                         ) : (
-                          <span className="text-lg sm:text-xl tracking-tight font-extrabold text-center font-sans">
+                          <span className="text-xs sm:text-lg md:text-xl tracking-tight font-extrabold text-center font-sans line-clamp-1">
                             {partner.logoText}
                           </span>
                         )}
                       </div>
 
                       {/* Subtext description below badge */}
-                      <span className="text-[10px] text-neutral-500 font-medium font-sans mt-2 text-center group-hover:text-[#D4AF37] transition-colors">
+                      <span className="text-[9px] sm:text-[10px] text-neutral-500 font-medium font-sans mt-1 sm:mt-2 text-center group-hover:text-[#D4AF37] transition-colors truncate max-w-[90px] sm:max-w-none">
                         {partner.desc}
                       </span>
                     </div>
