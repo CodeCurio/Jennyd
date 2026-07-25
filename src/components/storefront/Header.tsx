@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { ShoppingBag, Search, Menu, X, User, Globe } from "lucide-react";
+import { ShoppingBag, Search, Menu, X, User, Globe, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -136,7 +136,7 @@ export function Header() {
       >
         {/* ── Row 1: Logo | Search | Icons ── */}
         <div className="border-b border-gray-100">
-          <div className="max-w-7xl mx-auto px-4 lg:px-6 h-[80px] hidden md:flex items-center gap-6 lg:gap-10">
+          <div className="max-w-7xl mx-auto px-4 lg:px-6 h-[80px] hidden md:flex items-center justify-between gap-6 lg:gap-10">
 
             {/* Logo */}
             <Link href="/" className="shrink-0 flex items-center">
@@ -165,7 +165,7 @@ export function Header() {
             </div>
 
             {/* Action Icons */}
-            <div className="flex items-center gap-1 shrink-0">
+            <div className="flex items-center gap-1 shrink-0 ml-auto">
               {/* Preferences */}
               <button
                 onClick={() => window.showLanguageSelector?.()}
@@ -288,95 +288,65 @@ export function Header() {
         </div>
 
         {/* ── Mobile Layout ── */}
-        <div className="flex md:hidden items-center justify-between px-3 h-16 border-b border-gray-100 relative w-full overflow-hidden">
-          {/* Left: Mobile Menu Trigger */}
-          <button
-            className="p-2 text-gray-800 shrink-0 cursor-pointer z-10"
-            onClick={() => setIsMobileMenuOpen(true)}
-            aria-label="Open Navigation Menu"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-
-          {/* Center: Exactly Centered Logo */}
-          <Link 
-            href="/" 
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-0 flex items-center justify-center pointer-events-auto"
-          >
-            <div className="relative w-[120px] min-[360px]:w-[130px] sm:w-[155px] h-[44px] shrink-0">
-              <Image
-                src={settings?.logo_url || "/logo.png"}
-                alt={settings?.site_name || "Jennyd Scents"}
-                fill
-                className="object-contain object-center drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)] contrast-125 brightness-90"
-                priority
-              />
-            </div>
-          </Link>
-
-            {/* Right: Action Icons (Search, Cart, Currency & Language) */}
-            <div className="flex items-center gap-4 shrink-0 z-10 relative pr-2">
-            {/* Search */}
-              <button
-                onClick={() => setIsSearchOpen(true)}
-                className="w-8 h-8 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors cursor-pointer"
-                aria-label="Search"
-              >
-                <Search className="w-4 h-4" />
+        <div className="flex md:hidden items-center justify-between px-3 sm:px-4 h-16 border-b border-gray-100 w-full bg-white relative">
+          {/* Left: Mobile Menu Trigger + Brand Logo */}
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              className="p-1.5 text-gray-800 hover:text-[#D4AF37] transition-colors cursor-pointer rounded-lg hover:bg-gray-50"
+              onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Open Navigation Menu"
+            >
+              <Menu className="w-5 h-5" />
             </button>
-            {/* Cart */}
-              <button
-                className="w-8 h-8 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors relative cursor-pointer"
-                onClick={() => setIsDrawerOpen(true)}
-                aria-label="Shopping Cart"
-              >
-                <ShoppingBag className="w-4 h-4" />
+
+            {/* Brand Logo - Left Aligned */}
+            <Link href="/" className="flex items-center">
+              <div className="relative w-[115px] min-[360px]:w-[130px] sm:w-[150px] h-[40px] shrink-0">
+                <Image
+                  src={settings?.logo_url || "/logo.png"}
+                  alt={settings?.site_name || "Jennyd Scents"}
+                  fill
+                  className="object-contain object-left drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)] contrast-125 brightness-95"
+                  priority
+                />
+              </div>
+            </Link>
+          </div>
+
+          {/* Right: Action Icons (Search, Preferences/Globe, Cart) */}
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+            {/* Search */}
+            <button
+              onClick={() => setIsSearchOpen(true)}
+              className="w-8 h-8 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors rounded-full hover:bg-gray-100 cursor-pointer"
+              aria-label="Search"
+            >
+              <Search className="w-[18px] h-[18px]" strokeWidth={1.8} />
+            </button>
+
+            {/* Language & Currency Preferences Modal Trigger */}
+            <button
+              onClick={() => window.showLanguageSelector?.()}
+              className="w-8 h-8 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors rounded-full hover:bg-gray-100 cursor-pointer"
+              aria-label="Currency & Language Preferences"
+              title="Preferences"
+            >
+              <Globe className="w-[18px] h-[18px]" strokeWidth={1.8} />
+            </button>
+
+            {/* Cart Bag */}
+            <button
+              className="w-8 h-8 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors relative rounded-full hover:bg-gray-100 cursor-pointer"
+              onClick={() => setIsDrawerOpen(true)}
+              aria-label="Shopping Cart"
+            >
+              <ShoppingBag className="w-[18px] h-[18px]" strokeWidth={1.8} />
               {itemCount > 0 && (
-                <span className="absolute top-0.5 right-0.5 bg-[#D4AF37] text-white text-[8px] font-bold min-w-[15px] h-[15px] rounded-full flex items-center justify-center px-0.5 leading-none font-mono">
+                <span className="absolute -top-0.5 -right-0.5 bg-[#D4AF37] text-white text-[9px] font-bold min-w-[15px] h-[15px] rounded-full flex items-center justify-center px-0.5 leading-none font-mono shadow-sm">
                   {itemCount}
                 </span>
               )}
             </button>
-              {/* Currency & Language Picker */}
-              <button
-                onClick={() => setShowPicker(prev => !prev)}
-                className="w-8 h-8 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors cursor-pointer"
-                aria-label="Currency & Language"
-              >
-                <Globe className="w-4 h-4" />
-            </button>
-            {/* Popover Panel */}
-            {showPicker && (
-              <div className="absolute right-0 top-full mt-2 w-56 bg-white shadow-lg rounded-md p-3 z-20 border border-gray-200">
-                {/* Language */}
-                <div className="mb-2">
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Language</label>
-                  <select
-                    className="w-full text-sm border border-gray-300 rounded-md p-1"
-                    onChange={() => window.showLanguageSelector?.()}
-                  >
-                    <option>English</option>
-                    <option>हिन्दी</option>
-                    <option>العربية</option>
-                  </select>
-                </div>
-                {/* Currency */}
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Currency</label>
-                  <select
-                    value={currency}
-                    onChange={(e) => setCurrency(e.target.value)}
-                    className="w-full text-sm border border-gray-300 rounded-md p-1"
-                  >
-                    {SUPPORTED_CURRENCIES.map((c) => (
-                      <option key={c.code} value={c.code}>
-                        {c.code} – {c.symbol}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            )}
           </div>
         </div>
 
