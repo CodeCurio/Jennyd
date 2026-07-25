@@ -13,7 +13,7 @@ interface ButtonProps extends Omit<HTMLMotionProps<"button">, "children"> {
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "primary", size = "md", children, ...props }, ref) => {
     const baseStyles =
-      "relative overflow-hidden inline-flex items-center justify-center font-sans font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none";
+      "relative inline-flex items-center justify-center font-sans font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none text-center leading-tight cursor-pointer rounded-none";
 
     const variants = {
       primary: "bg-foreground text-background hover:bg-black",
@@ -23,28 +23,32 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     const sizes = {
-      sm: "h-9 px-4 text-xs tracking-wide uppercase",
-      md: "h-12 px-8 text-sm",
-      lg: "h-14 px-10 text-base",
+      sm: "min-h-[36px] py-2 px-3 sm:px-4 text-xs tracking-wider uppercase",
+      md: "min-h-[44px] py-2.5 px-4 sm:px-6 text-xs sm:text-sm tracking-wider uppercase",
+      lg: "min-h-[50px] py-3 px-6 sm:px-8 text-sm sm:text-base tracking-wider uppercase",
     };
 
     return (
       <motion.button
         ref={ref}
-        whileTap={{ scale: 0.97 }}
+        whileTap={{ scale: 0.98 }}
         className={cn(baseStyles, variants[variant], sizes[size], className)}
         {...props}
       >
-        {/* Shimmer effect for primary button */}
+        {/* Shimmer effect inside a clipped absolute container */}
         {variant === "primary" && (
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12"
-            initial={{ x: "-150%" }}
-            whileHover={{ x: "150%" }}
-            transition={{ duration: 0.6, ease: "easeInOut" }}
-          />
+          <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[inherit]">
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12"
+              initial={{ x: "-150%" }}
+              whileHover={{ x: "150%" }}
+              transition={{ duration: 0.6, ease: "easeInOut" }}
+            />
+          </div>
         )}
-        <span className="relative z-10">{children}</span>
+        <span className="relative z-10 flex items-center justify-center gap-2 text-center leading-snug w-full">
+          {children}
+        </span>
       </motion.button>
     );
   }
