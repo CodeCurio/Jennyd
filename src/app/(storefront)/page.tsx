@@ -537,55 +537,22 @@ export default function Home() {
           <div className="w-12 h-[2px] bg-[#D4AF37] mx-auto mt-1.5" />
         </div>
 
-        {/* Mobile View: High Density 5-Note Scroll Row (< md) */}
-        <div className="md:hidden w-full overflow-hidden py-1 px-3">
-          <div className="flex overflow-x-auto no-scrollbar gap-3.5 pb-2 pt-1 scroll-smooth">
-            {displayNotes.map((note) => (
-              <Link
-                key={`mobile-note-${note.id || note.name}`}
-                href={`/products?note=${encodeURIComponent(note.name.toLowerCase())}`}
-                className="flex flex-col items-center gap-1.5 group shrink-0 w-[68px] cursor-pointer"
-              >
-                <div className="relative w-16 h-16 rounded-full border-2 border-[#EAE7E1] p-0.5 bg-[#FAF8F5] group-active:scale-95 group-hover:border-[#D4AF37] transition-all duration-300 shadow-2xs flex items-center justify-center">
-                  <div className="relative w-full h-full rounded-full overflow-hidden">
-                    {note.image_url ? (
-                      <img
-                        src={note.image_url}
-                        alt={note.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-[#FAF8F5] flex items-center justify-center text-[#D4AF37] font-serif text-sm font-bold">
-                        {note.name[0]}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <span className="font-serif text-[11px] font-bold uppercase tracking-wider text-[#121212] group-hover:text-[#D4AF37] transition-colors text-center line-clamp-1">
-                  {note.name}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* Desktop View: Infinite Marquee Container (>= md) */}
-        <div className="hidden md:block w-full relative overflow-hidden py-4">
-          <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white via-white/80 to-transparent z-10 pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white via-white/80 to-transparent z-10 pointer-events-none" />
+        {/* Infinite Auto-Scrolling Marquee Container (Mobile + Desktop) */}
+        <div className="w-full relative overflow-hidden py-2 sm:py-4">
+          <div className="absolute left-0 top-0 bottom-0 w-12 sm:w-32 bg-gradient-to-r from-white via-white/80 to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-32 bg-gradient-to-l from-white via-white/80 to-transparent z-10 pointer-events-none" />
 
           <div className="w-full overflow-x-auto no-scrollbar">
-            <div className="animate-marquee-medium flex items-center gap-12">
-              {[...Array(2)].map((_, listIdx) => (
-                <div key={listIdx} className="flex items-center gap-12 shrink-0">
+            <div className="animate-marquee-medium flex items-center gap-6 sm:gap-12">
+              {[...Array(3)].map((_, listIdx) => (
+                <div key={listIdx} className="flex items-center gap-6 sm:gap-12 shrink-0">
                   {displayNotes.map((note, noteIdx) => (
                     <Link
                       key={`${listIdx}-${noteIdx}-${note.id || note.name}`}
                       href={`/products?note=${encodeURIComponent(note.name.toLowerCase())}`}
-                      className="flex flex-col items-center gap-3 group shrink-0 cursor-pointer"
+                      className="flex flex-col items-center gap-2 sm:gap-3 group shrink-0 cursor-pointer w-[72px] sm:w-auto"
                     >
-                      <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-full border-2 border-[#EAE7E1] p-1 bg-[#FAF8F5] group-hover:border-[#D4AF37] group-hover:scale-108 transition-all duration-300 shadow-2xs group-hover:shadow-md flex items-center justify-center">
+                      <div className="relative w-16 h-16 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full border-2 border-[#EAE7E1] p-0.5 sm:p-1 bg-[#FAF8F5] group-hover:border-[#D4AF37] group-hover:scale-108 transition-all duration-300 shadow-2xs group-hover:shadow-md flex items-center justify-center">
                         <div className="relative w-full h-full rounded-full overflow-hidden">
                           {note.image_url ? (
                             <img
@@ -594,14 +561,14 @@ export default function Home() {
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                             />
                           ) : (
-                            <div className="w-full h-full bg-[#FAF8F5] flex items-center justify-center text-[#D4AF37] font-serif text-base font-bold">
+                            <div className="w-full h-full bg-[#FAF8F5] flex items-center justify-center text-[#D4AF37] font-serif text-sm sm:text-base font-bold">
                               {note.name[0]}
                             </div>
                           )}
                         </div>
                       </div>
 
-                      <span className="font-serif text-sm font-bold uppercase tracking-wider text-[#121212] group-hover:text-[#D4AF37] transition-colors text-center">
+                      <span className="font-serif text-[11px] sm:text-sm font-bold uppercase tracking-wider text-[#121212] group-hover:text-[#D4AF37] transition-colors text-center line-clamp-1">
                         {note.name}
                       </span>
                     </Link>

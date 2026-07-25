@@ -88,7 +88,7 @@ export function Header() {
             color: settings?.announcement_bar_text_color || "#ffffff",
           }}
         >
-          <p className="text-[11px] tracking-[0.18em] uppercase font-medium">
+          <p className="text-[10px] sm:text-[11px] tracking-[0.12em] sm:tracking-[0.18em] uppercase font-medium max-w-full px-4 truncate text-center">
             {Array.isArray(settings?.announcements) &&
             settings.announcements.length > 1 ? (
               <AnimatePresence mode="wait">
@@ -288,61 +288,61 @@ export function Header() {
         </div>
 
         {/* ── Mobile Layout ── */}
-        <div className="flex md:hidden items-center justify-between px-3 sm:px-4 h-16 border-b border-gray-100 w-full bg-white relative">
+        <div className="flex md:hidden items-center justify-between px-3 sm:px-4 h-[52px] border-b border-gray-100 w-full bg-white relative max-w-full overflow-hidden">
           {/* Left: Mobile Menu Trigger + Brand Logo */}
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 shrink-0">
             <button
-              className="p-1.5 text-gray-800 hover:text-[#D4AF37] transition-colors cursor-pointer rounded-lg hover:bg-gray-50"
+              className="w-7 h-7 flex items-center justify-center text-gray-800 hover:text-[#D4AF37] transition-colors cursor-pointer rounded-lg hover:bg-gray-50"
               onClick={() => setIsMobileMenuOpen(true)}
               aria-label="Open Navigation Menu"
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="w-4 h-4" strokeWidth={1.5} />
             </button>
 
-            {/* Brand Logo - Left Aligned */}
+            {/* Brand Logo - Fine & Crisp */}
             <Link href="/" className="flex items-center">
-              <div className="relative w-[115px] min-[360px]:w-[130px] sm:w-[150px] h-[40px] shrink-0">
+              <div className="relative w-[82px] min-[360px]:w-[95px] sm:w-[120px] h-[30px] shrink-0">
                 <Image
                   src={settings?.logo_url || "/logo.png"}
                   alt={settings?.site_name || "Jennyd Scents"}
                   fill
-                  className="object-contain object-left drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)] contrast-125 brightness-95"
+                  className="object-contain object-left drop-shadow-[0_1px_2px_rgba(0,0,0,0.12)] contrast-125 brightness-95"
                   priority
                 />
               </div>
             </Link>
           </div>
 
-          {/* Right: Action Icons (Search, Preferences/Globe, Cart) */}
-          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+          {/* Right: Action Icons (Search, Preferences/Globe, Cart Bag) */}
+          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
             {/* Search */}
             <button
               onClick={() => setIsSearchOpen(true)}
-              className="w-8 h-8 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors rounded-full hover:bg-gray-100 cursor-pointer"
+              className="w-7 h-7 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors rounded-full hover:bg-gray-100 cursor-pointer"
               aria-label="Search"
             >
-              <Search className="w-[18px] h-[18px]" strokeWidth={1.8} />
+              <Search className="w-4 h-4" strokeWidth={1.5} />
             </button>
 
             {/* Language & Currency Preferences Modal Trigger */}
             <button
               onClick={() => window.showLanguageSelector?.()}
-              className="w-8 h-8 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors rounded-full hover:bg-gray-100 cursor-pointer"
+              className="w-7 h-7 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors rounded-full hover:bg-gray-100 cursor-pointer"
               aria-label="Currency & Language Preferences"
               title="Preferences"
             >
-              <Globe className="w-[18px] h-[18px]" strokeWidth={1.8} />
+              <Globe className="w-4 h-4" strokeWidth={1.5} />
             </button>
 
-            {/* Cart Bag */}
+            {/* Cart Bag Icon with Count Badge */}
             <button
-              className="w-8 h-8 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors relative rounded-full hover:bg-gray-100 cursor-pointer"
+              className="w-7 h-7 flex items-center justify-center text-gray-700 hover:text-[#D4AF37] transition-colors relative rounded-full hover:bg-gray-100 cursor-pointer"
               onClick={() => setIsDrawerOpen(true)}
               aria-label="Shopping Cart"
             >
-              <ShoppingBag className="w-[18px] h-[18px]" strokeWidth={1.8} />
+              <ShoppingBag className="w-4 h-4" strokeWidth={1.5} />
               {itemCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-[#D4AF37] text-white text-[9px] font-bold min-w-[15px] h-[15px] rounded-full flex items-center justify-center px-0.5 leading-none font-mono shadow-sm">
+                <span className="absolute -top-0.5 right-0 bg-[#D4AF37] text-white text-[8px] font-bold min-w-[13px] h-[13px] rounded-full flex items-center justify-center px-0.5 leading-none font-mono shadow-xs border border-white">
                   {itemCount}
                 </span>
               )}
