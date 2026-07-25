@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, RefreshCw, Sparkles, SlidersHorizontal, Check, ChevronRight } from "lucide-react";
+import { X, RefreshCw, Sparkles, SlidersHorizontal, Check } from "lucide-react";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { useCart } from "@/lib/store/CartContext";
 import { useToast } from "@/components/ui/Toast";
@@ -243,16 +243,16 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
   const hasActiveFilters = activeFilterCount > 0;
 
   return (
-    <div className="w-full max-w-[1536px] mx-auto px-4 sm:px-6 lg:px-8 py-8 font-sans overflow-x-hidden">
+    <div className="w-full max-w-[1536px] mx-auto px-3 sm:px-6 lg:px-8 py-6 font-sans overflow-x-hidden">
       
-      {/* ── 1. Contained Top Quick Category Chips Bar (No page overflow) ── */}
-      <div className="relative w-full max-w-full overflow-hidden mb-6">
+      {/* ── 1. Compact Category Chips Bar for Mobile & Desktop ── */}
+      <div className="relative w-full max-w-full overflow-hidden mb-4">
         {/* Soft edge gradients */}
-        <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[#FAF8F5] to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#FAF8F5] to-transparent z-10 pointer-events-none" />
+        <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-[#FAF8F5] to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-[#FAF8F5] to-transparent z-10 pointer-events-none" />
 
-        <div className="w-full overflow-x-auto no-scrollbar py-1.5 scroll-smooth">
-          <div className="flex items-center gap-2.5 w-max px-1">
+        <div className="w-full overflow-x-auto no-scrollbar py-1 scroll-smooth">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 w-max px-0.5">
             {QUICK_CATEGORIES.map((chip) => {
               const isSelected =
                 (chip.category === "All" && chip.note === "All" && !chip.sort && activeCategory === "All" && activeNote === "All" && sortOrder === "featured") ||
@@ -271,9 +271,9 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
                       setActiveNote(chip.note);
                     }
                   }}
-                  className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-xl transition-all duration-300 cursor-pointer border shrink-0 ${
+                  className={`px-3 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold uppercase tracking-wider rounded-lg sm:rounded-xl transition-all duration-300 cursor-pointer border shrink-0 ${
                     isSelected
-                      ? "bg-[#121212] text-[#D4AF37] border-[#121212] shadow-xs scale-102 font-serif"
+                      ? "bg-[#121212] text-[#D4AF37] border-[#121212] shadow-2xs font-serif"
                       : "bg-white text-neutral-600 border-[#EAE7E1] hover:border-[#D4AF37] hover:text-[#121212]"
                   }`}
                 >
@@ -285,95 +285,83 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
         </div>
       </div>
 
-      {/* ── 2. Integrated Filter Toolbar Row (Filter & Refine + Embedded Active Chips + Sort) ── */}
-      <div className="bg-white border border-[#EAE7E1] p-3.5 sm:p-4 rounded-2xl mb-8 shadow-2xs space-y-3">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+      {/* ── 2. Ultra-Compact Mobile & Desktop Filter Toolbar ── */}
+      <div className="bg-white border border-[#EAE7E1] p-2.5 sm:p-4 rounded-2xl mb-6 shadow-2xs space-y-2">
+        <div className="flex items-center justify-between gap-2">
           
-          {/* Left: Filter Trigger Button & Count */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setIsFilterPanelOpen(true)}
-              className="flex items-center gap-2 bg-[#121212] hover:bg-[#D4AF37] text-white text-xs font-bold uppercase tracking-widest px-4.5 py-2.5 rounded-xl transition-all duration-300 shadow-2xs cursor-pointer group"
-            >
-              <SlidersHorizontal className="w-4 h-4 text-[#D4AF37] group-hover:text-white transition-colors" />
-              <span>Filter & Refine</span>
-              {activeFilterCount > 0 && (
-                <span className="bg-[#D4AF37] text-white text-[10px] font-bold px-2 py-0.5 rounded-full font-mono">
-                  {activeFilterCount}
-                </span>
-              )}
-            </button>
+          {/* Left: Filter Trigger Button */}
+          <button
+            onClick={() => setIsFilterPanelOpen(true)}
+            className="flex items-center gap-1.5 bg-[#121212] hover:bg-[#D4AF37] text-white text-[11px] sm:text-xs font-bold uppercase tracking-wider px-3.5 py-2 rounded-xl transition-all duration-300 shadow-2xs cursor-pointer shrink-0"
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5 text-[#D4AF37]" />
+            <span>Filter</span>
+            {activeFilterCount > 0 && (
+              <span className="bg-[#D4AF37] text-white text-[9px] font-bold px-1.5 py-0.2 rounded-full font-mono">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
 
-            <span className="text-xs text-neutral-500 font-medium">
-              Showing <strong className="text-[#121212] font-mono">{filteredProducts.length}</strong> Perfumes
-            </span>
-          </div>
+          {/* Middle: Count Info */}
+          <span className="text-[11px] sm:text-xs text-neutral-500 font-medium font-mono hidden min-[360px]:inline">
+            <strong className="text-[#121212]">{filteredProducts.length}</strong> Perfumes
+          </span>
 
-          {/* Right: Sort Dropdown */}
-          <div className="flex items-center gap-2 self-end sm:self-auto">
-            <span className="text-xs font-bold uppercase tracking-wider text-neutral-400 hidden sm:inline">Sort:</span>
-            <select
-              value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value)}
-              className="text-xs font-bold uppercase tracking-wider border border-[#EAE7E1] bg-[#FAF8F5] text-[#121212] px-3.5 py-2 rounded-xl focus:outline-none focus:border-[#D4AF37] cursor-pointer shadow-2xs"
-            >
-              <option value="featured">Featured</option>
-              <option value="best-selling">Bestsellers</option>
-              <option value="newest">Newest Arrivals</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
-            </select>
-          </div>
+          {/* Right: Sort Selector */}
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+            className="text-[11px] sm:text-xs font-bold uppercase tracking-wider border border-[#EAE7E1] bg-[#FAF8F5] text-[#121212] px-2.5 sm:px-3.5 py-2 rounded-xl focus:outline-none focus:border-[#D4AF37] cursor-pointer shadow-2xs shrink-0"
+          >
+            <option value="featured">Sort: Featured</option>
+            <option value="best-selling">Bestsellers</option>
+            <option value="newest">Newest</option>
+            <option value="price-asc">Price: Low-High</option>
+            <option value="price-desc">Price: High-Low</option>
+          </select>
 
         </div>
 
-        {/* Embedded Active Filter Chips */}
+        {/* Embedded Active filter chips */}
         {hasActiveFilters && (
-          <div className="flex flex-wrap items-center gap-2 pt-2.5 border-t border-[#EAE7E1]">
-            <span className="text-[11px] text-neutral-400 font-bold uppercase tracking-wider">Active:</span>
+          <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-[#EAE7E1]">
+            <span className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Active:</span>
             {activeCategory !== "All" && (
-              <span className="inline-flex items-center gap-1.5 bg-[#FAF8F5] text-[#121212] text-[11px] font-bold px-2.5 py-1 rounded-lg border border-[#EAE7E1]">
-                Category: {activeCategory}
-                <button onClick={() => setActiveCategory("All")} className="hover:text-red-600 cursor-pointer"><X size={12} /></button>
+              <span className="inline-flex items-center gap-1 bg-[#FAF8F5] text-[#121212] text-[10px] font-bold px-2 py-0.5 rounded-lg border border-[#EAE7E1]">
+                Cat: {activeCategory}
+                <button onClick={() => setActiveCategory("All")} className="hover:text-red-600 cursor-pointer"><X size={11} /></button>
               </span>
             )}
             {activeNote !== "All" && (
-              <span className="inline-flex items-center gap-1.5 bg-[#FAF8F5] text-[#121212] text-[11px] font-bold px-2.5 py-1 rounded-lg border border-[#EAE7E1]">
+              <span className="inline-flex items-center gap-1 bg-[#FAF8F5] text-[#121212] text-[10px] font-bold px-2 py-0.5 rounded-lg border border-[#EAE7E1]">
                 Note: {activeNote}
-                <button onClick={() => setActiveNote("All")} className="hover:text-red-600 cursor-pointer"><X size={12} /></button>
+                <button onClick={() => setActiveNote("All")} className="hover:text-red-600 cursor-pointer"><X size={11} /></button>
               </span>
             )}
             {activeSize !== "All" && (
-              <span className="inline-flex items-center gap-1.5 bg-[#FAF8F5] text-[#121212] text-[11px] font-bold px-2.5 py-1 rounded-lg border border-[#EAE7E1]">
+              <span className="inline-flex items-center gap-1 bg-[#FAF8F5] text-[#121212] text-[10px] font-bold px-2 py-0.5 rounded-lg border border-[#EAE7E1]">
                 Size: {activeSize.toUpperCase()}
-                <button onClick={() => setActiveSize("All")} className="hover:text-red-600 cursor-pointer"><X size={12} /></button>
+                <button onClick={() => setActiveSize("All")} className="hover:text-red-600 cursor-pointer"><X size={11} /></button>
               </span>
             )}
             {(!!priceParam || priceMin > absoluteMinPrice || priceMax < absoluteMaxPrice) && (
-              <span className="inline-flex items-center gap-1.5 bg-[#FAF8F5] text-[#121212] text-[11px] font-bold px-2.5 py-1 rounded-lg border border-[#EAE7E1]">
-                Price: {
-                  priceParam === "under-499" ? `Under ${formatPrice(499)}` :
-                  priceParam === "under-999" ? `Under ${formatPrice(999)}` :
-                  priceParam === "500-999" ? `${formatPrice(500)} to ${formatPrice(999)}` :
-                  priceParam === "1000-1999" ? `${formatPrice(1000)} to ${formatPrice(1999)}` :
-                  priceParam === "2000-4999" ? `${formatPrice(2000)} to ${formatPrice(4999)}` :
-                  priceParam === "above-5000" ? `Above ${formatPrice(5000)}` :
-                  `${formatPrice(priceMin)} - ${formatPrice(priceMax)}`
-                }
-                <button onClick={() => handlePricePreset("all")} className="hover:text-red-600 cursor-pointer"><X size={12} /></button>
+              <span className="inline-flex items-center gap-1 bg-[#FAF8F5] text-[#121212] text-[10px] font-bold px-2 py-0.5 rounded-lg border border-[#EAE7E1]">
+                Price: {formatPrice(priceMin)}-{formatPrice(priceMax)}
+                <button onClick={() => handlePricePreset("all")} className="hover:text-red-600 cursor-pointer"><X size={11} /></button>
               </span>
             )}
             {searchQuery && (
-              <span className="inline-flex items-center gap-1.5 bg-[#FAF8F5] text-[#121212] text-[11px] font-bold px-2.5 py-1 rounded-lg border border-[#EAE7E1]">
+              <span className="inline-flex items-center gap-1 bg-[#FAF8F5] text-[#121212] text-[10px] font-bold px-2 py-0.5 rounded-lg border border-[#EAE7E1]">
                 Search: "{searchQuery}"
-                <button onClick={() => router.push(pathname)} className="hover:text-red-600 cursor-pointer"><X size={12} /></button>
+                <button onClick={() => router.push(pathname)} className="hover:text-red-600 cursor-pointer"><X size={11} /></button>
               </span>
             )}
             <button
               onClick={clearAllFilters}
-              className="text-[11px] text-red-600 hover:text-red-800 font-bold uppercase tracking-wider ml-auto cursor-pointer flex items-center gap-1"
+              className="text-[10px] text-red-600 font-bold uppercase tracking-wider ml-auto cursor-pointer flex items-center gap-0.5"
             >
-              <RefreshCw size={11} /> Clear All
+              <RefreshCw size={10} /> Reset
             </button>
           </div>
         )}
@@ -591,10 +579,10 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
         )}
       </AnimatePresence>
 
-      {/* ── 4. Main Product Grid (4 Full Columns across page) ── */}
-      <div className="pt-2">
+      {/* ── 4. Main Product Grid ── */}
+      <div className="pt-1">
         {filteredProducts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center bg-[#FAF8F5] border border-dashed border-[#EAE7E1] rounded-2xl">
+          <div className="flex flex-col items-center justify-center py-16 text-center bg-[#FAF8F5] border border-dashed border-[#EAE7E1] rounded-2xl">
             <p className="text-base text-neutral-600 font-serif mb-4">No luxury perfumes match your selected filters.</p>
             <button
               onClick={clearAllFilters}
@@ -604,7 +592,7 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-6 lg:gap-8">
             <AnimatePresence>
               {filteredProducts.map((product) => (
                 <motion.div
