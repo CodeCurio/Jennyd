@@ -496,9 +496,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── 2. Brand Value Proposition Bar (USPs - Mobile Optimized) ── */}
+      {/* ── 2. Brand Value Proposition Bar (USPs - Viewport Fit) ── */}
       <section className="bg-white border-y border-[#EAE7E1]">
-        <div className="max-w-[1440px] mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-10">
+        <div className="max-w-[1440px] mx-auto px-3.5 sm:px-6 lg:px-8 py-3.5 sm:py-5">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-8">
             {VALUE_PROPOSITIONS.map((usp, idx) => {
               const Icon = usp.icon;
