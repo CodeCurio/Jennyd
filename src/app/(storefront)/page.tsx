@@ -29,7 +29,7 @@ const HERO_SLIDES = [
   {
     image: "/assets/jennyd-banner-1.webp",
     tabletImage: "/assets/jennyd-banner-1.webp",
-    mobileImage: "/assets/jennyd-banner-1.webp",
+    mobileImage: "/assets/jennyd-banner-mobile-1.webp",
     title: "Jennyd Luxury Scents",
     subtitle: "EXCLUSIVELY JENNYD",
     cta: "EXPLORE COLLECTION",
@@ -38,7 +38,7 @@ const HERO_SLIDES = [
   {
     image: "/assets/jennyd-banner-2.webp",
     tabletImage: "/assets/jennyd-banner-2.webp",
-    mobileImage: "/assets/jennyd-banner-2.webp",
+    mobileImage: "/assets/jennyd-banner-mobile-2.webp",
     title: "Signature Extrait De Parfum",
     subtitle: "PURE ARTISANAL SCENTS",
     cta: "SHOP NOW",
@@ -47,8 +47,8 @@ const HERO_SLIDES = [
   {
     image: "/assets/jennyd-banner-3.webp",
     tabletImage: "/assets/jennyd-banner-3.webp",
-    mobileImage: "/assets/jennyd-banner-3.webp",
-    title: "Artisanal Attars & Oils",
+    mobileImage: "/assets/jennyd-banner-mobile-3.webp",
+    title: "Artisanal Pure Attars",
     subtitle: "PURE ATTAR COLLECTION",
     cta: "DISCOVER ATTARS",
     link: "/products?category=attar"
@@ -63,7 +63,7 @@ const VALUE_PROPOSITIONS = [
   },
   {
     icon: Flame,
-    title: "Handcrafted Artisanal Oils",
+    title: "Handcrafted Artisanal Attars",
     desc: "Traditional non-alcoholic attars blended by master Indian perfumers."
   },
   {
@@ -83,8 +83,8 @@ const CATEGORY_TILES = [
   { name: "For Him",      image: "/assets/collection-men.webp", link: "/products?category=men",          subtitle: "Masculine Woods & Oud" },
   { name: "For Her",      image: "/assets/collection-women.webp", link: "/products?category=women",        subtitle: "Sensual Florals & Vanilla" },
   { name: "Unisex",       image: "/assets/collection-unisex.webp", link: "/products?category=unisex",       subtitle: "Universal Signature Scents" },
-  { name: "Attars & Oils",image: "/assets/product image 5.jpeg", link: "/products?category=attar",        subtitle: "Pure Non-Alcoholic Concentrates" },
-  { name: "Gift Sets",    image: "/assets/product image 1.jpeg", link: "/products?category=combos",       subtitle: "Curated Luxury Boxes" },
+  { name: "Pure Attars",  image: "/assets/product image 5.jpeg", link: "/products?category=attar",        subtitle: "Pure Non-Alcoholic Concentrates" },
+  { name: "Kids",         image: "/assets/product image 1.jpeg", link: "/products?category=kids",         subtitle: "Playful & Mild Scents" },
 ];
 
 const DEFAULT_NOTES = [
@@ -111,8 +111,8 @@ const BESTSELLER_TABS = [
   { id: "all", label: "ALL BESTSELLERS" },
   { id: "him", label: "FOR HIM" },
   { id: "her", label: "FOR HER" },
-  { id: "attar", label: "ATTAR & OILS" },
-  { id: "gifting", label: "GIFT SETS" },
+  { id: "attar", label: "PURE ATTAR" },
+  { id: "kids", label: "KIDS" },
   { id: "unisex", label: "UNISEX & OUD" }
 ];
 
@@ -121,11 +121,11 @@ const MOCK_BEST_SELLERS = [
   { id: "b2", title: "Midnight Amber Intense", price: 2999, salePrice: 2499, image: "/assets/product image 3.jpeg", slug: "midnight-amber", badge: "Best Seller", category: "AMBER SPICE", rating: 4.92, reviewsCount: 64 },
   { id: "b3", title: "Velvet Rose & Vanilla", price: 1899, salePrice: 1499, image: "/assets/product image 2.jpeg", slug: "velvet-rose", badge: "Best Seller", category: "FLORAL GOURMAND", rating: 4.85, reviewsCount: 47 },
   { id: "b4", title: "Citrus Breeze Eau De Parfum", price: 1499, salePrice: 1199, image: "/assets/product image 4.jpeg", slug: "citrus-breeze", badge: "Best Seller", category: "FRESH CITRUS", rating: 4.79, reviewsCount: 38 },
-  { id: "b5", title: "Ruh Khus Pure Attar", price: 1996, salePrice: 499, image: "/assets/product image 5.jpeg", slug: "ruh-khus-attar", badge: "Pure Oil", category: "NON-ALCOHOLIC ATTAR", rating: 4.95, reviewsCount: 82 },
+  { id: "b5", title: "Ruh Khus Pure Attar", price: 1996, salePrice: 499, image: "/assets/product image 5.jpeg", slug: "ruh-khus-attar", badge: "Pure Attar", category: "NON-ALCOHOLIC ATTAR", rating: 4.95, reviewsCount: 82 },
   { id: "b6", title: "Persian Oud Extrait", price: 12999, salePrice: 9099, image: "/assets/product image 1.jpeg", slug: "persian-oud", badge: "Luxury Oud", category: "ROYAL ORIENTAL OUD", rating: 4.98, reviewsCount: 112 },
   { id: "b7", title: "Vanilla Oud Signature", price: 2495, salePrice: 499, image: "/assets/product image 2.jpeg", slug: "vanilla-oud", badge: "Hot Seller", category: "WOODY VANILLA", rating: 4.87, reviewsCount: 54 },
   { id: "b8", title: "Black Musk Pure Attar", price: 1996, salePrice: 499, image: "/assets/product image 5.jpeg", slug: "black-musk-attar", badge: "Artisanal", category: "NON-ALCOHOLIC ATTAR", rating: 4.91, reviewsCount: 76 },
-  { id: "b9", title: "My Special One Edition", price: 2990, salePrice: 1499, image: "/assets/product image 3.jpeg", slug: "my-special-one", badge: "Gift Box", category: "LUXURY GIFT SET", rating: 4.89, reviewsCount: 41 },
+  { id: "b9", title: "Junior Berry Breeze", price: 2990, salePrice: 1499, image: "/assets/product image 3.jpeg", slug: "junior-berry-breeze", badge: "Kids Special", category: "KIDS COLLECTION", rating: 4.89, reviewsCount: 41 },
   { id: "b10", title: "Leather Oud Intense", price: 2495, salePrice: 499, image: "/assets/product image 4.jpeg", slug: "leather-oud", badge: "For Him", category: "SMOKY LEATHER OUD", rating: 4.86, reviewsCount: 39 }
 ];
 
@@ -351,12 +351,12 @@ export default function Home() {
       return filtered.length > 0 ? filtered.slice(0, 10) : pool.filter(p => p.title.toUpperCase().includes("ATTAR"));
     }
 
-    if (activeBestsellerTab === "gifting") {
+    if (activeBestsellerTab === "kids") {
       const filtered = pool.filter(p => {
         const title = (p.title || "").toUpperCase();
         return (
-          title.includes("EDITION") || title.includes("SET") || title.includes("COMBO") ||
-          title.includes("BESTIE") || title.includes("SPECIAL") || title.includes("COLLECTION")
+          title.includes("KIDS") || title.includes("JUNIOR") || title.includes("BERRY") ||
+          title.includes("SWEET") || title.includes("BABY") || title.includes("DIVA") || title.includes("DISNEY")
         );
       });
       return filtered.length > 0 ? filtered.slice(0, 10) : pool.slice(4, 10);
@@ -430,8 +430,8 @@ export default function Home() {
   return (
     <div className="flex flex-col bg-[#FAF8F5] selection:bg-[#D4AF37] selection:text-white font-sans overflow-hidden">
       
-      {/* ── 1. Hero Carousel (100% Full Width 2007x784 Banners) ── */}
-      <section className="relative w-full aspect-[2007/784] overflow-hidden group bg-[#121212]">
+      {/* ── 1. Hero Carousel (Mobile & Desktop Viewport Optimized) ── */}
+      <section className="relative w-full h-[210px] min-h-[190px] sm:h-auto sm:aspect-[2007/784] overflow-hidden group bg-[#121212]">
         {slides.map((slide, i) => {
           const isActive = i === currentSlide;
           return (
@@ -450,10 +450,17 @@ export default function Home() {
                 transition={{ duration: 0.8, ease: "easeInOut" }}
                 className="absolute inset-0 w-full h-full"
               >
+                {/* Mobile Image (Visible on mobile < sm) */}
+                <img
+                  src={slide.mobileImage || slide.image}
+                  alt={slide.title || "Jennyd Luxury Fragrance"}
+                  className="w-full h-full object-cover object-center sm:hidden block"
+                />
+                {/* Desktop Image (Visible on desktop >= sm) */}
                 <img
                   src={slide.image}
                   alt={slide.title || "Jennyd Luxury Fragrance"}
-                  className="w-full h-full object-cover object-center block"
+                  className="w-full h-full object-cover object-center hidden sm:block"
                 />
               </motion.div>
             </Link>
@@ -496,22 +503,43 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── 2. Brand Value Proposition Bar (USPs - Viewport Fit) ── */}
+      {/* ── 2. Brand Value Proposition Bar (USPs - Ultra Luxury Mobile & Desktop) ── */}
       <section className="bg-white border-y border-[#EAE7E1]">
-        <div className="max-w-[1440px] mx-auto px-3.5 sm:px-6 lg:px-8 py-3.5 sm:py-5">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-8">
+        {/* Mobile Layout: Infinite Auto-Scrolling Marquee Strip (Same Speed as Shop by Notes) */}
+        <div className="sm:hidden w-full overflow-hidden bg-[#121212] py-2.5 shadow-sm relative flex">
+          <div className="animate-marquee-medium flex items-center gap-6 shrink-0">
+            {[...VALUE_PROPOSITIONS, ...VALUE_PROPOSITIONS, ...VALUE_PROPOSITIONS, ...VALUE_PROPOSITIONS].map((usp, idx) => {
+              const Icon = usp.icon;
+              return (
+                <div key={idx} className="flex items-center gap-2 shrink-0">
+                  <div className="w-5.5 h-5.5 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
+                    <Icon className="w-3 h-3" strokeWidth={2} />
+                  </div>
+                  <span className="font-serif font-bold text-[10.5px] text-white uppercase tracking-wider whitespace-nowrap">
+                    {usp.title}
+                  </span>
+                  <span className="w-1 h-1 rounded-full bg-[#D4AF37]/60 ml-4 shrink-0" />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Desktop & Tablet Layout (Full Rich Cards) */}
+        <div className="hidden sm:block max-w-[1440px] mx-auto px-6 lg:px-8 py-5">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
             {VALUE_PROPOSITIONS.map((usp, idx) => {
               const Icon = usp.icon;
               return (
-                <div key={idx} className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-2.5 p-3 sm:p-0 rounded-2xl bg-[#FAF8F5] sm:bg-transparent border border-[#EAE7E1] sm:border-none shadow-2xs sm:shadow-none group">
-                  <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white sm:bg-[#FAF8F5] border border-[#EAE7E1] flex items-center justify-center text-[#D4AF37] group-hover:bg-[#D4AF37] group-hover:text-white transition-colors duration-300 shrink-0">
-                    <Icon className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={1.75} />
+                <div key={idx} className="flex flex-row items-start text-left gap-2.5 rounded-2xl bg-transparent border-none shadow-none group">
+                  <div className="w-11 h-11 rounded-full bg-[#FAF8F5] border border-[#EAE7E1] flex items-center justify-center text-[#D4AF37] group-hover:bg-[#D4AF37] group-hover:text-white transition-colors duration-300 shrink-0">
+                    <Icon className="w-5 h-5" strokeWidth={1.75} />
                   </div>
                   <div>
-                    <h3 className="font-serif font-bold text-[11px] sm:text-sm text-[#121212] uppercase tracking-wider mb-0.5">
+                    <h3 className="font-serif font-bold text-sm text-[#121212] uppercase tracking-wider mb-0.5">
                       {usp.title}
                     </h3>
-                    <p className="text-[10px] sm:text-[11px] text-neutral-500 font-sans leading-relaxed">
+                    <p className="text-[11px] text-neutral-500 font-sans leading-relaxed">
                       {usp.desc}
                     </p>
                   </div>
@@ -523,8 +551,8 @@ export default function Home() {
       </section>
 
       {/* ── 3. Featured Collections (Touch-Swipeable Carousel on Mobile) ── */}
-      <section className="py-12 md:py-24 max-w-[1440px] mx-auto w-full px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-8 md:mb-16 flex flex-col gap-2">
+      <section className="py-6 sm:py-12 md:py-24 max-w-[1440px] mx-auto w-full px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-2xl mx-auto mb-4 sm:mb-8 md:mb-16 flex flex-col gap-1.5 sm:gap-2">
           <span className="text-[#D4AF37] uppercase tracking-[0.3em] text-[10px] sm:text-xs font-bold font-sans">
             Explore Collections
           </span>
@@ -666,42 +694,62 @@ export default function Home() {
       </section>
 
       {/* ── 5. Ajmal-Inspired Multi-Category Bestsellers Showcase ── */}
-      <section className="py-16 md:py-24 max-w-[1440px] mx-auto w-full px-4 sm:px-6 lg:px-8">
+      <section className="py-8 sm:py-16 md:py-24 max-w-[1440px] mx-auto w-full px-3.5 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-8 md:mb-12 flex flex-col gap-2">
-          <span className="text-[#D4AF37] uppercase tracking-[0.3em] text-[10px] sm:text-xs font-bold font-sans">
+        <div className="text-center max-w-2xl mx-auto mb-4 sm:mb-8 md:mb-12 flex flex-col gap-1 sm:gap-2">
+          <span className="text-[#D4AF37] uppercase tracking-[0.25em] sm:tracking-[0.3em] text-[9.5px] sm:text-xs font-bold font-sans">
             Curated High-Performance Scents
           </span>
-          <h2 className="text-2xl sm:text-3xl md:text-5xl font-serif text-[#121212] tracking-tight uppercase">
+          <h2 className="text-xl sm:text-3xl md:text-5xl font-serif text-[#121212] tracking-tight uppercase">
             OUR BESTSELLERS
           </h2>
-          <div className="w-16 h-[2px] bg-[#D4AF37] mx-auto mt-1" />
+          <div className="w-12 sm:w-16 h-[2px] bg-[#D4AF37] mx-auto mt-0.5" />
         </div>
 
-        {/* Tab Filters (Ajmal Style: HIM, HER, ATTAR, GIFTING, UNISEX, ALL) */}
-        <div className="flex justify-center mb-8 sm:mb-12 overflow-x-auto no-scrollbar pb-2">
-          <div className="flex items-center gap-2 sm:gap-4 border-b border-[#EAE7E1] px-2 min-w-max">
+        {/* Mobile Tab Matrix (Zero Horizontal Scroll Required! 3x2 Pill Grid) */}
+        <div className="sm:hidden grid grid-cols-3 gap-1.5 mb-5 px-0.5">
+          {BESTSELLER_TABS.map((tab) => {
+            const isActive = activeBestsellerTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveBestsellerTab(tab.id)}
+                className={`py-2 px-1 text-[9.5px] font-bold uppercase tracking-wider rounded-xl transition-all duration-200 cursor-pointer border text-center ${
+                  isActive
+                    ? "bg-[#121212] text-[#D4AF37] border-[#121212] shadow-2xs font-serif font-semibold"
+                    : "bg-white text-neutral-600 border-[#EAE7E1] hover:border-[#D4AF37]"
+                }`}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Desktop & Tablet Tab Filters (Luxury Animated Capsule Segment Bar) */}
+        <div className="hidden sm:flex justify-center mb-8 sm:mb-12">
+          <div className="inline-flex items-center gap-1 bg-[#FAF8F5] border border-[#EAE7E1] p-1.5 rounded-full shadow-inner">
             {BESTSELLER_TABS.map((tab) => {
               const isActive = activeBestsellerTab === tab.id;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveBestsellerTab(tab.id)}
-                  className={`relative py-3 px-4 sm:px-6 text-xs sm:text-sm font-bold uppercase tracking-[0.18em] transition-all duration-300 cursor-pointer ${
+                  className={`relative px-4 lg:px-6 py-2.5 text-xs font-bold uppercase tracking-[0.16em] transition-all duration-300 cursor-pointer rounded-full z-10 ${
                     isActive
-                      ? "text-[#121212]"
-                      : "text-neutral-400 hover:text-neutral-700"
+                      ? "text-[#D4AF37]"
+                      : "text-neutral-500 hover:text-[#121212] hover:bg-white/80"
                   }`}
                 >
-                  {tab.label}
                   {isActive && (
                     <motion.div
-                      layoutId="bestseller-active-indicator"
-                      className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#D4AF37]"
-                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                      layoutId="bestseller-active-pill"
+                      className="absolute inset-0 bg-[#121212] rounded-full -z-10 shadow-md"
+                      transition={{ type: "spring", stiffness: 400, damping: 32 }}
                     />
                   )}
+                  <span>{tab.label}</span>
                 </button>
               );
             })}

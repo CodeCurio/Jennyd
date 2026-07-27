@@ -307,7 +307,7 @@ export function CartDrawer() {
                     Your cart is currently empty
                   </h3>
                   <p className="text-xs text-neutral-500 max-w-xs mb-6 leading-relaxed">
-                    Explore our luxury perfume oils, extraits, and handcrafted attars to build your signature scent profile.
+                    Explore our luxury extraits and handcrafted attars to build your signature scent profile.
                   </p>
 
                   <div className="flex flex-col gap-2 w-full max-w-[240px] mx-auto">

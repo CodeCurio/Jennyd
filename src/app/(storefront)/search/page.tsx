@@ -37,7 +37,7 @@ function SearchPageContent() {
         "content",
         queryParam 
           ? `Discover premium fragrances matching your search for "${queryParam}". Find your next signature scent.`
-          : "Search and explore the Jennyd collection of luxury perfumes, attars, and custom fragrance gift sets."
+          : "Search and explore the Jennyd collection of luxury perfumes, attars, and kids perfumes."
       );
     }
   }, [queryParam]);

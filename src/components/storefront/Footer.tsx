@@ -206,12 +206,12 @@ export async function Footer() {
             </li>
             <li>
               <Link href="/products?category=attar" className="hover:text-[#D4AF37] hover:translate-x-1 transition-all inline-block">
-                Artisanal Pure Attar Oils
+                Artisanal Pure Attars
               </Link>
             </li>
             <li>
-              <Link href="/products?category=gift-sets" className="hover:text-[#D4AF37] hover:translate-x-1 transition-all inline-block">
-                Curated Gift Discovery Sets
+              <Link href="/products?category=kids" className="hover:text-[#D4AF37] hover:translate-x-1 transition-all inline-block">
+                Kids Perfumes Collection
               </Link>
             </li>
             <li>

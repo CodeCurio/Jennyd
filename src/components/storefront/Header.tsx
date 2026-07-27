@@ -232,8 +232,8 @@ export function Header() {
                             <Link href="/products?category=men" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors">Men's Perfumes</Link>
                             <Link href="/products?category=women" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors">Women's Perfumes</Link>
                             <Link href="/products?category=unisex" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors">Unisex Perfumes</Link>
-                            <Link href="/products?category=attar" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors">Attars & Oils</Link>
-                            <Link href="/products?category=gifts" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors">Gift Sets</Link>
+                            <Link href="/products?category=attar" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors">Pure Attars</Link>
+                            <Link href="/products?category=kids" className="text-sm text-gray-600 hover:text-[#D4AF37] transition-colors">Kids Collection</Link>
                           </div>
                           <div className="flex flex-col gap-3">
                             <h3 className="text-xs font-bold uppercase tracking-widest text-[#D4AF37] mb-1 pb-2 border-b border-gray-100">By Collection</h3>

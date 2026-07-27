@@ -180,7 +180,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
     { label: "Oud Collection", href: "/products?category=Oud" },
     { label: "Floral Scents", href: "/products?category=Floral" },
     { label: "Woody Series", href: "/products?category=Woody" },
-    { label: "Gift Sets", href: "/products?category=Gifts" },
+    { label: "Kids Collection", href: "/products?category=kids" },
   ];
 
   return (

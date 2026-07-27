@@ -133,7 +133,7 @@ export default function CartPage() {
                 Your Bag is Currently Empty
               </h2>
               <p className="text-xs sm:text-sm text-neutral-500 mb-10 max-w-md mx-auto leading-relaxed">
-                Discover our hand-blended perfume oils, opulent extraits, and curated gift collections to begin your fragrance journey.
+                Discover our opulent extraits and handcrafted attars to begin your fragrance journey.
               </p>
 
               <div className="flex flex-col gap-3 max-w-xs mx-auto">
