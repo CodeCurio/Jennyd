@@ -71,18 +71,18 @@ export function ProductCard({ product, onQuickAdd, onQuickView }: ProductCardPro
       className="group flex flex-col w-full h-full relative"
     >
       {/* Image Container: Uniform 3:4 portrait frame with soft luxury background */}
-      <div className="relative w-full aspect-[3/4] bg-[#FAF8F5] overflow-hidden mb-3 border border-[#EAE7E1] rounded-2xl shadow-2xs group-hover:shadow-md group-hover:border-[#D4AF37]/50 transition-all duration-500">
+      <div className="relative w-full aspect-[3/4] bg-[#FAF8F5] overflow-hidden mb-2.5 border border-[#EAE7E1] rounded-2xl shadow-2xs group-hover:shadow-md group-hover:border-[#D4AF37]/50 transition-all duration-500">
         <Link href={`/products/${product.slug}`} className="block w-full h-full relative">
-          {/* Badge */}
+          {/* Left Badge (Fixed Overflow & Truncate on Mobile) */}
           {badge && (
-            <div className="absolute top-2.5 left-2.5 z-10 border border-[#D4AF37] bg-white/95 backdrop-blur-xs text-[#121212] text-[8px] sm:text-[9px] uppercase font-bold px-2 py-0.5 tracking-wider rounded-md shadow-2xs">
+            <div className="absolute top-2 left-2 z-10 border border-[#D4AF37] bg-white/95 backdrop-blur-xs text-[#121212] text-[8px] sm:text-[9px] uppercase font-bold px-1.5 sm:px-2 py-0.5 tracking-wider rounded-md shadow-2xs max-w-[62%] truncate">
               {badge}
             </div>
           )}
 
           {/* Discount Tag Badge (Top Right) */}
           {isSale && discountPercent > 0 && (
-            <div className="absolute top-2.5 right-2.5 z-10 bg-[#D4AF37] text-white text-[8px] sm:text-[9px] uppercase font-bold px-2 py-0.5 tracking-wider rounded-md shadow-2xs">
+            <div className="absolute top-2 right-2 z-10 bg-[#D4AF37] text-white text-[8px] sm:text-[9px] uppercase font-extrabold px-1.5 sm:px-2 py-0.5 tracking-wider rounded-md shadow-2xs shrink-0">
               {discountPercent}% OFF
             </div>
           )}
@@ -135,47 +135,42 @@ export function ProductCard({ product, onQuickAdd, onQuickView }: ProductCardPro
         </div>
       </div>
       
-      {/* Product Details (Ajmal-inspired layout in Jennyd Luxury Theme) */}
-      <div className="flex flex-col flex-1 px-0.5 text-center sm:text-left justify-between">
+      {/* Product Details (Ultra-Clean & Responsive Mobile & Desktop Layout) */}
+      <div className="flex flex-col flex-1 px-0.5 text-left justify-between">
         <div>
           {/* Olfactory Accord Tag */}
-          <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] text-neutral-400 block mb-1 truncate">
+          <span className="text-[8.5px] sm:text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#D4AF37] block mb-0.5 truncate">
             {accordTag}
           </span>
 
           {/* Product Title */}
-          <Link href={`/products/${product.slug}`} className="block group/title mb-1.5">
-            <h3 className="font-serif font-bold text-sm sm:text-base text-[#121212] group-hover/title:text-[#D4AF37] transition-colors duration-300 line-clamp-1 leading-snug">
+          <Link href={`/products/${product.slug}`} className="block group/title mb-1">
+            <h3 className="font-serif font-bold text-xs sm:text-base text-[#121212] group-hover/title:text-[#D4AF37] transition-colors duration-300 line-clamp-1 leading-snug">
               {product.title}
             </h3>
           </Link>
 
           {/* Rating & Review Count */}
-          <div className="flex items-center justify-center sm:justify-start gap-1 mb-2">
-            <div className="flex text-[#D4AF37] gap-0.5">
-              <Star className="w-3 h-3 fill-current" />
+          <div className="flex items-center gap-1 mb-1.5">
+            <div className="flex text-[#D4AF37]">
+              <Star className="w-2.8 h-2.8 sm:w-3.5 sm:h-3.5 fill-current" />
             </div>
-            <span className="text-[10px] sm:text-xs font-bold text-neutral-700 font-sans">
-              {rating.toFixed(2)}
+            <span className="text-[9.5px] sm:text-xs font-bold text-neutral-800 font-sans">
+              {rating.toFixed(1)}
             </span>
-            <span className="text-[10px] text-neutral-400 font-sans">
-              ({reviewsCount} Reviews)
+            <span className="text-[9px] sm:text-[10.5px] text-neutral-400 font-sans">
+              ({reviewsCount})
             </span>
           </div>
 
           {/* Pricing */}
-          <div className="flex items-baseline justify-center sm:justify-start gap-2 flex-wrap">
-            <span className="text-sm sm:text-base font-bold text-[#121212] font-mono">
+          <div className="flex items-baseline gap-1.5 flex-wrap">
+            <span className="text-xs sm:text-base font-bold text-[#121212] font-mono">
               {formatPrice(displayPrice)}
             </span>
             {isSale && (
-              <span className="text-[11px] sm:text-xs text-neutral-400 line-through font-mono">
+              <span className="text-[10px] sm:text-xs text-neutral-400 line-through font-mono">
                 {formatPrice(product.price)}
-              </span>
-            )}
-            {isSale && discountPercent > 0 && (
-              <span className="text-[9px] font-extrabold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 uppercase">
-                {discountPercent}% Off
               </span>
             )}
           </div>
@@ -189,9 +184,9 @@ export function ProductCard({ product, onQuickAdd, onQuickView }: ProductCardPro
               e.stopPropagation();
               onQuickAdd();
             }}
-            className="w-full mt-3 py-2.5 px-3 bg-[#121212] hover:bg-[#D4AF37] text-white text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-xl transition-all duration-300 shadow-2xs active:scale-98 cursor-pointer flex items-center justify-center gap-1.5"
+            className="w-full mt-2.5 py-2 sm:py-2.5 px-2 bg-[#121212] hover:bg-[#D4AF37] text-white text-[9.5px] sm:text-xs font-bold uppercase tracking-wider rounded-xl transition-all duration-300 shadow-2xs active:scale-98 cursor-pointer flex items-center justify-center gap-1"
           >
-            <ShoppingBag className="w-3.5 h-3.5 text-[#D4AF37]" />
+            <ShoppingBag className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#D4AF37]" />
             <span>Add to Cart</span>
           </button>
         )}
