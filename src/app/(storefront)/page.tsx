@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { ProductCard } from "@/components/ui/ProductCard";
+import { QuickViewModal } from "@/components/storefront/QuickViewModal";
 import { useCart } from "@/lib/store/CartContext";
 import { useToast } from "@/components/ui/Toast";
 import { useState, useEffect } from "react";
@@ -26,28 +27,28 @@ import { useCurrency } from "@/lib/store/CurrencyContext";
 
 const HERO_SLIDES = [
   {
-    image: "/assets/Banner-1.jpeg",
-    tabletImage: "/assets/Mobile-banner1.jpeg",
-    mobileImage: "/assets/Mobile-banner1.jpeg",
-    title: "Oud Royale Extrait",
+    image: "/assets/jennyd-banner-1.webp",
+    tabletImage: "/assets/jennyd-banner-1.webp",
+    mobileImage: "/assets/jennyd-banner-1.webp",
+    title: "Jennyd Luxury Scents",
     subtitle: "EXCLUSIVELY JENNYD",
     cta: "EXPLORE COLLECTION",
     link: "/products"
   },
   {
-    image: "/assets/Banner-2.jpeg",
-    tabletImage: "/assets/Mobile-banner2.jpeg",
-    mobileImage: "/assets/Mobile-banner2.jpeg",
-    title: "Velvet Rose & Vanilla",
-    subtitle: "SIGNATURE FRAGRANCE",
+    image: "/assets/jennyd-banner-2.webp",
+    tabletImage: "/assets/jennyd-banner-2.webp",
+    mobileImage: "/assets/jennyd-banner-2.webp",
+    title: "Signature Extrait De Parfum",
+    subtitle: "PURE ARTISANAL SCENTS",
     cta: "SHOP NOW",
     link: "/products"
   },
   {
-    image: "/assets/Banner-3.jpeg",
-    tabletImage: "/assets/Mobile-banner3.png",
-    mobileImage: "/assets/Mobile-banner3.png",
-    title: "Artisanal Perfume Oils",
+    image: "/assets/jennyd-banner-3.webp",
+    tabletImage: "/assets/jennyd-banner-3.webp",
+    mobileImage: "/assets/jennyd-banner-3.webp",
+    title: "Artisanal Attars & Oils",
     subtitle: "PURE ATTAR COLLECTION",
     cta: "DISCOVER ATTARS",
     link: "/products?category=attar"
@@ -106,11 +107,26 @@ const MOCK_PRODUCTS = [
   { id: "4", title: "Citrus Breeze Eau De Parfum", price: 1499, image: "/assets/product image 4.jpeg", slug: "citrus-breeze" },
 ];
 
+const BESTSELLER_TABS = [
+  { id: "all", label: "ALL BESTSELLERS" },
+  { id: "him", label: "FOR HIM" },
+  { id: "her", label: "FOR HER" },
+  { id: "attar", label: "ATTAR & OILS" },
+  { id: "gifting", label: "GIFT SETS" },
+  { id: "unisex", label: "UNISEX & OUD" }
+];
+
 const MOCK_BEST_SELLERS = [
-  { id: "b1", title: "Oud Royale Extrait", price: 2499, salePrice: 1999, image: "/assets/product image 1.jpeg", slug: "oud-royale", badge: "Best Seller" },
-  { id: "b2", title: "Midnight Amber Intense", price: 2999, salePrice: 2499, image: "/assets/product image 3.jpeg", slug: "midnight-amber", badge: "Best Seller" },
-  { id: "b3", title: "Velvet Rose & Vanilla", price: 1899, image: "/assets/product image 2.jpeg", slug: "velvet-rose", badge: "Best Seller" },
-  { id: "b4", title: "Citrus Breeze Eau De Parfum", price: 1499, image: "/assets/product image 4.jpeg", slug: "citrus-breeze", badge: "Best Seller" },
+  { id: "b1", title: "Oud Royale Extrait", price: 2499, salePrice: 1999, image: "/assets/product image 1.jpeg", slug: "oud-royale", badge: "Best Seller", category: "WOODY OUD", rating: 4.88, reviewsCount: 51 },
+  { id: "b2", title: "Midnight Amber Intense", price: 2999, salePrice: 2499, image: "/assets/product image 3.jpeg", slug: "midnight-amber", badge: "Best Seller", category: "AMBER SPICE", rating: 4.92, reviewsCount: 64 },
+  { id: "b3", title: "Velvet Rose & Vanilla", price: 1899, salePrice: 1499, image: "/assets/product image 2.jpeg", slug: "velvet-rose", badge: "Best Seller", category: "FLORAL GOURMAND", rating: 4.85, reviewsCount: 47 },
+  { id: "b4", title: "Citrus Breeze Eau De Parfum", price: 1499, salePrice: 1199, image: "/assets/product image 4.jpeg", slug: "citrus-breeze", badge: "Best Seller", category: "FRESH CITRUS", rating: 4.79, reviewsCount: 38 },
+  { id: "b5", title: "Ruh Khus Pure Attar", price: 1996, salePrice: 499, image: "/assets/product image 5.jpeg", slug: "ruh-khus-attar", badge: "Pure Oil", category: "NON-ALCOHOLIC ATTAR", rating: 4.95, reviewsCount: 82 },
+  { id: "b6", title: "Persian Oud Extrait", price: 12999, salePrice: 9099, image: "/assets/product image 1.jpeg", slug: "persian-oud", badge: "Luxury Oud", category: "ROYAL ORIENTAL OUD", rating: 4.98, reviewsCount: 112 },
+  { id: "b7", title: "Vanilla Oud Signature", price: 2495, salePrice: 499, image: "/assets/product image 2.jpeg", slug: "vanilla-oud", badge: "Hot Seller", category: "WOODY VANILLA", rating: 4.87, reviewsCount: 54 },
+  { id: "b8", title: "Black Musk Pure Attar", price: 1996, salePrice: 499, image: "/assets/product image 5.jpeg", slug: "black-musk-attar", badge: "Artisanal", category: "NON-ALCOHOLIC ATTAR", rating: 4.91, reviewsCount: 76 },
+  { id: "b9", title: "My Special One Edition", price: 2990, salePrice: 1499, image: "/assets/product image 3.jpeg", slug: "my-special-one", badge: "Gift Box", category: "LUXURY GIFT SET", rating: 4.89, reviewsCount: 41 },
+  { id: "b10", title: "Leather Oud Intense", price: 2495, salePrice: 499, image: "/assets/product image 4.jpeg", slug: "leather-oud", badge: "For Him", category: "SMOKY LEATHER OUD", rating: 4.86, reviewsCount: 39 }
 ];
 
 const ZODIAC_SIGNS = [
@@ -182,7 +198,15 @@ export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [trendingProducts, setTrendingProducts] = useState<any[]>([]);
   const [bestSellers, setBestSellers] = useState<any[]>([]);
+  const [allProducts, setAllProducts] = useState<any[]>([]);
   const [fragranceNotes, setFragranceNotes] = useState<any[]>([]);
+
+  // Bestseller Ajmal-style Tab State
+  const [activeBestsellerTab, setActiveBestsellerTab] = useState<string>("him");
+
+  // Quick View Modal State
+  const [quickViewProduct, setQuickViewProduct] = useState<any>(null);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   
   // Zodiac States
   const [selectedSign, setSelectedSign] = useState(ZODIAC_SIGNS[0]);
@@ -245,7 +269,7 @@ export default function Home() {
     fetchFragranceNotes();
   }, []);
 
-  // Fetch Best Sellers & Trending Products
+  // Fetch All Products for Bestseller Tabs & Trending Section
   useEffect(() => {
     const fetchHomeProducts = async () => {
       try {
@@ -260,18 +284,15 @@ export default function Home() {
             hoverImage: p.product_images?.[1]?.image_url || p.metadata?.images?.[1] || undefined
           }));
 
+          setAllProducts(productsWithImages);
+
           const best = productsWithImages.filter(p => 
             p.metadata?.badge?.toLowerCase().includes("best") || 
             p.tags?.some((t: string) => t.toLowerCase().includes("best"))
           );
 
-          if (best.length >= 4) {
-            setBestSellers(best.slice(0, 4));
-            setTrendingProducts(productsWithImages.filter(p => !best.includes(p)).slice(0, 4));
-          } else {
-            setBestSellers(productsWithImages.slice(0, 4));
-            setTrendingProducts(productsWithImages.slice(4, 8));
-          }
+          setBestSellers(best.length > 0 ? best : productsWithImages);
+          setTrendingProducts(productsWithImages.slice(0, 8));
         }
       } catch (err) {
         // Fallback to static MOCK_BEST_SELLERS
@@ -279,6 +300,81 @@ export default function Home() {
     };
     fetchHomeProducts();
   }, []);
+
+  // Filter products for Ajmal-style Bestseller tabs (HIM, HER, ATTAR, GIFTING, UNISEX, ALL)
+  const getDisplayBestsellers = () => {
+    const pool = allProducts.length > 0 ? allProducts : MOCK_BEST_SELLERS;
+
+    if (activeBestsellerTab === "all") {
+      return pool.slice(0, 12);
+    }
+
+    if (activeBestsellerTab === "him") {
+      const filtered = pool.filter(p => {
+        const title = (p.title || "").toUpperCase();
+        const badge = (p.badge || p.metadata?.badge || "").toUpperCase();
+        return (
+          badge.includes("HIS") || badge.includes("HIM") || badge.includes("MEN") ||
+          title.includes("PERSIAN") || title.includes("BLACK") || title.includes("VETIVER") ||
+          title.includes("LEATHER") || title.includes("WHISKEY") || title.includes("COFFEE") ||
+          title.includes("OLD GIN") || title.includes("TOBACCO") || title.includes("ROYAL") ||
+          title.includes("FOR YOU") || title.includes("LONG DRIVE") || title.includes("MID NIGHT") ||
+          title.includes("ONE AM") || title.includes("IMPERIAL")
+        );
+      });
+      return filtered.length > 0 ? filtered.slice(0, 10) : pool.slice(0, 8);
+    }
+
+    if (activeBestsellerTab === "her") {
+      const filtered = pool.filter(p => {
+        const title = (p.title || "").toUpperCase();
+        const badge = (p.badge || p.metadata?.badge || "").toUpperCase();
+        return (
+          badge.includes("HER") || badge.includes("DIVA") || badge.includes("WOMEN") ||
+          title.includes("FLORAL") || title.includes("VANILLA") || title.includes("ROSE") ||
+          title.includes("QUEEN") || title.includes("PRINCESS") || title.includes("GORGEOUS") ||
+          title.includes("DREAMGIRL") || title.includes("VALENTINE") || title.includes("MISSYOU") ||
+          title.includes("VICTORIA") || title.includes("HEARTBEAT") || title.includes("LOVEYOU") ||
+          title.includes("HUGYOU") || title.includes("MYHONEY") || title.includes("BELOVED") ||
+          title.includes("TRUELOVE") || title.includes("MYCRUSH") || title.includes("KISS") ||
+          title.includes("DARLING") || title.includes("LOVEBITE") || title.includes("SOULMATE")
+        );
+      });
+      return filtered.length > 0 ? filtered.slice(0, 10) : pool.slice(2, 10);
+    }
+
+    if (activeBestsellerTab === "attar") {
+      const filtered = pool.filter(p => {
+        const title = (p.title || "").toUpperCase();
+        return title.includes("ATTAR");
+      });
+      return filtered.length > 0 ? filtered.slice(0, 10) : pool.filter(p => p.title.toUpperCase().includes("ATTAR"));
+    }
+
+    if (activeBestsellerTab === "gifting") {
+      const filtered = pool.filter(p => {
+        const title = (p.title || "").toUpperCase();
+        return (
+          title.includes("EDITION") || title.includes("SET") || title.includes("COMBO") ||
+          title.includes("BESTIE") || title.includes("SPECIAL") || title.includes("COLLECTION")
+        );
+      });
+      return filtered.length > 0 ? filtered.slice(0, 10) : pool.slice(4, 10);
+    }
+
+    if (activeBestsellerTab === "unisex") {
+      const filtered = pool.filter(p => {
+        const title = (p.title || "").toUpperCase();
+        return (
+          title.includes("OUD") || title.includes("AMBER") || title.includes("CITRUS") ||
+          title.includes("OCEAN") || title.includes("SAFFRON") || title.includes("SANDALWOOD")
+        );
+      });
+      return filtered.length > 0 ? filtered.slice(0, 10) : pool.slice(0, 8);
+    }
+
+    return pool.slice(0, 10);
+  };
 
   // Fetch Zodiac Product dynamically
   useEffect(() => {
@@ -334,8 +430,8 @@ export default function Home() {
   return (
     <div className="flex flex-col bg-[#FAF8F5] selection:bg-[#D4AF37] selection:text-white font-sans overflow-hidden">
       
-      {/* ── 1. Hero Carousel ── */}
-      <section className="relative w-full aspect-[4/5] sm:aspect-[16/7] md:aspect-[21/9] overflow-hidden group bg-[#121212]">
+      {/* ── 1. Hero Carousel (100% Full Width 2007x784 Banners) ── */}
+      <section className="relative w-full aspect-[2007/784] overflow-hidden group bg-[#121212]">
         {slides.map((slide, i) => {
           const isActive = i === currentSlide;
           return (
@@ -351,25 +447,14 @@ export default function Home() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: isActive ? 1 : 0 }}
-                transition={{ duration: 0.9, ease: "easeInOut" }}
+                transition={{ duration: 0.8, ease: "easeInOut" }}
                 className="absolute inset-0 w-full h-full"
               >
-                <motion.div
-                  initial={{ scale: 1 }}
-                  animate={{ scale: isActive ? 1.05 : 1 }}
-                  transition={{ duration: 5.5, ease: "easeOut" }}
-                  className="absolute inset-0 w-full h-full"
-                >
-                  <picture className="w-full h-full absolute inset-0">
-                    <source media="(max-width: 640px)" srcSet={slide.mobileImage || slide.image} />
-                    <source media="(max-width: 1024px)" srcSet={slide.tabletImage || slide.image} />
-                    <img
-                      src={slide.image}
-                      alt={slide.title || "Jennyd Luxury Fragrance"}
-                      className="w-full h-full object-cover"
-                    />
-                  </picture>
-                </motion.div>
+                <img
+                  src={slide.image}
+                  alt={slide.title || "Jennyd Luxury Fragrance"}
+                  className="w-full h-full object-cover object-center block"
+                />
               </motion.div>
             </Link>
           );
@@ -580,34 +665,84 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── 5. Best Sellers Section ── */}
+      {/* ── 5. Ajmal-Inspired Multi-Category Bestsellers Showcase ── */}
       <section className="py-16 md:py-24 max-w-[1440px] mx-auto w-full px-4 sm:px-6 lg:px-8">
-        <div className="flex items-end justify-between mb-10 md:mb-14 border-b border-[#EAE7E1] pb-5">
-          <div>
-            <span className="text-[#D4AF37] uppercase tracking-[0.3em] text-[10px] sm:text-xs font-bold font-sans block mb-1">
-              Highly Recommended
-            </span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif text-[#121212]">
-              Best Sellers
-            </h2>
+        
+        {/* Section Header */}
+        <div className="text-center max-w-2xl mx-auto mb-8 md:mb-12 flex flex-col gap-2">
+          <span className="text-[#D4AF37] uppercase tracking-[0.3em] text-[10px] sm:text-xs font-bold font-sans">
+            Curated High-Performance Scents
+          </span>
+          <h2 className="text-2xl sm:text-3xl md:text-5xl font-serif text-[#121212] tracking-tight uppercase">
+            OUR BESTSELLERS
+          </h2>
+          <div className="w-16 h-[2px] bg-[#D4AF37] mx-auto mt-1" />
+        </div>
+
+        {/* Tab Filters (Ajmal Style: HIM, HER, ATTAR, GIFTING, UNISEX, ALL) */}
+        <div className="flex justify-center mb-8 sm:mb-12 overflow-x-auto no-scrollbar pb-2">
+          <div className="flex items-center gap-2 sm:gap-4 border-b border-[#EAE7E1] px-2 min-w-max">
+            {BESTSELLER_TABS.map((tab) => {
+              const isActive = activeBestsellerTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveBestsellerTab(tab.id)}
+                  className={`relative py-3 px-4 sm:px-6 text-xs sm:text-sm font-bold uppercase tracking-[0.18em] transition-all duration-300 cursor-pointer ${
+                    isActive
+                      ? "text-[#121212]"
+                      : "text-neutral-400 hover:text-neutral-700"
+                  }`}
+                >
+                  {tab.label}
+                  {isActive && (
+                    <motion.div
+                      layoutId="bestseller-active-indicator"
+                      className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#D4AF37]"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                </button>
+              );
+            })}
           </div>
-          <Link 
-            href="/products?sort=best-selling" 
-            className="text-xs font-bold uppercase tracking-[0.2em] text-[#121212] hover:text-[#D4AF37] transition-colors flex items-center gap-1 border-b border-[#121212] pb-1 hover:border-[#D4AF37]"
+        </div>
+
+        {/* Animated Product Grid (Showing 8 to 10 products per category tab in 2-col Mobile / 4-col/5-col Desktop) */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeBestsellerTab}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+            className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6 md:gap-8"
           >
-            View All <ArrowRight className="w-3.5 h-3.5" />
+            {getDisplayBestsellers().map((product: any) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                onQuickAdd={() => handleQuickAdd(product)}
+                onQuickView={() => {
+                  setQuickViewProduct(product);
+                  setIsQuickViewOpen(true);
+                }}
+              />
+            ))}
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Bottom CTA to explore full category */}
+        <div className="mt-12 text-center">
+          <Link
+            href={`/products?category=${activeBestsellerTab === "all" ? "best-selling" : activeBestsellerTab}`}
+            className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#121212] hover:bg-[#D4AF37] text-white text-xs font-bold uppercase tracking-[0.2em] rounded-xl transition-all duration-300 shadow-md group"
+          >
+            <span>Explore All {BESTSELLER_TABS.find(t => t.id === activeBestsellerTab)?.label}</span>
+            <ArrowRight className="w-4 h-4 text-[#D4AF37] group-hover:text-white transition-colors" />
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
-          {(bestSellers.length > 0 ? bestSellers : MOCK_BEST_SELLERS).map((product) => (
-            <ProductCard 
-              key={product.id} 
-              product={product} 
-              onQuickAdd={() => handleQuickAdd(product)}
-            />
-          ))}
-        </div>
       </section>
 
       {/* ── 6. Celestial Scent Matcher (Zodiac Finder - Mobile Optimized) ── */}
@@ -730,7 +865,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── 7. Trending Now ── */}
+      {/* ── 7. Trending Now (Expanded High Density Grid) ── */}
       <section className="py-16 md:py-24 max-w-[1440px] mx-auto w-full px-4 sm:px-6 lg:px-8">
         <div className="flex items-end justify-between mb-10 md:mb-14 border-b border-[#EAE7E1] pb-5">
           <div>
@@ -749,30 +884,34 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
-          {(trendingProducts.length > 0 ? trendingProducts : MOCK_PRODUCTS).map((product) => (
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
+          {(trendingProducts.length > 0 ? trendingProducts.slice(0, 8) : MOCK_PRODUCTS).map((product) => (
             <ProductCard 
               key={product.id} 
               product={product} 
               onQuickAdd={() => handleQuickAdd(product)}
+              onQuickView={() => {
+                setQuickViewProduct(product);
+                setIsQuickViewOpen(true);
+              }}
             />
           ))}
         </div>
       </section>
 
-      {/* ── 8. Artisanal Heritage Promo Banner (100% Mobile Optimized) ── */}
+      {/* ── 8. Signature Fragrance Offer Promo Banner (Original Jennyd Artwork) ── */}
       <section className="py-6 max-w-[1440px] mx-auto w-full px-3.5 sm:px-6 lg:px-8">
-        <div className="relative w-full bg-[#121212] text-white border border-[#EAE7E1] rounded-2xl overflow-hidden shadow-lg">
+        <div className="relative w-full bg-[#121212] text-white border border-[#D4AF37]/30 rounded-2xl overflow-hidden shadow-xl">
           {/* Mobile Background Image & Overlay (< lg) */}
           <div className="lg:hidden absolute inset-0 z-0">
             <Image
-              src="https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?q=80&w=1600"
-              alt="Artisanal Attars"
+              src="/assets/product image 1.jpeg"
+              alt="Jennyd Signature Fragrance"
               fill
               unoptimized
-              className="object-cover opacity-30 brightness-75"
+              className="object-cover opacity-35 brightness-75"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#121212] via-[#121212]/85 to-[#121212]/60" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#121212] via-[#121212]/90 to-[#121212]/70" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 items-center relative z-10">
@@ -780,32 +919,45 @@ export default function Home() {
             {/* Promo Content */}
             <div className="lg:col-span-7 p-6 sm:p-10 md:p-14 space-y-4">
               <span className="bg-[#D4AF37] text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-md inline-block shadow-2xs">
-                Special Heritage Offer
+                Limited Time Special Offer
               </span>
+              
               <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-serif text-white leading-tight">
-                Buy 2 Get 1 Free on all Signature Attars
+                Buy Your Signature Fragrance
               </h2>
-              <p className="text-neutral-300 text-xs sm:text-sm leading-relaxed max-w-lg font-sans">
-                Experience the rich heritage of Indian perfumery. Pure, hand-blended perfume oils crafted without alcohol for lasting projection.
-              </p>
-              <div className="pt-2">
-                <Link href="/products?category=attar" className="inline-block w-full sm:w-auto">
-                  <Button className="w-full sm:w-auto bg-[#D4AF37] text-white hover:bg-white hover:text-black rounded-xl px-6 py-3.5 uppercase tracking-wider text-xs font-bold transition-all shadow-md">
-                    Shop Attar Collection →
+
+              <div className="space-y-2">
+                <p className="text-[#D4AF37] text-base sm:text-xl font-semibold tracking-wide">
+                  Up to 90% OFF + Free delivery all over india
+                </p>
+                <p className="text-neutral-300 text-xs sm:text-sm leading-relaxed max-w-lg font-sans">
+                  Elevate your presence with long-lasting Extrait de Parfum and artisanal pure attars. 
+                </p>
+                <div className="inline-flex items-center gap-1.5 bg-white/5 border border-white/10 px-3 py-1 rounded-lg text-[11px] text-neutral-300 mt-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>* Free delivery offers valid in India only.</span>
+                </div>
+              </div>
+
+              <div className="pt-3">
+                <Link href="/products" className="inline-block w-full sm:w-auto">
+                  <Button className="w-full sm:w-auto bg-[#D4AF37] text-white hover:bg-white hover:text-black rounded-xl px-7 py-3.5 uppercase tracking-wider text-xs font-bold transition-all shadow-md">
+                    Claim Offer & Shop Now →
                   </Button>
                 </Link>
               </div>
             </div>
 
-            {/* Desktop Visual Image (>= lg) */}
-            <div className="hidden lg:block lg:col-span-5 relative lg:h-full min-h-[340px]">
+            {/* Desktop Visual Image (Original Jennyd Product - >= lg) */}
+            <div className="hidden lg:block lg:col-span-5 relative lg:h-full min-h-[380px] bg-black/40">
               <Image
-                src="https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?q=80&w=1600"
-                alt="Artisanal Attars"
+                src="/assets/product image 1.jpeg"
+                alt="Jennyd Luxury Signature Perfume"
                 fill
                 unoptimized
-                className="object-cover opacity-90"
+                className="object-cover object-center filter brightness-105 contrast-105"
               />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#121212] via-transparent to-transparent" />
             </div>
 
           </div>
@@ -874,61 +1026,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── 10. Global Logistics & Delivery Partners (Infinite Auto-Scrolling Marquee) ── */}
-      <section className="py-10 sm:py-20 bg-white border-t border-[#EAE7E1] overflow-hidden w-full">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 text-center mb-6 sm:mb-10">
-          <span className="text-[#D4AF37] uppercase tracking-[0.3em] text-[10px] sm:text-xs font-bold font-sans block mb-1">
-            Global Fulfillment & Express Shipping
-          </span>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif text-[#121212]">
-            Our Global Delivery Partners
-          </h2>
-          <p className="text-neutral-500 text-xs sm:text-sm mt-1.5 max-w-xl mx-auto font-sans leading-relaxed">
-            Fast, insured, and trackable express shipping to over 220+ countries worldwide through our trusted courier networks.
-          </p>
-          <div className="w-12 h-[2px] bg-[#D4AF37] mx-auto mt-2.5" />
-        </div>
-
-        {/* Auto-Scrolling Infinite Marquee */}
-        <div className="w-full relative overflow-hidden bg-[#FAF8F5] py-5 sm:py-8 border-y border-[#EAE7E1]">
-          {/* Fade overlays for smooth edge transition */}
-          <div className="absolute left-0 top-0 bottom-0 w-12 sm:w-36 bg-gradient-to-r from-[#FAF8F5] via-[#FAF8F5]/80 to-transparent z-10 pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-36 bg-gradient-to-l from-[#FAF8F5] via-[#FAF8F5]/80 to-transparent z-10 pointer-events-none" />
-
-          <div className="w-full overflow-x-auto no-scrollbar">
-            <div className="animate-marquee-medium flex items-center gap-4 sm:gap-10 md:gap-12">
-              {[...Array(3)].map((_, listIdx) => (
-                <div key={listIdx} className="flex items-center gap-4 sm:gap-10 md:gap-12 shrink-0">
-                  {DELIVERY_PARTNERS.map((partner, idx) => (
-                    <div
-                      key={`${listIdx}-${idx}-${partner.short}`}
-                      className="flex flex-col items-center justify-center shrink-0 group cursor-pointer w-24 sm:w-36 md:w-44"
-                    >
-                      {/* Logo Card Badge */}
-                      <div className={`w-24 sm:w-36 md:w-44 h-12 sm:h-16 md:h-18 rounded-lg sm:rounded-xl flex items-center justify-center p-2 sm:p-4 transition-all duration-300 group-hover:scale-105 shadow-2xs group-hover:shadow-lg ${partner.color} border border-black/5`}>
-                        {partner.short === "FedEx" ? (
-                          <span className="text-sm sm:text-xl md:text-2xl tracking-tight font-extrabold font-sans">
-                            Fed<span className="text-[#FF6600]">Ex</span>
-                          </span>
-                        ) : (
-                          <span className="text-xs sm:text-lg md:text-xl tracking-tight font-extrabold text-center font-sans line-clamp-1">
-                            {partner.logoText}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Subtext description below badge */}
-                      <span className="text-[9px] sm:text-[10px] text-neutral-500 font-medium font-sans mt-1 sm:mt-2 text-center group-hover:text-[#D4AF37] transition-colors truncate max-w-[90px] sm:max-w-none">
-                        {partner.desc}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Quick View Modal */}
+      <QuickViewModal
+        product={quickViewProduct}
+        isOpen={isQuickViewOpen}
+        onClose={() => setIsQuickViewOpen(false)}
+      />
 
     </div>
   );

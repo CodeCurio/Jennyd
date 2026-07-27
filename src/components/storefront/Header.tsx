@@ -83,7 +83,7 @@ export function Header() {
       {/* ── Announcement Bar ── */}
       {(!settings || settings.announcement_bar_active !== false) && (
         <div
-          className="w-full h-8 flex items-center justify-center relative z-50 overflow-hidden"
+          className="w-full h-6 flex items-center justify-center relative z-50 overflow-hidden"
           style={{
             backgroundColor: settings?.announcement_bar_color || "#000000",
             color: settings?.announcement_bar_text_color || "#ffffff",
@@ -137,7 +137,7 @@ export function Header() {
       >
         {/* ── Row 1: Logo | Search | Icons ── */}
         <div className="border-b border-gray-100">
-          <div className="max-w-7xl mx-auto px-4 lg:px-6 h-[80px] hidden md:flex items-center justify-between gap-6 lg:gap-10">
+          <div className="max-w-7xl mx-auto px-4 lg:px-6 h-[60px] hidden md:flex items-center justify-between gap-6 lg:gap-10">
 
             {/* Logo */}
             <Link href="/" className="shrink-0 flex items-center">
@@ -209,7 +209,7 @@ export function Header() {
         {/* ── Row 2: Navigation Strip ── */}
         <div className="hidden md:block border-b border-gray-100 relative">
           <div className="max-w-7xl mx-auto px-4 lg:px-6 relative">
-            <nav className="flex items-center justify-center h-12">
+            <nav className="flex items-center justify-center h-9">
               {NAV_LINKS.map((link, index) => (
                 <div
                   key={link.label}

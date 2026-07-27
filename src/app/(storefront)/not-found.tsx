@@ -10,7 +10,7 @@ export default function NotFound() {
   return (
     <div className="min-h-[70vh] bg-background flex items-center justify-center px-4 py-20 font-sans text-[#1A1A1A]">
       <div className="max-w-xl w-full text-center space-y-8">
-        
+
         {/* Large Decorative 404 Header */}
         <div className="relative inline-block">
           <span className="text-8xl sm:text-9xl font-serif font-extrabold text-neutral-100 select-none tracking-widest">
@@ -42,7 +42,7 @@ export default function NotFound() {
           >
             <Home className="w-4 h-4" /> Back To Home
           </Link>
-          
+
           <Link
             href="/products"
             className="bg-white text-[#1A1A1A] border border-neutral-300 hover:border-black px-7 py-3.5 text-xs font-bold uppercase tracking-widest transition-colors inline-flex items-center gap-2"

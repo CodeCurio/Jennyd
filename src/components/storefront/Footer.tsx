@@ -2,7 +2,18 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { FooterLanguageSelector, FooterCurrencySelector } from "./FooterLanguageSelector";
 import { NewsletterForm } from "./NewsletterForm";
-import { MapPin, Phone, Mail, Clock, ShieldCheck, Lock, Award, Heart } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, ShieldCheck, Lock, Award, Heart, Truck } from "lucide-react";
+
+const DELIVERY_PARTNERS = [
+  { name: "FedEx Express", short: "FedEx", logoText: "FedEx", color: "bg-[#4D148C] text-white font-sans font-bold", desc: "Priority Express" },
+  { name: "DHL Express", short: "DHL", logoText: "DHL", color: "bg-[#FFCC00] text-[#D40511] font-sans font-extrabold italic", desc: "Global Air Freight" },
+  { name: "UPS Worldwide", short: "UPS", logoText: "UPS", color: "bg-[#351C15] text-[#FFB500] font-sans font-bold", desc: "Global Logistics" },
+  { name: "Aramex Express", short: "Aramex", logoText: "aramex", color: "bg-[#E31837] text-white font-sans font-bold", desc: "Middle East & Asia" },
+  { name: "Blue Dart", short: "Blue Dart", logoText: "BLUE DART", color: "bg-[#003399] text-[#FFCC00] font-sans font-extrabold italic", desc: "South Asia Express" },
+  { name: "India Post EMS", short: "India Post", logoText: "India Post", color: "bg-[#D2232A] text-white font-sans font-bold", desc: "Speed Post Int'l" },
+  { name: "Delhivery", short: "Delhivery", logoText: "DELHIVERY", color: "bg-[#111111] text-white font-sans font-bold", desc: "Express Air" },
+  { name: "DTDC Express", short: "DTDC", logoText: "DTDC", color: "bg-[#0A2540] text-[#E31837] font-sans font-extrabold", desc: "Global Network" }
+];
 
 const InstagramIcon = ({ size = 18 }: { size?: number }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
@@ -311,6 +322,59 @@ export async function Footer() {
             <VisaLogo />
             <MastercardLogo />
             <RuPayLogo />
+          </div>
+        </div>
+      </div>
+
+      {/* ── 3.5 Global Delivery Partners Auto-Scrolling Marquee (Below Razorpay) ── */}
+      <div className="w-full py-6 border-t border-neutral-800/80 relative z-10 overflow-hidden">
+        <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 text-center mb-4">
+          <div className="flex items-center justify-center gap-2 text-xs text-neutral-300">
+            <Truck className="w-4 h-4 text-[#D4AF37]" />
+            <span className="font-semibold text-white uppercase tracking-widest text-xs font-sans">Global Fulfillment & Express Delivery Partners</span>
+          </div>
+          <span className="text-[11px] text-neutral-400 font-sans block mt-1">
+            Fast, insured, and trackable express shipping to over 220+ countries worldwide through our trusted courier networks.
+          </span>
+        </div>
+
+        {/* Continuous Auto-Scrolling Infinite Marquee Slider */}
+        <div className="w-full relative overflow-hidden bg-[#121212]/80 py-4 border-y border-white/5">
+          {/* Fade overlays for smooth edge transition in dark footer theme */}
+          <div className="absolute left-0 top-0 bottom-0 w-12 sm:w-36 bg-gradient-to-r from-[#0A0A0A] via-[#0A0A0A]/80 to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-36 bg-gradient-to-l from-[#0A0A0A] via-[#0A0A0A]/80 to-transparent z-10 pointer-events-none" />
+
+          <div className="w-full overflow-x-auto no-scrollbar">
+            <div className="animate-marquee-medium flex items-center gap-4 sm:gap-10 md:gap-12">
+              {[...Array(3)].map((_, listIdx) => (
+                <div key={listIdx} className="flex items-center gap-4 sm:gap-10 md:gap-12 shrink-0">
+                  {DELIVERY_PARTNERS.map((partner, idx) => (
+                    <div
+                      key={`${listIdx}-${idx}-${partner.short}`}
+                      className="flex flex-col items-center justify-center shrink-0 group cursor-pointer w-28 sm:w-36 md:w-44"
+                    >
+                      {/* Logo Card Badge */}
+                      <div className={`w-28 sm:w-36 md:w-44 h-11 sm:h-14 md:h-16 rounded-lg sm:rounded-xl flex items-center justify-center p-2 sm:p-3.5 transition-all duration-300 group-hover:scale-105 shadow-2xs group-hover:shadow-lg ${partner.color} border border-black/10`}>
+                        {partner.short === "FedEx" ? (
+                          <span className="text-sm sm:text-lg md:text-xl tracking-tight font-extrabold font-sans">
+                            Fed<span className="text-[#FF6600]">Ex</span>
+                          </span>
+                        ) : (
+                          <span className="text-xs sm:text-base md:text-lg tracking-tight font-extrabold text-center font-sans line-clamp-1">
+                            {partner.logoText}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Subtext description below badge */}
+                      <span className="text-[9px] sm:text-[10px] text-neutral-400 font-medium font-sans mt-1.5 text-center group-hover:text-[#D4AF37] transition-colors truncate max-w-[100px] sm:max-w-none">
+                        {partner.desc}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
