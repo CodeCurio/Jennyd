@@ -18,7 +18,7 @@ const NAV_LINKS = [
   { href: "/products?category=men", label: "Men" },
   { href: "/products?category=women", label: "Women" },
   { href: "/products?category=unisex", label: "Unisex" },
-  { href: "/social-impact", label: "Beauty with a Purpose" },
+  { href: "/social-impact", label: "Social Reforms" },
   { href: "/about", label: "About Us" },
   { href: "/contact", label: "Contact Us" },
 ];

@@ -36,7 +36,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        router.push("/admin/login");
+        setTimeout(() => router.push("/admin/login"), 0);
         return;
       }
 
@@ -49,7 +49,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       if (profile?.role === "admin") {
         setIsAuthorized(true);
       } else {
-        router.push("/admin/login");
+        setTimeout(() => router.push("/admin/login"), 0);
       }
       setIsLoading(false);
     };

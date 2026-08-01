@@ -211,7 +211,9 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
     setPriceMin(absoluteMinPrice);
     setPriceMax(absoluteMaxPrice);
     setSortOrder("featured");
-    router.push(pathname, { scroll: false });
+    setTimeout(() => {
+      router.push(pathname, { scroll: false });
+    }, 0);
   };
 
   const handlePricePreset = (presetValue: string) => {
@@ -231,7 +233,9 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
       }
     }
     const qs = params.toString();
-    router.push(`${pathname}${qs ? `?${qs}` : ""}`, { scroll: false });
+    setTimeout(() => {
+      router.push(`${pathname}${qs ? `?${qs}` : ""}`, { scroll: false });
+    }, 0);
   };
 
   const activeFilterCount = (activeCategory !== "All" ? 1 : 0) +

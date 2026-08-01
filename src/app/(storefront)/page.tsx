@@ -6,6 +6,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { QuickViewModal } from "@/components/storefront/QuickViewModal";
+import { VideoShowcase } from "@/components/storefront/VideoShowcase";
+import { TopVideoBar } from "@/components/storefront/TopVideoBar";
 import { useCart } from "@/lib/store/CartContext";
 import { useToast } from "@/components/ui/Toast";
 import { useState, useEffect } from "react";
@@ -430,6 +432,9 @@ export default function Home() {
   return (
     <div className="flex flex-col bg-[#FAF8F5] selection:bg-[#D4AF37] selection:text-white font-sans overflow-hidden">
       
+      {/* ── Top Video Bar (Above Hero Section) ── */}
+      <TopVideoBar />
+
       {/* ── 1. Hero Carousel (Mobile & Desktop Viewport Optimized) ── */}
       <section className="relative w-full h-[210px] min-h-[190px] sm:h-auto sm:aspect-[2007/784] overflow-hidden group bg-[#121212]">
         {slides.map((slide, i) => {
@@ -1011,6 +1016,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* ── Video Reel Showcase (Above Reviews Section) ── */}
+      <VideoShowcase />
 
       {/* ── 9. Customer Endorsements & Reviews ── */}
       <section className="py-16 md:py-24 bg-white border-t border-[#EAE7E1]">

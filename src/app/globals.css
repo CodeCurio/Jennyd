@@ -150,16 +150,17 @@ body {
 select.goog-te-combo {
   background-color: #ffffff !important;
   color: #1a1a1a !important;
-  border: 1px solid #e5e7eb !important;
-  border-radius: 12px !important;
-  padding: 10px 16px !important;
-  font-size: 14px !important;
+  border: 1px solid rgba(212, 175, 55, 0.4) !important;
+  border-radius: 16px !important;
+  padding: 12px 18px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
   font-family: var(--font-sans) !important;
   outline: none !important;
   cursor: pointer !important;
   width: 100% !important;
-  max-width: 320px !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+  max-width: 100% !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
   transition: all 0.25s ease-in-out !important;
   appearance: none !important; /* Hide native browser arrow */
   background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23D4AF37' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
@@ -171,12 +172,12 @@ select.goog-te-combo {
 
 select.goog-te-combo:hover {
   border-color: #D4AF37 !important;
-  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.08) !important;
+  box-shadow: 0 4px 14px rgba(212, 175, 55, 0.15) !important;
 }
 
 select.goog-te-combo:focus {
   border-color: #D4AF37 !important;
-  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15) !important;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2) !important;
 }
 
 /* Remove default inline branding and logo spacing inside widget container */

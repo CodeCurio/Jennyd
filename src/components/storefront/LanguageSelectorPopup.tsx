@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { Globe, X, Loader2 } from "lucide-react";
+import { Globe, X, Loader2, Coins, Languages } from "lucide-react";
 import { useCurrency, SUPPORTED_CURRENCIES } from "@/lib/store/CurrencyContext";
 
 declare global {
@@ -17,6 +17,7 @@ declare global {
 export function LanguageSelectorPopup() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"language" | "currency">("language");
   const [isTranslateLoaded, setIsTranslateLoaded] = useState(false);
   const { currency, setCurrency } = useCurrency();
 
@@ -46,12 +47,14 @@ export function LanguageSelectorPopup() {
   };
 
   useEffect(() => {
-    // 1. Register global trigger callback for header and footer icons
+    // 1. Register global trigger callbacks for header and footer icons
     window.showLanguageSelector = () => {
+      setActiveTab("language");
       setIsOpen(true);
     };
 
     window.showCurrencySelector = () => {
+      setActiveTab("currency");
       setIsOpen(true);
     };
 
@@ -59,10 +62,13 @@ export function LanguageSelectorPopup() {
     window.googleTranslateElementInit = () => {
       try {
         if (window.google && window.google.translate) {
-          new window.google.translate.TranslateElement({
-            pageLanguage: 'en',
-            autoDisplay: false
-          }, 'google_translate_element');
+          new window.google.translate.TranslateElement(
+            {
+              pageLanguage: "en",
+              autoDisplay: false,
+            },
+            "google_translate_element"
+          );
           setIsTranslateLoaded(true);
         }
       } catch (e) {
@@ -86,40 +92,37 @@ export function LanguageSelectorPopup() {
       setIsTranslateLoaded(true);
     }
 
-    // 4. Open the modal on first load or browser refresh
-    setIsOpen(true);
-    
-    // Auto-apply saved language preference on load if it exists
-    const savedLang = localStorage.getItem("user-language-pref");
+    // Auto-apply saved language preference on load if it exists (defaults to English "en")
+    const savedLang = localStorage.getItem("user-language-pref") || "en";
     if (savedLang && savedLang !== "en") {
       applySavedLanguage(savedLang);
     }
   }, []);
 
-  // 5. On page transitions (route changes), translate silently in the background (DO NOT open popup)
+  // On page transitions (route changes), translate silently in the background
   useEffect(() => {
-    const savedLang = localStorage.getItem("user-language-pref");
+    const savedLang = localStorage.getItem("user-language-pref") || "en";
     if (savedLang && savedLang !== "en") {
       applySavedLanguage(savedLang);
     }
   }, [pathname]);
 
-  // 6. Listen for changes in Google's native dropdown selector
+  // Listen for changes in Google's native dropdown selector
   useEffect(() => {
     const handleNativeChange = (e: Event) => {
       const target = e.target as HTMLSelectElement;
       if (target && target.classList.contains("goog-te-combo")) {
-        const selectedLang = target.value;
+        const selectedLang = target.value || "en";
         localStorage.setItem("user-language-pref", selectedLang);
         setLanguageCookie(selectedLang);
         
-        // Notify other trigger components (like the footer language button) to update their label
+        // Notify other trigger components to update their label
         window.dispatchEvent(new Event("languageChanged"));
         
         // Close modal automatically after selection
         setTimeout(() => {
           setIsOpen(false);
-        }, 800);
+        }, 600);
       }
     };
 
@@ -156,72 +159,87 @@ export function LanguageSelectorPopup() {
         {/* Heading */}
         <div className="text-center space-y-2">
           <div className="mx-auto w-12 h-12 rounded-full bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37] mb-2">
-            <Globe className="w-6 h-6" />
+            {activeTab === "language" ? <Globe className="w-6 h-6" /> : <Coins className="w-6 h-6" />}
           </div>
-          <h3 className="text-2xl font-serif font-normal text-gray-900 tracking-wide text-center">Preferences</h3>
+          <h3 className="text-2xl font-serif font-normal text-gray-900 tracking-wide text-center">
+            Regional Preferences
+          </h3>
           <p className="text-xs text-gray-400 font-light max-w-[280px] leading-relaxed text-center">
-            Choose your preferred language and currency options below.
+            {activeTab === "language" 
+              ? "Choose your preferred language from the dropdown menu to translate the page."
+              : "Choose your preferred store currency from the list below."}
           </p>
         </div>
 
-        {/* Language Dropdown Container */}
-        <div className="w-full flex flex-col gap-1.5">
-          <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
-            Select Language
-          </label>
-          <div className="w-full flex flex-col items-center justify-center min-h-[60px] border border-neutral-100 rounded-2xl p-3 bg-neutral-50/50">
-            {!isTranslateLoaded && (
-              <div className="flex items-center justify-center gap-2 text-xs text-gray-400 font-light animate-pulse">
-                <Loader2 className="w-4 h-4 animate-spin text-[#D4AF37]" />
-                Configuring translation options...
-              </div>
-            )}
-            {/* Mount point for Google Translate dropdown */}
-            <div 
-              id="google_translate_element" 
-              className={`w-full flex justify-center transition-opacity duration-300 ${
-                isTranslateLoaded ? "opacity-100" : "opacity-0 pointer-events-none h-0"
-              }`} 
-            />
-          </div>
+        {/* Tab Switcher */}
+        <div className="grid grid-cols-2 p-1 bg-neutral-100 rounded-xl w-full text-xs font-medium">
+          <button
+            type="button"
+            onClick={() => setActiveTab("language")}
+            className={`py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+              activeTab === "language" 
+                ? "bg-white text-black shadow-xs font-semibold" 
+                : "text-gray-500 hover:text-black"
+            }`}
+          >
+            <Languages className="w-3.5 h-3.5 text-[#D4AF37]" />
+            Language
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("currency")}
+            className={`py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+              activeTab === "currency" 
+                ? "bg-white text-black shadow-xs font-semibold" 
+                : "text-gray-500 hover:text-black"
+            }`}
+          >
+            <Coins className="w-3.5 h-3.5 text-[#D4AF37]" />
+            Currency ({currency})
+          </button>
         </div>
 
-        {/* Currency selection block */}
-        <div className="w-full flex flex-col gap-1.5">
-          <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
-            Select Currency
-          </label>
-          <div className="relative w-full">
-            <select
-              value={currency}
-              onChange={(e) => {
-                setCurrency(e.target.value);
-                // Close modal automatically after selection
-                setTimeout(() => {
-                  setIsOpen(false);
-                }, 800);
-              }}
-              className="w-full px-4 py-3 bg-neutral-50/50 border border-neutral-150 rounded-2xl text-xs font-semibold text-gray-800 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all appearance-none cursor-pointer"
-            >
-              {SUPPORTED_CURRENCIES.map((c) => (
-                <option key={c.code} value={c.code}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-            {/* Custom arrow icon for the select */}
-            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-              </svg>
+        {/* Tab Content - Kept in DOM using CSS hidden to prevent Google Translate element destruction */}
+        <div className={`w-full flex-col items-center justify-center min-h-[70px] border border-neutral-100 rounded-2xl p-4 bg-neutral-50/50 ${activeTab === "language" ? "flex" : "hidden"}`}>
+          {!isTranslateLoaded && (
+            <div className="flex items-center justify-center gap-2 text-xs text-gray-400 font-light animate-pulse">
+              <Loader2 className="w-4 h-4 animate-spin text-[#D4AF37]" />
+              Configuring translation options...
             </div>
-          </div>
+          )}
+          {/* Mount point for Google Translate dropdown */}
+          <div 
+            id="google_translate_element" 
+            className={`w-full flex justify-center transition-opacity duration-300 ${
+              isTranslateLoaded ? "opacity-100" : "opacity-0 pointer-events-none h-0"
+            }`} 
+          />
+        </div>
+
+        <div className={`w-full flex-col items-center justify-center border border-neutral-100 rounded-2xl p-4 bg-neutral-50/50 gap-2 ${activeTab === "currency" ? "flex" : "hidden"}`}>
+          <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider block text-center w-full">
+            Select Currency ({SUPPORTED_CURRENCIES.length} Available)
+          </label>
+          <select
+            value={currency}
+            onChange={(e) => {
+              setCurrency(e.target.value);
+              setTimeout(() => setIsOpen(false), 400);
+            }}
+            className="w-full bg-white text-gray-900 border border-[#D4AF37]/40 rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20 shadow-xs cursor-pointer"
+          >
+            {SUPPORTED_CURRENCIES.map((c) => (
+              <option key={c.code} value={c.code}>
+                {c.code} - {c.name} ({c.symbol.trim()})
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Continue Button */}
         <button
           onClick={() => setIsOpen(false)}
-          className="w-full py-3 bg-black hover:bg-neutral-900 text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-all duration-300 active:scale-[0.98] shadow-xs cursor-pointer mt-2"
+          className="w-full py-3 bg-black hover:bg-neutral-900 text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-all duration-300 active:scale-[0.98] shadow-xs cursor-pointer"
         >
           Continue Shopping
         </button>
@@ -229,4 +247,3 @@ export function LanguageSelectorPopup() {
     </div>
   );
 }
-

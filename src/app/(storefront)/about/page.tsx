@@ -83,7 +83,7 @@ export default function AboutPage() {
               <div className="flex flex-col gap-2">
                 <span className="text-[#D4AF37] uppercase tracking-[0.3em] text-xs sm:text-sm font-bold">Our Responsibility</span>
                 <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif leading-tight font-normal text-foreground">
-                  Beauty with a Purpose
+                  Social Reforms & CSR Responsibility
                 </h2>
               </div>
               

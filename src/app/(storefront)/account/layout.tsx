@@ -26,14 +26,20 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
   // Redirect unauthenticated users to login (only for protected routes)
   useEffect(() => {
     if (!isLoading && !user && !isPublicRoute) {
-      router.push("/account/login");
+      const timer = setTimeout(() => {
+        router.push("/account/login");
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [isLoading, user, router, isPublicRoute]);
 
   // If logged in user visits login/signup, redirect to dashboard
   useEffect(() => {
     if (!isLoading && user && isPublicRoute) {
-      router.push("/account");
+      const timer = setTimeout(() => {
+        router.push("/account");
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [isLoading, user, router, isPublicRoute]);
 

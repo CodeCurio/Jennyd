@@ -6,6 +6,7 @@ import { ToastProvider } from "@/components/ui/Toast";
 import { AuthProvider } from "@/lib/store/AuthContext";
 import { LanguageSelectorPopup } from "@/components/storefront/LanguageSelectorPopup";
 import { CurrencyProvider } from "@/lib/store/CurrencyContext";
+import { WhatsAppButton } from "@/components/storefront/WhatsAppButton";
 
 export default function StorefrontLayout({
   children,
@@ -25,6 +26,7 @@ export default function StorefrontLayout({
               <Footer />
               <CartDrawer />
               <LanguageSelectorPopup />
+              <WhatsAppButton />
             </div>
           </CartProvider>
         </CurrencyProvider>

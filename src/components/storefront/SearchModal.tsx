@@ -115,7 +115,9 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
     saveRecentSearch(searchVal);
     onClose();
-    router.push(`/search?q=${encodeURIComponent(searchVal)}`);
+    setTimeout(() => {
+      router.push(`/search?q=${encodeURIComponent(searchVal)}`);
+    }, 0);
   };
 
   const saveRecentSearch = (searchVal: string) => {
@@ -141,13 +143,17 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
     setQuery(searchVal);
     saveRecentSearch(searchVal);
     onClose();
-    router.push(`/search?q=${encodeURIComponent(searchVal)}`);
+    setTimeout(() => {
+      router.push(`/search?q=${encodeURIComponent(searchVal)}`);
+    }, 0);
   };
 
   const handleProductClick = (slug: string, title: string) => {
     saveRecentSearch(title);
     onClose();
-    router.push(`/products/${slug}`);
+    setTimeout(() => {
+      router.push(`/products/${slug}`);
+    }, 0);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -310,7 +316,9 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                           key={idx}
                           onClick={() => {
                             onClose();
-                            router.push(cat.href);
+                            setTimeout(() => {
+                              router.push(cat.href);
+                            }, 0);
                           }}
                           className="flex items-center justify-between text-left text-xs uppercase font-semibold tracking-wider px-4 py-3 border border-black/5 hover:border-black transition-all duration-300 rounded-none bg-white hover:shadow-xs group cursor-pointer"
                         >

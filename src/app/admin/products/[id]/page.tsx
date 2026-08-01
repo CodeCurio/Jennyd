@@ -3,7 +3,7 @@
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Image as ImageIcon, Check, Loader2, UploadCloud, Search, Plus, Trash } from "lucide-react";
+import { ArrowLeft, Save, Image as ImageIcon, Check, Loader2, UploadCloud, Search, Plus, Trash, Clock, Calendar, SunMoon } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { supabase } from "@/lib/supabase";
 
@@ -35,6 +35,11 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const [stock, setStock] = useState("");
   const [sizeRows, setSizeRows] = useState<{ size: string; price: string; stock: string }[]>([]);
   
+  // Perfume Performance Attributes State
+  const [longevity, setLongevity] = useState("");
+  const [bestSeasons, setBestSeasons] = useState("");
+  const [idealTime, setIdealTime] = useState("");
+
   // Complex State
   const [selectedNotes, setSelectedNotes] = useState<Note[]>([]);
   const [images, setImages] = useState<(File | string | null)[]>([null, null, null, null]);
@@ -78,6 +83,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             setType(m.type || "");
             setBadge(m.badge || "");
             setDiscountTag(m.discountTag || "");
+            setLongevity(m.longevity || "");
+            setBestSeasons(m.bestSeasons || m.best_seasons || "");
+            setIdealTime(m.idealTime || m.ideal_time || "");
             
             if (m.sizes && Array.isArray(m.sizes)) {
               setSizeRows(m.sizes.map((s: any) => ({
@@ -184,6 +192,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         badge,
         type,
         discountTag,
+        longevity,
+        bestSeasons,
+        idealTime,
         notes: selectedNotes.map(n => ({ name: n.name, image: n.image_url })),
         images: uploadedImageUrls,
         sizes: formattedSizes,
@@ -227,7 +238,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   }
 
   return (
-    <div className="max-w-4xl mx-auto pb-24">
+    <div className="max-w-4xl mx-auto pb-24 font-sans">
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
           <Link href="/admin/products" className="p-2 bg-white rounded-full border border-gray-200 hover:bg-gray-50">
@@ -283,6 +294,92 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                 ))}
               </select>
             </div>
+          </div>
+        </div>
+
+        {/* Perfume Performance & Attributes (Longevity, Best Seasons, Ideal Time) */}
+        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm space-y-6">
+          <h2 className="text-lg font-bold border-b border-gray-100 pb-2 flex items-center gap-2">
+            <Clock className="w-5 h-5 text-[#D4AF37]" /> Perfume Performance & Attributes
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            {/* Longevity Option */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium flex items-center gap-1.5">
+                <Clock className="w-4 h-4 text-gray-500" /> Longevity (Duration)
+              </label>
+              <select 
+                value={longevity} 
+                onChange={e => setLongevity(e.target.value)} 
+                className="w-full border border-gray-300 rounded-md p-2.5 text-sm focus:ring-black focus:border-black font-semibold text-gray-850"
+              >
+                <option value="">Select Longevity</option>
+                <option value="6 - 8 Hours">6 - 8 Hours</option>
+                <option value="8 - 10 Hours">8 - 10 Hours</option>
+                <option value="10 - 12 Hours">10 - 12 Hours</option>
+                <option value="12 - 14+ Hours (Extrait)">12 - 14+ Hours (Extrait)</option>
+                <option value="14 - 24 Hours (Extreme)">14 - 24 Hours (Extreme)</option>
+              </select>
+              <input 
+                type="text" 
+                placeholder="Or type custom longevity..." 
+                value={longevity} 
+                onChange={e => setLongevity(e.target.value)} 
+                className="w-full border border-gray-200 rounded-md p-2 text-xs focus:ring-black focus:border-black mt-1" 
+              />
+            </div>
+
+            {/* Best Seasons Option */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium flex items-center gap-1.5">
+                <Calendar className="w-4 h-4 text-gray-500" /> Best Seasons
+              </label>
+              <select 
+                value={bestSeasons} 
+                onChange={e => setBestSeasons(e.target.value)} 
+                className="w-full border border-gray-300 rounded-md p-2.5 text-sm focus:ring-black focus:border-black font-semibold text-gray-850"
+              >
+                <option value="">Select Seasons</option>
+                <option value="All Seasons / Year-Round">All Seasons / Year-Round</option>
+                <option value="Autumn / Winter">Autumn / Winter</option>
+                <option value="Spring / Summer">Spring / Summer</option>
+                <option value="Monsoon / Rainy">Monsoon / Rainy</option>
+              </select>
+              <input 
+                type="text" 
+                placeholder="Or type custom seasons..." 
+                value={bestSeasons} 
+                onChange={e => setBestSeasons(e.target.value)} 
+                className="w-full border border-gray-200 rounded-md p-2 text-xs focus:ring-black focus:border-black mt-1" 
+              />
+            </div>
+
+            {/* Ideal Time Option */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium flex items-center gap-1.5">
+                <SunMoon className="w-4 h-4 text-gray-500" /> Ideal Time
+              </label>
+              <select 
+                value={idealTime} 
+                onChange={e => setIdealTime(e.target.value)} 
+                className="w-full border border-gray-300 rounded-md p-2.5 text-sm focus:ring-black focus:border-black font-semibold text-gray-850"
+              >
+                <option value="">Select Ideal Time</option>
+                <option value="All-Day & Any Time">All-Day & Any Time</option>
+                <option value="Evening & Special Night Out">Evening & Special Night Out</option>
+                <option value="Daytime & Office Wear">Daytime & Office Wear</option>
+                <option value="Night Parties & Festivals">Night Parties & Festivals</option>
+              </select>
+              <input 
+                type="text" 
+                placeholder="Or type custom ideal time..." 
+                value={idealTime} 
+                onChange={e => setIdealTime(e.target.value)} 
+                className="w-full border border-gray-200 rounded-md p-2 text-xs focus:ring-black focus:border-black mt-1" 
+              />
+            </div>
+
           </div>
         </div>
 

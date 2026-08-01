@@ -103,16 +103,16 @@ export async function Footer() {
       <div className="absolute left-1/2 top-0 -translate-x-1/2 w-[800px] h-[300px] bg-[#D4AF37]/5 rounded-full blur-3xl pointer-events-none" />
 
       {/* ── 1. Top Newsletter Section ── */}
-      <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 pb-14 border-b border-neutral-800/80 relative z-10">
-        <div className="bg-[#121212] border border-[#D4AF37]/25 rounded-2xl p-6 sm:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-2xl">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-16 pb-10 sm:pb-14 border-b border-neutral-800/80 relative z-10">
+        <div className="bg-[#121212] border border-[#D4AF37]/25 rounded-2xl sm:rounded-3xl p-4 sm:p-8 lg:p-10 flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-10 shadow-2xl">
           <div className="space-y-2 text-center lg:text-left max-w-xl">
-            <span className="text-[#D4AF37] uppercase tracking-[0.25em] text-[11px] font-bold font-sans">
+            <span className="text-[#D4AF37] uppercase tracking-[0.25em] text-[10px] sm:text-[11px] font-bold font-sans block">
               Private Fragrance Circle
             </span>
-            <h3 className="text-2xl sm:text-3xl font-serif text-white font-normal">
+            <h3 className="text-xl sm:text-2xl lg:text-3xl font-serif text-white font-normal leading-snug">
               Unlock Exclusive Offers & New Launches
             </h3>
-            <p className="text-neutral-400 text-xs sm:text-sm font-sans leading-relaxed">
+            <p className="text-neutral-400 text-xs sm:text-sm font-sans leading-relaxed font-light">
               Subscribe to receive private invitations to limited-edition perfume drops, bespoke scent recommendations, and special promotions.
             </p>
           </div>
@@ -216,7 +216,7 @@ export async function Footer() {
             </li>
             <li>
               <Link href="/social-impact" className="hover:text-[#D4AF37] hover:translate-x-1 transition-all inline-block text-[#D4AF37] font-semibold">
-                Beauty with a Purpose ❤️
+                Social Reforms & Impact ❤️
               </Link>
             </li>
           </ul>
