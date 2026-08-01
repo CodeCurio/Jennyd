@@ -431,6 +431,9 @@ export default function Home() {
   return (
     <div className="flex flex-col bg-[#FAF8F5] selection:bg-[#D4AF37] selection:text-white font-sans overflow-hidden">
       
+      {/* ── Primary SEO Heading ── */}
+      <h1 className="sr-only">Jennyd Scents — Luxury Extrait De Parfum &amp; Artisanal Pure Attars in India</h1>
+
       {/* ── 1. Hero Carousel (Mobile & Desktop Viewport Optimized) ── */}
       <section className="relative w-full h-[210px] min-h-[190px] sm:h-auto sm:aspect-[2007/784] overflow-hidden group bg-[#121212]">
         {slides.map((slide, i) => {

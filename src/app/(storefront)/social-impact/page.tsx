@@ -385,8 +385,25 @@ export default function SocialImpactPage() {
     }
   };
 
+  const socialImpactJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "NGO",
+    "name": "Jennyd Global Foundation",
+    "url": "https://jennydscents.com/social-impact",
+    "logo": "https://jennydscents.com/logo.png",
+    "description": "Jennyd Global Foundation directs corporate social reform funds to acid attack survivor rehabilitation, food security, clean water, education, blood donation, and tree planting drives.",
+    "parentOrganization": {
+      "@type": "Organization",
+      "name": "Jennyd Scents"
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-[#FDFBF7] font-sans text-neutral-800 selection:bg-[#D4AF37] selection:text-black">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(socialImpactJsonLd) }}
+      />
       
       {/* ── 1. Hero Section ── */}
       <section className="relative w-full py-20 sm:py-24 bg-[#0A0A0A] text-white border-b-2 border-[#D4AF37]/50 overflow-hidden">

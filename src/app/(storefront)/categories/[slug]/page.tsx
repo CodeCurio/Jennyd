@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import { supabase } from "@/lib/supabase";
 import { ProductListing } from "@/components/storefront/ProductListing";
 import Image from "next/image";
@@ -6,6 +7,36 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 
 export const revalidate = 60; 
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const resolvedParams = await params;
+  const slug = decodeURIComponent(resolvedParams.slug);
+
+  const { data: category } = await supabase
+    .from("categories")
+    .select("name, description")
+    .eq("slug", slug)
+    .single();
+
+  if (!category) {
+    return {
+      title: "Category Not Found | Jennyd Scents",
+    };
+  }
+
+  return {
+    title: `${category.name} Perfume Collection | Jennyd Scents`,
+    description: category.description || `Explore ${category.name} luxury fragrances and attars crafted by Jennyd Scents.`,
+    alternates: {
+      canonical: `https://jennydscents.com/categories/${encodeURIComponent(slug)}`,
+    },
+    openGraph: {
+      title: `${category.name} Perfume Collection | Jennyd Scents`,
+      description: category.description || `Explore ${category.name} luxury fragrances by Jennyd Scents.`,
+      url: `https://jennydscents.com/categories/${encodeURIComponent(slug)}`,
+    },
+  };
+}
 
 export default async function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = await params;

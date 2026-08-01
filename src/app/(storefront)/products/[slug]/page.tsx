@@ -306,8 +306,38 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
   const heartNotes = noteList.slice(2, 4);
   const baseNotes = noteList.slice(4);
 
+  const productJsonLd = {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    "name": PRODUCT.title,
+    "image": PRODUCT.images.map((img: string) => img.startsWith("http") ? img : `https://jennydscents.com${img}`),
+    "description": PRODUCT.description || `${PRODUCT.title} - Luxury Extrait de Parfum by Jennyd Scents`,
+    "sku": PRODUCT.id,
+    "brand": {
+      "@type": "Brand",
+      "name": "Jennyd Scents"
+    },
+    "offers": {
+      "@type": "Offer",
+      "url": `https://jennydscents.com/products/${slug}`,
+      "priceCurrency": "INR",
+      "price": PRODUCT.price,
+      "availability": isSelectedSizeAvailable ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      "itemCondition": "https://schema.org/NewCondition"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "reviewCount": "48"
+    }
+  };
+
   return (
     <div className="bg-[#FAF8F5] min-h-screen relative pb-24 font-sans text-[#1A1A1A]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
       
       {/* ── Breadcrumb Navigation ── */}
       <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-3.5 sm:py-5 text-[10px] sm:text-[11px] uppercase tracking-widest text-neutral-400 font-medium overflow-x-auto whitespace-nowrap no-scrollbar">

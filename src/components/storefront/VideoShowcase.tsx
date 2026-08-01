@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Play, 
@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-interface VideoItem {
+interface CinemaItem {
   id: string;
   src: string;
   title: string;
@@ -25,40 +25,40 @@ interface VideoItem {
   productLink?: string;
 }
 
-const VIDEOS: VideoItem[] = [
+const CINEMATIC_SHOWCASE: CinemaItem[] = [
   {
-    id: "v1",
+    id: "c1",
     src: "/assets/videos/video-1.mp4",
-    title: "Luxury Unboxing Experience",
-    subtitle: "Tamper-evident gold foil seal & heavy glass bottle",
-    badge: "UNBOXING",
+    title: "Deep Smoky Woods & Golden Amber",
+    subtitle: "Formulated with rare distilled Cambodian & Assam oud wood extracts",
+    badge: "ROYAL OUD EXTRAIT",
     productName: "Oud Royale Extrait",
     productLink: "/products/oud-royale"
   },
   {
-    id: "v2",
+    id: "c2",
     src: "/assets/videos/video-2.mp4",
-    title: "Artisanal Sillage & Projection",
-    subtitle: "24-hour ultra concentrated Extrait de Parfum",
-    badge: "INSIDE THE BOTTLE",
+    title: "Velvet Rose & Madagascar Vanilla",
+    subtitle: "Sensual floral petals warmth infused with rich warm vanilla notes",
+    badge: "FLORAL GOURMAND",
     productName: "Velvet Rose & Vanilla",
     productLink: "/products/velvet-rose"
   },
   {
-    id: "v3",
+    id: "c3",
     src: "/assets/videos/video-3.mp4",
-    title: "Customer Reactions & Favorites",
-    subtitle: "Loved by perfume connoisseurs across India",
-    badge: "VERIFIED REVIEWS",
+    title: "Midnight Amber & Warm Spices",
+    subtitle: "An intense evening fragrance crafted for a magnetic presence",
+    badge: "AMBER SPICE",
     productName: "Midnight Amber Intense",
     productLink: "/products/midnight-amber"
   },
   {
-    id: "v4",
+    id: "c4",
     src: "/assets/videos/video-4.mp4",
-    title: "Craftsmanship & Distillation",
-    subtitle: "Pure non-alcoholic attars & high end extracts",
-    badge: "THE CRAFT",
+    title: "Artisanal Non-Alcoholic Concentrates",
+    subtitle: "Traditional steam-distilled pure oil blends by master perfumers",
+    badge: "PURE ATTAR OILS",
     productName: "Ruh Khus Pure Attar",
     productLink: "/products/ruh-khus-attar"
   }
@@ -67,12 +67,12 @@ const VIDEOS: VideoItem[] = [
 export function VideoShowcase() {
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [mutedStates, setMutedStates] = useState<Record<string, boolean>>({
-    v1: true,
-    v2: true,
-    v3: true,
-    v4: true
+    c1: true,
+    c2: true,
+    c3: true,
+    c4: true
   });
-  const [activeModalVideo, setActiveModalVideo] = useState<VideoItem | null>(null);
+  const [activeModalItem, setActiveModalItem] = useState<CinemaItem | null>(null);
 
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({});
 
@@ -82,7 +82,6 @@ export function VideoShowcase() {
     if (!video) return;
 
     if (video.paused) {
-      // Pause all other videos
       Object.entries(videoRefs.current).forEach(([k, v]) => {
         if (k !== id && v) v.pause();
       });
@@ -102,8 +101,8 @@ export function VideoShowcase() {
     setMutedStates(prev => ({ ...prev, [id]: video.muted }));
   };
 
-  const openModal = (video: VideoItem) => {
-    setActiveModalVideo(video);
+  const openModal = (item: CinemaItem) => {
+    setActiveModalItem(item);
   };
 
   return (
@@ -117,20 +116,20 @@ export function VideoShowcase() {
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-12 md:mb-16 flex flex-col gap-2">
           <span className="text-[#D4AF37] uppercase tracking-[0.3em] text-[10px] sm:text-xs font-bold font-sans flex items-center justify-center gap-2">
-            <Sparkles className="w-3.5 h-3.5" /> Jennyd In Motion <Sparkles className="w-3.5 h-3.5" />
+            <Sparkles className="w-3.5 h-3.5" /> BEYOND THE FLACON <Sparkles className="w-3.5 h-3.5" />
           </span>
           <h2 className="text-2xl sm:text-4xl md:text-5xl font-serif text-white tracking-wide">
-            Visual Stories & Customer Reel Showcase
+            Visual Elegance &amp; Olfactory Aura
           </h2>
           <p className="text-neutral-400 text-xs sm:text-sm font-sans leading-relaxed max-w-md mx-auto">
-            Experience the texture, bottle craftsmanship, sillage, and unboxing moments captured live in high definition.
+            Immerse yourself in the sillage, bottle craftsmanship, and opulent aura of Jennyd Extrait de Parfum.
           </p>
           <div className="w-16 h-[2px] bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent mx-auto mt-2" />
         </div>
 
-        {/* 4 Video Grid Layout */}
+        {/* 4 Cards Grid Layout */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 lg:gap-8">
-          {VIDEOS.map((item) => {
+          {CINEMATIC_SHOWCASE.map((item) => {
             const isPlaying = playingId === item.id;
             const isMuted = mutedStates[item.id] ?? true;
 
@@ -140,7 +139,7 @@ export function VideoShowcase() {
                 onClick={() => openModal(item)}
                 className="group relative rounded-2xl overflow-hidden border border-white/10 bg-[#121212] hover:border-[#D4AF37]/60 transition-all duration-500 shadow-2xl hover:shadow-[#D4AF37]/20 cursor-pointer flex flex-col aspect-[9/16] sm:aspect-[9/15]"
               >
-                {/* Video Element */}
+                {/* Visual Canvas Element */}
                 <video
                   ref={(el) => { videoRefs.current[item.id] = el; }}
                   src={item.src}
@@ -163,14 +162,14 @@ export function VideoShowcase() {
                     <button
                       onClick={(e) => toggleMute(item.id, e)}
                       className="w-8 h-8 rounded-full bg-black/60 hover:bg-black/90 border border-white/20 hover:border-[#D4AF37] flex items-center justify-center text-white hover:text-[#D4AF37] transition-all backdrop-blur-md cursor-pointer"
-                      title={isMuted ? "Unmute" : "Mute"}
+                      title={isMuted ? "Audio Off" : "Audio On"}
                     >
                       {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4 text-[#D4AF37]" />}
                     </button>
                     <button
                       onClick={() => openModal(item)}
                       className="w-8 h-8 rounded-full bg-black/60 hover:bg-black/90 border border-white/20 hover:border-[#D4AF37] flex items-center justify-center text-white hover:text-[#D4AF37] transition-all backdrop-blur-md cursor-pointer"
-                      title="Expand Video"
+                      title="Expand View"
                     >
                       <Maximize2 className="w-3.5 h-3.5" />
                     </button>
@@ -200,7 +199,7 @@ export function VideoShowcase() {
                   <h3 className="font-serif text-base sm:text-lg font-bold text-white group-hover:text-[#D4AF37] transition-colors leading-snug">
                     {item.title}
                   </h3>
-                  <p className="text-[11px] text-neutral-300 font-sans line-clamp-2 leading-relaxed">
+                  <p className="text-[11px] text-neutral-300 font-sans line-clamp-2 leading-relaxed font-light">
                     {item.subtitle}
                   </p>
 
@@ -210,7 +209,7 @@ export function VideoShowcase() {
                         <ShoppingBag className="w-3 h-3" /> {item.productName}
                       </span>
                       <span className="text-white/70 group-hover:text-white flex items-center gap-0.5 font-bold uppercase tracking-wider text-[9px]">
-                        Watch <ArrowRight className="w-2.5 h-2.5 text-[#D4AF37]" />
+                        Explore Aura <ArrowRight className="w-2.5 h-2.5 text-[#D4AF37]" />
                       </span>
                     </div>
                   )}
@@ -222,15 +221,15 @@ export function VideoShowcase() {
 
       </div>
 
-      {/* Fullscreen Video Modal Lightbox */}
+      {/* Fullscreen Lightbox Modal */}
       <AnimatePresence>
-        {activeModalVideo && (
+        {activeModalItem && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-3 sm:p-6"
-            onClick={() => setActiveModalVideo(null)}
+            onClick={() => setActiveModalItem(null)}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
@@ -243,20 +242,20 @@ export function VideoShowcase() {
               {/* Modal Top Control Bar */}
               <div className="absolute top-4 inset-x-4 flex items-center justify-between z-30">
                 <span className="bg-black/70 border border-[#D4AF37]/50 text-[#D4AF37] text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full backdrop-blur-md">
-                  {activeModalVideo.badge}
+                  {activeModalItem.badge}
                 </span>
 
                 <button
-                  onClick={() => setActiveModalVideo(null)}
+                  onClick={() => setActiveModalItem(null)}
                   className="w-10 h-10 rounded-full bg-black/70 hover:bg-black border border-white/20 hover:border-white text-white flex items-center justify-center backdrop-blur-md transition-all cursor-pointer shadow-lg"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              {/* Modal Main Video */}
+              {/* Modal Main Visual Canvas */}
               <video
-                src={activeModalVideo.src}
+                src={activeModalItem.src}
                 controls
                 autoPlay
                 playsInline
@@ -266,21 +265,21 @@ export function VideoShowcase() {
               {/* Modal Bottom Detail Drawer */}
               <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black via-black/90 to-transparent p-6 z-30 flex flex-col gap-2">
                 <h3 className="font-serif text-2xl font-bold text-white leading-tight">
-                  {activeModalVideo.title}
+                  {activeModalItem.title}
                 </h3>
-                <p className="text-xs text-neutral-300 font-sans leading-relaxed">
-                  {activeModalVideo.subtitle}
+                <p className="text-xs text-neutral-300 font-sans leading-relaxed font-light">
+                  {activeModalItem.subtitle}
                 </p>
 
-                {activeModalVideo.productLink && (
+                {activeModalItem.productLink && (
                   <div className="pt-3">
                     <Link
-                      href={activeModalVideo.productLink}
-                      onClick={() => setActiveModalVideo(null)}
+                      href={activeModalItem.productLink}
+                      onClick={() => setActiveModalItem(null)}
                       className="inline-flex items-center justify-center gap-2 w-full py-3 bg-[#D4AF37] hover:bg-white text-black font-bold uppercase tracking-wider text-xs rounded-xl transition-colors shadow-lg"
                     >
                       <ShoppingBag className="w-4 h-4" />
-                      <span>Shop {activeModalVideo.productName}</span>
+                      <span>Discover {activeModalItem.productName}</span>
                     </Link>
                   </div>
                 )}

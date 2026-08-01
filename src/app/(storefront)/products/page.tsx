@@ -1,9 +1,23 @@
+import { Metadata } from "next";
 import { supabase } from "@/lib/supabase";
 import { ProductListing } from "@/components/storefront/ProductListing";
 import Image from "next/image";
 import { Suspense } from "react";
 
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: "All Luxury Perfumes & Pure Attars | Jennyd Scents",
+  description: "Browse the complete collection of Jennyd Scents. High-concentration Extrait de Parfum, artisanal non-alcoholic pure attars, zodiac scents, and luxury unisex fragrances with 24-hour sillage.",
+  alternates: {
+    canonical: "https://jennydscents.com/products",
+  },
+  openGraph: {
+    title: "All Luxury Perfumes & Pure Attars | Jennyd Scents",
+    description: "Browse the complete collection of Jennyd Scents. High-concentration Extrait de Parfum & artisanal attars.",
+    url: "https://jennydscents.com/products",
+  },
+};
 
 export default async function ProductsPage() {
   const { data: products, error } = await supabase
