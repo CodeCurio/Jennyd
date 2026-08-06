@@ -63,6 +63,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Listen for auth state changes
   useEffect(() => {
+    // Save initial hash & search BEFORE Supabase SDK clears them
+    const initialHash = typeof window !== "undefined" ? window.location.hash : "";
+    const initialSearch = typeof window !== "undefined" ? window.location.search : "";
+    const isEmailVerificationLink = 
+      initialHash.includes("access_token") || 
+      initialHash.includes("type=signup") || 
+      initialSearch.includes("code=");
+
     // Get initial session
     const initSession = async () => {
       try {
@@ -71,6 +79,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(currentSession?.user ?? null);
         if (currentSession?.user) {
           await fetchProfile(currentSession.user.id);
+
+          // If user arrived via confirmation link, redirect to /account or /checkout
+          if (isEmailVerificationLink && typeof window !== "undefined") {
+            const currentPath = window.location.pathname;
+            const targetPath = currentPath === "/checkout" ? "/checkout" : "/account";
+
+            try {
+              window.history.replaceState(null, "", targetPath);
+            } catch (e) {}
+
+            if (currentPath !== targetPath) {
+              window.location.href = targetPath;
+              return;
+            }
+          }
         }
       } catch (err) {
         console.warn("Supabase Auth session initialization failed (likely network error or blocked by adblocker):", err);
@@ -88,29 +111,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(newSession?.user ?? null);
         if (newSession?.user) {
           await fetchProfile(newSession.user.id);
-        } else {
-          setProfile(null);
-        }
-        setIsLoading(false);
 
-        // Handle email confirmation token redirection (#access_token=... or code=...)
-        if (typeof window !== "undefined" && newSession?.user) {
-          const hash = window.location.hash;
-          const search = window.location.search;
-          if (hash.includes("access_token") || hash.includes("type=signup") || search.includes("code=")) {
+          if (isEmailVerificationLink && typeof window !== "undefined") {
             const currentPath = window.location.pathname;
             const targetPath = currentPath === "/checkout" ? "/checkout" : "/account";
-
-            // Clean address bar URL
             try {
               window.history.replaceState(null, "", targetPath);
             } catch (e) {}
-
             if (currentPath !== targetPath) {
               window.location.href = targetPath;
             }
           }
+        } else {
+          setProfile(null);
         }
+        setIsLoading(false);
       }
     );
 
