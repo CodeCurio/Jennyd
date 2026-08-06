@@ -26,11 +26,13 @@ export const sendOrderReceiptEmail = async (
     const resend = getResendClient();
     if (!resend) {
       console.warn("RESEND_API_KEY is not set. Skipping email send.");
-      return { success: false, error: "API Key missing" };
+      return { success: false, error: "RESEND_API_KEY environment variable is missing on Vercel." };
     }
 
-    const { data, error } = await resend.emails.send({
-      from: SENDER_EMAIL,
+    const preferredSender = process.env.RESEND_SENDER_EMAIL || "onboarding@resend.dev";
+
+    let { data, error } = await resend.emails.send({
+      from: preferredSender,
       to: email,
       subject: `Order Confirmation - ${orderNumber}`,
       react: OrderReceiptEmail({
@@ -42,15 +44,35 @@ export const sendOrderReceiptEmail = async (
       }),
     });
 
+    // If preferred sender failed (e.g., domain unverified), fallback to onboarding@resend.dev
+    if (error && preferredSender !== "onboarding@resend.dev") {
+      console.warn("Preferred sender failed, retrying with onboarding@resend.dev:", error);
+      const fallbackRes = await resend.emails.send({
+        from: "onboarding@resend.dev",
+        to: email,
+        subject: `Order Confirmation - ${orderNumber}`,
+        react: OrderReceiptEmail({
+          orderNumber,
+          customerName,
+          totalAmount,
+          items,
+          shippingAddress
+        }),
+      });
+      data = fallbackRes.data;
+      error = fallbackRes.error;
+    }
+
     if (error) {
-      console.error("Resend API Error:", error);
-      return { success: false, error };
+      const errorMsg = typeof error === "object" ? (error.message || JSON.stringify(error)) : String(error);
+      console.error("Resend API Error:", errorMsg);
+      return { success: false, error: errorMsg };
     }
 
     return { success: true, data };
   } catch (err: any) {
     console.error("Error sending receipt email:", err);
-    return { success: false, error: err.message };
+    return { success: false, error: err.message || "Failed to send receipt email." };
   }
 };
 
@@ -65,11 +87,13 @@ export const sendOrderShippedEmail = async (
     const resend = getResendClient();
     if (!resend) {
       console.warn("RESEND_API_KEY is not set. Skipping email send.");
-      return { success: false, error: "API Key missing" };
+      return { success: false, error: "RESEND_API_KEY environment variable is missing on Vercel." };
     }
 
-    const { data, error } = await resend.emails.send({
-      from: SENDER_EMAIL,
+    const preferredSender = process.env.RESEND_SENDER_EMAIL || "onboarding@resend.dev";
+
+    let { data, error } = await resend.emails.send({
+      from: preferredSender,
       to: email,
       subject: `Your Order ${orderNumber} has been shipped!`,
       react: OrderShippedEmail({
@@ -80,14 +104,31 @@ export const sendOrderShippedEmail = async (
       }),
     });
 
+    if (error && preferredSender !== "onboarding@resend.dev") {
+      const fallbackRes = await resend.emails.send({
+        from: "onboarding@resend.dev",
+        to: email,
+        subject: `Your Order ${orderNumber} has been shipped!`,
+        react: OrderShippedEmail({
+          orderNumber,
+          customerName,
+          trackingUrl,
+          trackingId
+        }),
+      });
+      data = fallbackRes.data;
+      error = fallbackRes.error;
+    }
+
     if (error) {
-      console.error("Resend API Error:", error);
-      return { success: false, error };
+      const errorMsg = typeof error === "object" ? (error.message || JSON.stringify(error)) : String(error);
+      console.error("Resend API Error:", errorMsg);
+      return { success: false, error: errorMsg };
     }
 
     return { success: true, data };
   } catch (err: any) {
     console.error("Error sending shipped email:", err);
-    return { success: false, error: err.message };
+    return { success: false, error: err.message || "Failed to send shipped email." };
   }
 };
