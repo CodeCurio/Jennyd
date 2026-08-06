@@ -2,8 +2,12 @@ import { Resend } from "resend";
 import OrderReceiptEmail from "@/emails/OrderReceipt";
 import OrderShippedEmail from "@/emails/OrderShipped";
 
-// Initialize Resend with the API key from environment variables
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Resend safely inside helper functions to prevent build-time missing API key crashes
+const getResendClient = () => {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return null;
+  return new Resend(apiKey);
+};
 
 // For testing on unverified domains, Resend requires sending from onboarding@resend.dev
 const SENDER_EMAIL = process.env.NODE_ENV === "production" 
@@ -19,7 +23,8 @@ export const sendOrderReceiptEmail = async (
   shippingAddress: any
 ) => {
   try {
-    if (!process.env.RESEND_API_KEY) {
+    const resend = getResendClient();
+    if (!resend) {
       console.warn("RESEND_API_KEY is not set. Skipping email send.");
       return { success: false, error: "API Key missing" };
     }
@@ -57,7 +62,8 @@ export const sendOrderShippedEmail = async (
   trackingId?: string
 ) => {
   try {
-    if (!process.env.RESEND_API_KEY) {
+    const resend = getResendClient();
+    if (!resend) {
       console.warn("RESEND_API_KEY is not set. Skipping email send.");
       return { success: false, error: "API Key missing" };
     }
