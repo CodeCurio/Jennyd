@@ -1209,6 +1209,30 @@ export default function CheckoutPage() {
                       </div>
                     </label>
 
+                    {/* Cash on Delivery (Enabled for Testing) */}
+                    <label className={`flex items-start gap-3 p-4 rounded-xl border transition-all cursor-pointer ${
+                      paymentMethod === "cod" 
+                        ? "border-neutral-900 bg-neutral-50 shadow-xs" 
+                        : "border-neutral-200 bg-white hover:border-neutral-300"
+                    }`}>
+                      <input
+                        type="radio"
+                        name="payment_radio"
+                        checked={paymentMethod === "cod"}
+                        onChange={() => setPaymentMethod("cod")}
+                        className="w-4 h-4 accent-black mt-0.5 cursor-pointer"
+                      />
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs sm:text-sm font-bold text-neutral-900 block">Cash on Delivery (COD)</span>
+                          <span className="px-2 py-0.5 bg-[#D4AF37]/20 text-[#b8962f] rounded text-[10px] font-bold uppercase tracking-wider">Test Mode</span>
+                        </div>
+                        <p className="text-xs text-neutral-500 mt-0.5">
+                          Pay upon delivery (Enabled for testing order emails).
+                        </p>
+                      </div>
+                    </label>
+
                   </div>
                 </div>
 
