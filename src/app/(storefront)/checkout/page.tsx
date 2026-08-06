@@ -67,7 +67,13 @@ const parseSupabaseAuthError = (err: any): string => {
     return msg;
   }
 
-  return "Authentication failed. Please check your details or try signing in.";
+  return msg || "Authentication failed. Please check your details or try signing in.";
+};
+
+const sanitizeUUID = (val?: string | null): string | null => {
+  if (!val || typeof val !== "string") return null;
+  const match = val.match(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/);
+  return match ? match[0] : null;
 };
 
 const POPULAR_COUNTRIES = [
@@ -220,13 +226,42 @@ export default function CheckoutPage() {
         console.error("Error reading saved address from localStorage", e);
       }
 
-      // 2. Check session
+      // 2. Check session and fetch saved address from DB if logged in
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setUserId(session.user.id);
         if (session.user.email) {
           setEmail(session.user.email);
           setAuthEmail(session.user.email);
+        }
+
+        // Fetch user's saved address from DB address book
+        try {
+          const { data: dbAddresses } = await supabase
+            .from("addresses")
+            .select("*")
+            .eq("user_id", session.user.id)
+            .order("is_default", { ascending: false })
+            .limit(1);
+
+          if (dbAddresses && dbAddresses.length > 0) {
+            const dbAddr = dbAddresses[0];
+            const nameParts = (dbAddr.full_name || "").trim().split(" ");
+            const fName = nameParts[0] || "";
+            const lName = nameParts.slice(1).join(" ") || "";
+
+            setFirstName((prev) => prev || fName);
+            setLastName((prev) => prev || lName);
+            setPhone((prev) => prev || dbAddr.phone || "");
+            setAddressLine1((prev) => prev || dbAddr.address_line1 || "");
+            setAddressLine2((prev) => prev || dbAddr.address_line2 || "");
+            setCity((prev) => prev || dbAddr.city || "");
+            setState((prev) => prev || dbAddr.state || "");
+            setZip((prev) => prev || dbAddr.zip || "");
+            if (dbAddr.country) setCountry(dbAddr.country);
+          }
+        } catch (dbErr) {
+          console.error("Error fetching saved addresses from DB:", dbErr);
         }
 
         // If we restored an address and user is logged in, auto-save address and jump to payment step!
@@ -515,12 +550,13 @@ export default function CheckoutPage() {
     }
 
     const orderItemsPayload = items.map((item) => {
-      const cleanProductId = item.productId.substring(0, 36);
-      const sizeInfo = item.productId.length > 36 ? item.productId.substring(37) : "100ml";
+      const cleanProductId = sanitizeUUID(item.productId);
+      const cleanVariantId = sanitizeUUID(item.variantId);
+      const sizeInfo = item.productId.includes("-") ? item.productId.split("-").pop() : "100ml";
       return {
         order_id: orderData.id,
         product_id: cleanProductId,
-        variant_id: item.variantId || null,
+        variant_id: cleanVariantId,
         title: item.title,
         quantity: item.quantity,
         unit_price: item.price,
