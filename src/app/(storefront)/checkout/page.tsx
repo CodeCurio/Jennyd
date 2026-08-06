@@ -551,12 +551,12 @@ export default function CheckoutPage() {
 
     const orderItemsPayload = items.map((item) => {
       const cleanProductId = sanitizeUUID(item.productId);
-      const cleanVariantId = sanitizeUUID(item.variantId);
+      const rawVariantId = item.variantId && item.variantId !== item.productId ? sanitizeUUID(item.variantId) : null;
       const sizeInfo = item.productId.includes("-") ? item.productId.split("-").pop() : "100ml";
       return {
         order_id: orderData.id,
         product_id: cleanProductId,
-        variant_id: cleanVariantId,
+        variant_id: rawVariantId,
         title: item.title,
         quantity: item.quantity,
         unit_price: item.price,
@@ -565,8 +565,15 @@ export default function CheckoutPage() {
       };
     });
 
-    const { error: itemsError } = await supabase.from("order_items").insert(orderItemsPayload);
-    if (itemsError) throw new Error(itemsError.message);
+    let { error: itemsError } = await supabase.from("order_items").insert(orderItemsPayload);
+    
+    // Failsafe fallback: if foreign key constraint on variant_id fails, retry with null variant_id
+    if (itemsError) {
+      console.warn("Retrying order_items insert with variant_id: null fallback:", itemsError.message);
+      const safePayload = orderItemsPayload.map((item) => ({ ...item, variant_id: null }));
+      const { error: fallbackErr } = await supabase.from("order_items").insert(safePayload);
+      if (fallbackErr) throw new Error(fallbackErr.message);
+    }
 
     if (appliedCoupon) {
       await supabase.from("coupons").update({ times_used: (appliedCoupon.times_used || 0) + 1 }).eq("id", appliedCoupon.id);
