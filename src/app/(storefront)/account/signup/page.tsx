@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2, Mail, Lock, User } from "lucide-react";
@@ -18,6 +18,14 @@ export default function SignupPage() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [loginUrl, setLoginUrl] = useState("/account/login");
+
+  useEffect(() => {
+    const next = new URLSearchParams(window.location.search).get("next");
+    if (next) {
+      setLoginUrl(`/account/login?next=${encodeURIComponent(next)}`);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +48,8 @@ export default function SignupPage() {
       setError(signUpError);
       setIsLoading(false);
     } else {
-      router.push("/account");
+      const nextUrl = new URLSearchParams(window.location.search).get("next") || "/account";
+      router.push(nextUrl);
     }
   };
 
@@ -213,7 +222,7 @@ export default function SignupPage() {
 
           {/* Footer inside right panel */}
           <div className="pt-4 border-t border-neutral-100 flex flex-col items-center gap-2 text-center text-xs sm:text-sm text-gray-550">
-            <span>Already have an account? <Link href="/account/login" className="font-bold text-[#D4AF37] hover:underline">Sign In</Link></span>
+            <span>Already have an account? <Link href={loginUrl} className="font-bold text-[#D4AF37] hover:underline">Sign In</Link></span>
             <p className="text-[11px] text-gray-400 leading-relaxed font-light px-2 mt-1 max-w-xs">
               By registering, you agree to our <Link href="/terms" className="underline hover:text-gray-600">Terms of Service</Link> & <Link href="/privacy" className="underline hover:text-gray-600">Privacy Policy</Link>.
             </p>

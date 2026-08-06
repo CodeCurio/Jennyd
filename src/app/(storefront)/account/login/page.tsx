@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2, Mail, Lock } from "lucide-react";
@@ -16,6 +16,14 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [signupUrl, setSignupUrl] = useState("/account/signup");
+
+  useEffect(() => {
+    const next = new URLSearchParams(window.location.search).get("next");
+    if (next) {
+      setSignupUrl(`/account/signup?next=${encodeURIComponent(next)}`);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +35,8 @@ export default function LoginPage() {
       setError(signInError);
       setIsLoading(false);
     } else {
-      router.push("/account");
+      const nextUrl = new URLSearchParams(window.location.search).get("next") || "/account";
+      router.push(nextUrl);
     }
   };
 
@@ -171,7 +180,7 @@ export default function LoginPage() {
 
           {/* Action Links Below Form */}
           <div className="pt-4 border-t border-neutral-100 text-center text-xs sm:text-sm text-gray-500 flex flex-col items-center gap-1">
-            <span>Don&apos;t have an account? <Link href="/account/signup" className="font-bold text-[#D4AF37] hover:underline">Create Account</Link></span>
+            <span>Don&apos;t have an account? <Link href={signupUrl} className="font-bold text-[#D4AF37] hover:underline">Create Account</Link></span>
           </div>
 
         </div>

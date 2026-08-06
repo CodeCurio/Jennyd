@@ -3,6 +3,7 @@
 import { useState, useEffect, use } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Star, 
@@ -53,6 +54,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
   const { addItem } = useCart();
   const { addToast } = useToast();
   const { formatPrice } = useCurrency();
+  const router = useRouter();
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [zoomStyle, setZoomStyle] = useState<React.CSSProperties>({ display: "none" });
@@ -562,7 +564,10 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                 </div>
 
                 <button 
-                  onClick={handleAddToCart}
+                  onClick={() => {
+                    handleAddToCart();
+                    router.push("/checkout");
+                  }}
                   disabled={!isSelectedSizeAvailable}
                   className={`w-full h-11 sm:h-12 rounded-xl text-xs font-bold uppercase tracking-widest transition-all duration-300 cursor-pointer active:scale-98 ${
                     !isSelectedSizeAvailable

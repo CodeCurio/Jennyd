@@ -33,11 +33,12 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
     }
   }, [isLoading, user, router, isPublicRoute]);
 
-  // If logged in user visits login/signup, redirect to dashboard
+  // If logged in user visits login/signup, redirect to dashboard or next parameter
   useEffect(() => {
     if (!isLoading && user && isPublicRoute) {
+      const nextUrl = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("next") : null;
       const timer = setTimeout(() => {
-        router.push("/account");
+        router.push(nextUrl || "/account");
       }, 0);
       return () => clearTimeout(timer);
     }

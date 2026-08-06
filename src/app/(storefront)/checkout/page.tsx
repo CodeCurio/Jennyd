@@ -107,6 +107,7 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const orderPlacedRef = useRef(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   // Form State - Shipping Info
   const [country, setCountry] = useState("India");
@@ -135,17 +136,21 @@ export default function CheckoutPage() {
   const finalCountryName = isOtherCountry ? customCountry.trim() : country;
   const availableStates = COUNTRY_STATES[country] || [];
 
-  // Check auth user session on mount
+  // Check auth user session on mount; require login to proceed
   useEffect(() => {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setUserId(session.user.id);
         setEmail(session.user.email || "");
+        setIsCheckingAuth(false);
+      } else {
+        addToast({ title: "Sign In Required", message: "Please log in or create an account to proceed with checkout and enable order tracking.", type: "error" });
+        router.push("/account/login?next=/checkout");
       }
     };
     checkUser();
-  }, []);
+  }, [router, addToast]);
 
   // Update state defaults when country changes
   useEffect(() => {
@@ -367,6 +372,15 @@ export default function CheckoutPage() {
       setIsSubmitting(false);
     }
   };
+
+  if (isCheckingAuth) {
+    return (
+      <div className="bg-[#FAF8F5] min-h-screen flex flex-col items-center justify-center gap-3 font-sans text-neutral-800">
+        <Loader2 className="w-8 h-8 animate-spin text-[#D4AF37]" />
+        <p className="text-xs font-bold uppercase tracking-widest text-neutral-500">Securing checkout & verifying account...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[#FAF8F5] min-h-screen font-sans text-neutral-900 pb-24">
