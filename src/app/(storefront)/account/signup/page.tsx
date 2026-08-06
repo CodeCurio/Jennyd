@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Eye, EyeOff, Loader2, Mail, Lock, User } from "lucide-react";
+import { Eye, EyeOff, Loader2, Mail, Lock, User, MailCheck, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/lib/store/AuthContext";
 
 export default function SignupPage() {
@@ -18,6 +18,7 @@ export default function SignupPage() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isVerificationSent, setIsVerificationSent] = useState(false);
   const [loginUrl, setLoginUrl] = useState("/account/login");
 
   useEffect(() => {
@@ -43,9 +44,13 @@ export default function SignupPage() {
 
     setIsLoading(true);
 
-    const { error: signUpError } = await signUp(email, password, fullName);
-    if (signUpError) {
-      setError(signUpError);
+    const res = await signUp(email, password, fullName);
+    if (res.error) {
+      const msg = typeof res.error === "string" ? res.error : (res.error as any)?.message || "Failed to create account.";
+      setError(msg);
+      setIsLoading(false);
+    } else if (res.isVerificationSent) {
+      setIsVerificationSent(true);
       setIsLoading(false);
     } else {
       const nextUrl = new URLSearchParams(window.location.search).get("next") || "/account";
@@ -103,13 +108,39 @@ export default function SignupPage() {
             </p>
           </div>
 
-          {/* Error Notification */}
-          {error && (
-            <div className="bg-red-50 text-red-650 text-xs sm:text-sm px-4 py-3 rounded-xl border border-red-100 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 bg-red-600 rounded-full flex-shrink-0 animate-ping" />
-              <p className="font-semibold">{error}</p>
+          {/* Verification Sent Notice */}
+          {isVerificationSent ? (
+            <div className="bg-gradient-to-b from-[#FAF8F5] via-white to-[#FAF8F5] border border-[#D4AF37]/40 rounded-2xl p-6 sm:p-8 text-center space-y-4 shadow-sm relative overflow-hidden">
+              <div className="w-14 h-14 bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30 rounded-full flex items-center justify-center mx-auto shadow-xs">
+                <MailCheck className="w-7 h-7" />
+              </div>
+              <h3 className="text-xl sm:text-2xl font-serif font-bold text-neutral-900 tracking-tight">Verification Link Sent!</h3>
+              <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed max-w-sm mx-auto font-sans">
+                We sent a confirmation link to{" "}
+                <span className="font-bold font-mono text-neutral-900 bg-neutral-100 px-2 py-0.5 rounded border border-neutral-200/80 inline-block break-all my-1">
+                  {email}
+                </span>
+                . Please check your email inbox and click the link to confirm your account and access your dashboard.
+              </p>
+              <div className="pt-2 flex justify-center">
+                <Link
+                  href="/account/login"
+                  className="bg-[#1A1A1A] hover:bg-black text-white px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-xs cursor-pointer flex items-center gap-2"
+                >
+                  <ArrowLeft className="w-4 h-4 text-[#D4AF37]" />
+                  <span>Back to Sign In</span>
+                </Link>
+              </div>
             </div>
-          )}
+          ) : (
+            <>
+              {/* Error Notification */}
+              {error && (
+                <div className="bg-red-50 text-red-650 text-xs sm:text-sm px-4 py-3 rounded-xl border border-red-100 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-red-600 rounded-full flex-shrink-0 animate-ping" />
+                  <p className="font-semibold">{error}</p>
+                </div>
+              )}
 
           {/* Google Login Action */}
           <button
@@ -227,6 +258,8 @@ export default function SignupPage() {
               By registering, you agree to our <Link href="/terms" className="underline hover:text-gray-600">Terms of Service</Link> & <Link href="/privacy" className="underline hover:text-gray-600">Privacy Policy</Link>.
             </p>
           </div>
+            </>
+          )}
 
         </div>
       </div>

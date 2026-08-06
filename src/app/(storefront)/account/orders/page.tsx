@@ -3,14 +3,27 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/store/AuthContext";
 import { supabase } from "@/lib/supabase";
-import { Package, ChevronDown, ChevronUp, Loader2, ShoppingBag, AlertTriangle } from "lucide-react";
+import { 
+  Package, 
+  ChevronDown, 
+  ChevronUp, 
+  Loader2, 
+  ShoppingBag, 
+  AlertTriangle,
+  RotateCcw,
+  Printer,
+  Truck,
+  CheckCircle2
+} from "lucide-react";
 import { format } from "date-fns";
 import Link from "next/link";
 import { useToast } from "@/components/ui/Toast";
 import { useCurrency } from "@/lib/store/CurrencyContext";
+import { useCart } from "@/lib/store/CartContext";
 
 interface OrderItem {
   id: string;
+  product_id: string;
   title: string;
   quantity: number;
   unit_price: number;
@@ -37,7 +50,10 @@ export default function OrderHistoryPage() {
   const { user } = useAuth();
   const { addToast } = useToast();
   const { formatPrice } = useCurrency();
+  const { addItem } = useCart();
+
   const [orders, setOrders] = useState<Order[]>([]);
+  const [activeFilter, setActiveFilter] = useState<"all" | "active" | "delivered">("all");
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
   const [orderItems, setOrderItems] = useState<Record<string, OrderItem[]>>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -45,37 +61,6 @@ export default function OrderHistoryPage() {
   
   const [cancellingOrderId, setCancellingOrderId] = useState<string | null>(null);
   const [isCancelling, setIsCancelling] = useState(false);
-
-  const handleCancelOrder = async (orderId: string) => {
-    if (!user) return;
-    setIsCancelling(true);
-    try {
-      const res = await fetch("/api/order/cancel", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          orderId,
-          userId: user.id
-        })
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to cancel order");
-      }
-
-      // Update local state
-      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, fulfillment_status: "cancelled" } : o));
-      addToast({ title: "Order Cancelled", message: "Your order has been cancelled successfully.", type: "success" });
-      setCancellingOrderId(null);
-    } catch (err: any) {
-      addToast({ title: "Cancellation Failed", message: err.message, type: "error" });
-    } finally {
-      setIsCancelling(false);
-    }
-  };
 
   useEffect(() => {
     if (!user) return;
@@ -103,7 +88,6 @@ export default function OrderHistoryPage() {
 
     setExpandedOrderId(orderId);
 
-    // Fetch items if not already cached
     if (!orderItems[orderId]) {
       setIsLoadingItems(true);
       const { data } = await supabase
@@ -116,152 +100,240 @@ export default function OrderHistoryPage() {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "paid": return "bg-green-100 text-green-800";
-      case "pending": return "bg-yellow-100 text-yellow-800";
-      case "failed": return "bg-red-100 text-red-800";
-      case "shipped": return "bg-blue-100 text-blue-800";
-      case "delivered": return "bg-green-100 text-green-800";
-      case "processing": return "bg-indigo-100 text-indigo-800";
-      case "cancelled": return "bg-red-100 text-red-800";
-      default: return "bg-gray-100 text-gray-800";
+  const handleReOrder = async (orderId: string) => {
+    let items = orderItems[orderId];
+    if (!items) {
+      const { data } = await supabase
+        .from("order_items")
+        .select("*, products(slug, metadata)")
+        .eq("order_id", orderId);
+      items = data || [];
+    }
+
+    if (!items || items.length === 0) {
+      addToast({ title: "Error", message: "No items found in this order.", type: "error" });
+      return;
+    }
+
+    items.forEach(item => {
+      const variantId = item.variant_info?.size ? `${item.product_id}-${item.variant_info.size}` : item.product_id;
+      addItem({
+        productId: item.product_id,
+        variantId: variantId,
+        title: item.title,
+        price: item.unit_price,
+        quantity: item.quantity,
+        image: item.products?.metadata?.images?.[0] || "/assets/placeholder.jpg"
+      });
+    });
+
+    addToast({ 
+      title: "Items Added to Cart!", 
+      message: `${items.length} item(s) from order #${orders.find(o => o.id === orderId)?.order_number} added to your cart.`, 
+      type: "success" 
+    });
+  };
+
+  const handleCancelOrder = async (orderId: string) => {
+    if (!user) return;
+    setIsCancelling(true);
+    try {
+      const res = await fetch("/api/order/cancel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, userId: user.id })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to cancel order");
+      }
+
+      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, fulfillment_status: "cancelled" } : o));
+      addToast({ title: "Order Cancelled", message: "Your order has been cancelled successfully.", type: "success" });
+      setCancellingOrderId(null);
+    } catch (err: any) {
+      addToast({ title: "Cancellation Failed", message: err.message, type: "error" });
+    } finally {
+      setIsCancelling(false);
     }
   };
 
+  const filteredOrders = orders.filter(o => {
+    if (activeFilter === "active") return o.fulfillment_status !== "delivered" && o.fulfillment_status !== "cancelled";
+    if (activeFilter === "delivered") return o.fulfillment_status === "delivered";
+    return true;
+  });
+
   if (isLoading) {
     return (
-      <div className="h-60 flex items-center justify-center">
-        <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+      <div className="h-64 bg-white rounded-2xl border border-neutral-200/90 flex items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-[#D4AF37]" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-gray-900">Order History</h2>
-        <span className="text-xs text-gray-400 font-bold uppercase tracking-wider">{orders.length} orders</span>
+    <div className="space-y-5">
+
+      {/* ── Page Header & Filters ── */}
+      <div className="bg-white rounded-2xl p-4 sm:p-5 border border-neutral-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-base sm:text-lg font-serif font-bold text-neutral-900">Purchase History</h2>
+          <p className="text-xs text-neutral-400">View live status, track shipments, and re-order your favorite scents</p>
+        </div>
+
+        {/* Filter Segmented Control */}
+        <div className="flex items-center gap-1 bg-neutral-100 p-1 rounded-xl w-full sm:w-auto">
+          <button
+            onClick={() => setActiveFilter("all")}
+            className={`flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              activeFilter === "all" ? "bg-white text-neutral-900 shadow-2xs" : "text-neutral-500 hover:text-neutral-900"
+            }`}
+          >
+            All ({orders.length})
+          </button>
+          <button
+            onClick={() => setActiveFilter("active")}
+            className={`flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              activeFilter === "active" ? "bg-white text-neutral-900 shadow-2xs" : "text-neutral-500 hover:text-neutral-900"
+            }`}
+          >
+            Active ({orders.filter(o => o.fulfillment_status !== "delivered" && o.fulfillment_status !== "cancelled").length})
+          </button>
+          <button
+            onClick={() => setActiveFilter("delivered")}
+            className={`flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              activeFilter === "delivered" ? "bg-white text-neutral-900 shadow-2xs" : "text-neutral-500 hover:text-neutral-900"
+            }`}
+          >
+            Delivered ({orders.filter(o => o.fulfillment_status === "delivered").length})
+          </button>
+        </div>
       </div>
 
-      {orders.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-12 text-center">
-          <ShoppingBag className="w-16 h-16 text-gray-200 mx-auto mb-4" />
-          <h3 className="text-lg font-bold text-gray-900 mb-2">No orders yet</h3>
-          <p className="text-sm text-gray-500 mb-6">Once you place an order, it will show up here.</p>
-          <Link href="/products" className="inline-block bg-black text-white px-8 py-3 rounded-xl text-sm font-bold uppercase tracking-wider hover:bg-gray-900 transition-colors">
-            Shop Now
+      {/* ── Order List ── */}
+      {filteredOrders.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-2xs p-10 text-center space-y-3">
+          <ShoppingBag className="w-12 h-12 text-neutral-300 mx-auto" />
+          <h3 className="text-sm font-bold text-neutral-900">No orders found</h3>
+          <p className="text-xs text-neutral-500 max-w-xs mx-auto">There are no orders matching your selected filter.</p>
+          <Link href="/products" className="inline-block bg-[#1A1A1A] text-white px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors">
+            Start Shopping
           </Link>
         </div>
       ) : (
         <div className="space-y-4">
-          {orders.map((order) => {
+          {filteredOrders.map((order) => {
             const isExpanded = expandedOrderId === order.id;
             const items = orderItems[order.id] || [];
 
             return (
-              <div key={order.id} className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden transition-shadow hover:shadow-md">
-                {/* Order Header */}
-                <button
-                  onClick={() => toggleExpand(order.id)}
-                  className="w-full px-4 sm:px-6 py-4 sm:py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-left"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-                      <Package className="w-5 h-5 text-gray-400" />
+              <div key={order.id} className="bg-white rounded-2xl border border-neutral-200/90 shadow-2xs overflow-hidden">
+                {/* Header Strip */}
+                <div className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-neutral-100 bg-neutral-50/40">
+                  <div className="space-y-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-mono text-sm font-bold text-neutral-900">{order.order_number}</span>
+                      <span className={`px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border ${
+                        order.fulfillment_status === "delivered" ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
+                        order.fulfillment_status === "cancelled" ? "bg-red-50 text-red-700 border-red-200" :
+                        "bg-amber-50 text-amber-800 border-amber-200"
+                      }`}>
+                        {order.fulfillment_status}
+                      </span>
+                      <span className={`px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border ${
+                        order.payment_status === "paid" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-neutral-100 text-neutral-700 border-neutral-200"
+                      }`}>
+                        {order.payment_status}
+                      </span>
                     </div>
-                    <div>
-                      <div className="flex flex-wrap items-center gap-x-2">
-                        <p className="text-sm font-bold text-gray-900 font-mono">{order.order_number}</p>
-                        <span className="text-gray-300 hidden sm:inline">•</span>
-                        <span className={`text-[10px] font-bold uppercase tracking-wider ${
-                          order.payment_status === "paid" ? "text-green-600" :
-                          order.payment_status === "refunded" ? "text-gray-500" :
-                          order.payment_status === "failed" ? "text-red-500" : "text-amber-500"
-                        }`}>
-                          Payment: {order.payment_status === "pending" ? "Pending / COD" : order.payment_status}
-                        </span>
-                      </div>
-                      <p className="text-xs text-gray-500 mt-0.5">{format(new Date(order.created_at), "MMMM d, yyyy 'at' h:mm a")}</p>
-                    </div>
+                    <p className="text-xs text-neutral-400">
+                      {format(new Date(order.created_at), "MMMM d, yyyy 'at' h:mm a")}
+                    </p>
                   </div>
 
-                  <div className="flex items-center gap-4">
-                    <span className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full ${getStatusColor(order.fulfillment_status)}`}>
-                      Order: {order.fulfillment_status === "processing" ? "packed" : order.fulfillment_status}
-                    </span>
-                    <span className="font-bold text-sm text-gray-900 font-mono min-w-[80px] text-right">{formatPrice(Number(order.total))}</span>
-                    {isExpanded ? (
-                      <ChevronUp className="w-5 h-5 text-gray-400" />
-                    ) : (
-                      <ChevronDown className="w-5 h-5 text-gray-400" />
-                    )}
-                  </div>
-                </button>
+                  <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 border-neutral-100 pt-3 sm:pt-0">
+                    <div className="text-left sm:text-right">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 block">Total</span>
+                      <span className="font-mono text-sm font-bold text-neutral-900">{formatPrice(Number(order.total))}</span>
+                    </div>
 
-                {/* Expanded Details */}
+                    <button
+                      onClick={() => toggleExpand(order.id)}
+                      className="flex items-center gap-1 bg-white hover:bg-neutral-100 border border-neutral-200 px-3 py-1.5 rounded-xl text-xs font-bold text-neutral-700 transition-colors cursor-pointer"
+                    >
+                      <span>{isExpanded ? "Hide Details" : "View Details"}</span>
+                      {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Expanded Details Section */}
                 {isExpanded && (
-                  <div className="border-t border-gray-100">
+                  <div className="p-4 sm:p-5 space-y-4">
                     {isLoadingItems ? (
-                      <div className="py-8 flex justify-center">
-                        <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+                      <div className="py-6 flex justify-center">
+                        <Loader2 className="w-5 h-5 animate-spin text-[#D4AF37]" />
                       </div>
                     ) : (
                       <>
-                        {/* Items */}
-                        <div className="divide-y divide-gray-50">
+                        {/* Order Items */}
+                        <div className="divide-y divide-neutral-100">
                           {items.map((item) => {
                             const imageUrl = item.products?.metadata?.images?.[0] || "/assets/placeholder.jpg";
                             return (
-                              <div key={item.id} className="px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-3 sm:gap-4">
-                                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
-                                  <img src={imageUrl} alt={item.title} className="w-full h-full object-cover" />
+                              <div key={item.id} className="py-3 flex items-center justify-between gap-3">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-12 h-12 rounded-xl bg-neutral-100 overflow-hidden shrink-0 border border-neutral-200/80">
+                                    <img src={imageUrl} alt={item.title} className="w-full h-full object-cover" />
+                                  </div>
+                                  <div>
+                                    <p className="text-xs sm:text-sm font-bold text-neutral-900 line-clamp-1">{item.title}</p>
+                                    <p className="text-[11px] text-neutral-400">
+                                      Qty: {item.quantity} {item.variant_info?.size && `• Size: ${item.variant_info.size}`}
+                                    </p>
+                                  </div>
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-semibold text-gray-900 truncate">{item.title}</p>
-                                  {item.variant_info?.size && (
-                                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-0.5">Size: {item.variant_info.size}</p>
-                                  )}
-                                  <p className="text-xs text-gray-500 mt-0.5">{formatPrice(Number(item.unit_price))} × {item.quantity}</p>
-                                </div>
-                                <p className="font-bold text-sm text-gray-900 font-mono">{formatPrice(Number(item.line_total))}</p>
+                                <span className="font-mono text-xs sm:text-sm font-bold text-neutral-900">
+                                  {formatPrice(Number(item.line_total))}
+                                </span>
                               </div>
                             );
                           })}
                         </div>
 
-                        {/* Order Summary */}
-                        <div className="px-4 sm:px-6 py-3 sm:py-4 bg-gray-50/80 border-t border-gray-100 text-xs space-y-1.5 text-gray-500 font-medium">
-                          <div className="flex justify-between">
-                            <span>Subtotal</span>
-                            <span className="text-gray-900 font-mono">{formatPrice(Number(order.subtotal))}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>Shipping ({order.shipping_method || "Standard"})</span>
-                            <span className="text-gray-900 font-mono">{formatPrice(Number(order.shipping_cost))}</span>
-                          </div>
-                          {Number(order.discount_amount) > 0 && (
-                            <div className="flex justify-between text-green-600">
-                              <span>Discount {order.coupon_code ? `(${order.coupon_code})` : ""}</span>
-                              <span className="font-mono">-{formatPrice(Number(order.discount_amount))}</span>
+                        {/* Order Summary & Actions */}
+                        <div className="bg-neutral-50 rounded-xl p-4 border border-neutral-200/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs">
+                          <div className="space-y-1 text-neutral-500 font-medium w-full sm:w-auto">
+                            <div className="flex justify-between sm:justify-start gap-4">
+                              <span>Subtotal:</span>
+                              <span className="font-mono text-neutral-900">{formatPrice(Number(order.subtotal))}</span>
                             </div>
-                          )}
-                          <div className="flex justify-between pt-2 border-t border-gray-200 text-gray-900 font-bold">
-                            <span className="uppercase tracking-wider">Total</span>
-                            <span className="font-mono text-sm">{formatPrice(Number(order.total))}</span>
+                            <div className="flex justify-between sm:justify-start gap-4">
+                              <span>Shipping ({order.shipping_method || "Standard"}):</span>
+                              <span className="font-mono text-neutral-900">{formatPrice(Number(order.shipping_cost))}</span>
+                            </div>
                           </div>
-                          
-                          {/* Cancel Order Action */}
-                          {(order.fulfillment_status === "pending" || order.fulfillment_status === "processing") && (
-                            <div className="pt-4 border-t border-gray-200 flex justify-end">
+
+                          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+                            <button
+                              onClick={() => handleReOrder(order.id)}
+                              className="flex items-center gap-1.5 bg-[#1A1A1A] hover:bg-black text-white px-3.5 py-2 rounded-xl font-bold text-xs transition-colors cursor-pointer"
+                            >
+                              <RotateCcw className="w-3.5 h-3.5 text-[#D4AF37]" />
+                              <span>Re-Order Items</span>
+                            </button>
+
+                            {(order.fulfillment_status === "pending" || order.fulfillment_status === "processing") && (
                               <button
                                 onClick={() => setCancellingOrderId(order.id)}
-                                className="px-4 py-2.5 border border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 rounded-xl text-xs font-bold uppercase tracking-wider transition-all"
+                                className="px-3 py-2 border border-red-200 text-red-600 hover:bg-red-50 rounded-xl font-bold text-xs transition-colors cursor-pointer"
                               >
                                 Cancel Order
                               </button>
-                            </div>
-                          )}
+                            )}
+                          </div>
                         </div>
                       </>
                     )}
@@ -273,42 +345,37 @@ export default function OrderHistoryPage() {
         </div>
       )}
 
-      {/* Cancellation Confirmation Modal */}
+      {/* Cancellation Modal */}
       {cancellingOrderId && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => !isCancelling && setCancellingOrderId(null)}>
-          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 text-center" onClick={(e) => e.stopPropagation()}>
-            <div className="mx-auto w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mb-5">
-              <AlertTriangle className="w-7 h-7 text-red-600" />
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-xs p-4" onClick={() => !isCancelling && setCancellingOrderId(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 max-w-sm w-full text-center space-y-4" onClick={(e) => e.stopPropagation()}>
+            <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto">
+              <AlertTriangle className="w-6 h-6" />
             </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2">Cancel Your Order?</h3>
-            <p className="text-sm text-gray-500 mb-6">
-              Are you sure you want to cancel this order? This action will permanently cancel the order and return items to stock.
-            </p>
-            <div className="flex gap-3">
+            <div>
+              <h3 className="text-base font-bold text-neutral-900">Cancel Order?</h3>
+              <p className="text-xs text-neutral-500 mt-1">Are you sure you want to cancel this order? This action cannot be undone.</p>
+            </div>
+            <div className="flex gap-3 pt-2">
               <button
                 onClick={() => setCancellingOrderId(null)}
                 disabled={isCancelling}
-                className="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                className="flex-1 py-2.5 border border-neutral-300 rounded-xl text-xs font-semibold text-neutral-700 hover:bg-neutral-50 transition-colors"
               >
-                Go Back
+                Keep Order
               </button>
               <button
                 onClick={() => handleCancelOrder(cancellingOrderId)}
                 disabled={isCancelling}
-                className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-xl text-sm font-bold uppercase tracking-wider hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+                className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5"
               >
-                {isCancelling ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" /> Cancelling...
-                  </>
-                ) : (
-                  "Confirm Cancel"
-                )}
+                {isCancelling ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Confirm"}
               </button>
             </div>
           </div>
         </div>
       )}
+
     </div>
   );
 }

@@ -205,15 +205,15 @@ function OrderSuccessContent() {
 
         {/* Footer Actions */}
         <div className="mt-12 flex flex-col md:flex-row justify-center items-center gap-4">
-          <Link href="/products">
-            <Button className="bg-black hover:bg-gray-800 text-white text-xs font-bold uppercase tracking-widest py-4 px-10 rounded-none flex items-center gap-2 cursor-pointer shadow-sm">
-              Continue Shopping <ArrowRight className="w-4 h-4" />
+          <Link href="/account/orders">
+            <Button className="bg-[#1A1A1A] hover:bg-black text-white text-xs font-bold uppercase tracking-widest py-4 px-8 rounded-xl flex items-center gap-2 cursor-pointer shadow-md">
+              View Order in My Account <ArrowRight className="w-4 h-4" />
             </Button>
           </Link>
-          
-          <Link href="/">
-            <Button variant="outline" className="text-xs font-bold uppercase tracking-widest py-4 px-10 rounded-none border-black hover:bg-black hover:text-white cursor-pointer transition-all">
-              Go to Homepage
+
+          <Link href="/products">
+            <Button variant="outline" className="text-xs font-bold uppercase tracking-widest py-4 px-8 rounded-xl border-neutral-300 hover:border-black hover:bg-neutral-50 text-neutral-800 cursor-pointer transition-all">
+              Continue Shopping
             </Button>
           </Link>
         </div>

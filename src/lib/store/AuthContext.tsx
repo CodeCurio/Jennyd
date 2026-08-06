@@ -18,7 +18,7 @@ interface AuthContextType {
   profile: Profile | null;
   session: Session | null;
   isLoading: boolean;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: string | null }>;
+  signUp: (email: string, password: string, fullName: string) => Promise<{ error: string | null; isVerificationSent?: boolean }>;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signInWithGoogle: () => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
@@ -30,7 +30,7 @@ const AuthContext = createContext<AuthContextType>({
   profile: null,
   session: null,
   isLoading: true,
-  signUp: async () => ({ error: null }),
+  signUp: async () => ({ error: null, isVerificationSent: false }),
   signIn: async () => ({ error: null }),
   signInWithGoogle: async () => ({ error: null }),
   signOut: async () => {},
@@ -81,9 +81,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     initSession();
 
+    // Catch email confirmation hash fragments (#access_token=...&type=signup) and redirect to /account
+    if (typeof window !== "undefined" && window.location.hash) {
+      const hash = window.location.hash;
+      if (hash.includes("access_token") || hash.includes("type=signup") || hash.includes("type=email_verification")) {
+        const currentPath = window.location.pathname;
+        const targetPath = currentPath === "/checkout" ? "/checkout" : "/account";
+
+        // Clean the hash fragment from the URL address bar gracefully
+        try {
+          window.history.replaceState(null, "", currentPath + window.location.search);
+        } catch (e) {}
+
+        // Auto-redirect user to /account or /checkout
+        if (currentPath !== targetPath) {
+          window.location.href = targetPath;
+        }
+      }
+    }
+
     // Subscribe to auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, newSession) => {
+      async (event, newSession) => {
         setSession(newSession);
         setUser(newSession?.user ?? null);
         if (newSession?.user) {
@@ -92,6 +111,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setProfile(null);
         }
         setIsLoading(false);
+
+        // If user just confirmed email or signed in from hash token, ensure redirection to /account
+        if ((event === "SIGNED_IN" || event === "USER_UPDATED") && typeof window !== "undefined") {
+          if (window.location.hash.includes("type=signup") || window.location.hash.includes("access_token")) {
+            const currentPath = window.location.pathname;
+            const targetPath = currentPath === "/checkout" ? "/checkout" : "/account";
+            if (currentPath !== targetPath) {
+              window.location.href = targetPath;
+            }
+          }
+        }
       }
     );
 
@@ -106,25 +136,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password,
       options: {
         data: { full_name: fullName },
+        emailRedirectTo: `${window.location.origin}/api/auth/callback?next=/account`
       },
     });
 
-    if (error) return { error: error.message };
-
-    // Update the profile with full_name (trigger creates the row, we update it)
-    if (data.user) {
-      await supabase
-        .from("profiles")
-        .update({ full_name: fullName })
-        .eq("id", data.user.id);
+    if (error) {
+      const rawMsg = typeof error === "string" ? error : (error as any).message || "Failed to create account";
+      if (rawMsg.toLowerCase().includes("already registered") || rawMsg.toLowerCase().includes("already exists")) {
+        return { error: "An account with this email already exists. Please sign in instead." };
+      }
+      return { error: rawMsg };
     }
 
-    return { error: null };
+    if (data?.user && data.user.identities && data.user.identities.length === 0) {
+      return { error: "An account with this email already exists. Please sign in instead." };
+    }
+
+    // If session exists (email confirm disabled), safely update profile
+    if (data.session && data.user) {
+      try {
+        await supabase
+          .from("profiles")
+          .update({ full_name: fullName })
+          .eq("id", data.user.id);
+      } catch (e) {
+        console.warn("Profile update during signup warning:", e);
+      }
+    }
+
+    return { error: null, isVerificationSent: !data.session && !!data.user };
   };
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return { error: error.message };
+    if (error) return { error: typeof error === "string" ? error : (error as any).message || "Invalid login credentials." };
     return { error: null };
   };
 

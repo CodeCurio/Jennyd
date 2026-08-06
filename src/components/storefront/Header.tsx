@@ -179,10 +179,17 @@ export function Header() {
               {/* Account */}
               <Link
                 href={user ? "/account" : "/account/login"}
+                title={user ? profile?.full_name || "My Account" : "Sign In / Register"}
                 className="w-10 h-10 flex items-center justify-center rounded-full text-gray-600 hover:text-[#D4AF37] hover:bg-[#D4AF37]/8 transition-all duration-200"
               >
-                {user && profile?.full_name ? (
-                  <div className="w-8 h-8 rounded-full bg-[#D4AF37] flex items-center justify-center text-white text-sm font-semibold">
+                {user && profile?.avatar_url ? (
+                  <img 
+                    src={profile.avatar_url} 
+                    alt={profile.full_name || "Profile"} 
+                    className="w-6 h-6 rounded-full object-cover border border-[#D4AF37]/60"
+                  />
+                ) : user && profile?.full_name ? (
+                  <div className="w-6.5 h-6.5 rounded-full bg-[#1A1A1A] text-white flex items-center justify-center text-[10px] font-bold border border-[#D4AF37]/30 shadow-2xs">
                     {profile.full_name[0].toUpperCase()}
                   </div>
                 ) : (
@@ -410,8 +417,14 @@ export function Header() {
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-gray-700 hover:text-[#D4AF37] transition-colors"
                   >
-                    {user && profile?.full_name ? (
-                      <div className="w-8 h-8 rounded-full bg-[#D4AF37] flex items-center justify-center text-white text-xs font-bold shrink-0">
+                    {user && profile?.avatar_url ? (
+                      <img 
+                        src={profile.avatar_url} 
+                        alt="Profile" 
+                        className="w-8 h-8 rounded-full object-cover border border-[#D4AF37] shrink-0"
+                      />
+                    ) : user && profile?.full_name ? (
+                      <div className="w-8 h-8 rounded-full bg-[#1A1A1A] text-white flex items-center justify-center text-xs font-bold shrink-0 border border-[#D4AF37]/40">
                         {profile.full_name[0].toUpperCase()}
                       </div>
                     ) : (

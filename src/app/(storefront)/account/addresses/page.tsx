@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/store/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/ui/Toast";
-import { MapPin, Plus, Edit2, Trash2, Star, Loader2, X } from "lucide-react";
+import { MapPin, Plus, Edit2, Trash2, Star, Loader2, X, Check } from "lucide-react";
 
 interface Address {
   id: string;
@@ -88,7 +88,6 @@ export default function AddressBookPage() {
     setIsSubmitting(true);
 
     try {
-      // If setting as default, unset all others first
       if (form.is_default) {
         await supabase
           .from("addresses")
@@ -108,7 +107,7 @@ export default function AddressBookPage() {
           .from("addresses")
           .insert({ ...form, user_id: user.id });
         if (error) throw error;
-        addToast({ title: "Added", message: "New address added.", type: "success" });
+        addToast({ title: "Added", message: "New address added to book.", type: "success" });
       }
 
       setShowForm(false);
@@ -139,7 +138,7 @@ export default function AddressBookPage() {
       await supabase.from("addresses").update({ is_default: false }).eq("user_id", user.id);
       await supabase.from("addresses").update({ is_default: true }).eq("id", id);
       await fetchAddresses();
-      addToast({ title: "Updated", message: "Default address changed.", type: "success" });
+      addToast({ title: "Updated", message: "Default address updated.", type: "success" });
     } catch (err: any) {
       addToast({ title: "Error", message: err.message, type: "error" });
     }
@@ -147,33 +146,40 @@ export default function AddressBookPage() {
 
   if (isLoading) {
     return (
-      <div className="h-60 flex items-center justify-center">
-        <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+      <div className="h-64 bg-white rounded-2xl border border-neutral-200/90 flex items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-[#D4AF37]" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-gray-900">Address Book</h2>
+    <div className="space-y-5">
+      
+      {/* ── Page Header ── */}
+      <div className="bg-white rounded-2xl p-4 sm:p-5 border border-neutral-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-base sm:text-lg font-serif font-bold text-neutral-900">Address Book</h2>
+          <p className="text-xs text-neutral-400">Save and manage delivery addresses for instant checkout</p>
+        </div>
+
         <button
           onClick={openAddForm}
-          className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-gray-900 transition-colors"
+          className="flex items-center gap-1.5 bg-[#1A1A1A] hover:bg-black text-white px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors shadow-xs cursor-pointer"
         >
-          <Plus className="w-4 h-4" /> Add Address
+          <Plus className="w-4 h-4 text-[#D4AF37]" />
+          <span>Add New Address</span>
         </button>
       </div>
 
-      {/* Address Cards */}
+      {/* ── Address Cards Grid ── */}
       {addresses.length === 0 && !showForm ? (
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-12 text-center">
-          <MapPin className="w-16 h-16 text-gray-200 mx-auto mb-4" />
-          <h3 className="text-lg font-bold text-gray-900 mb-2">No saved addresses</h3>
-          <p className="text-sm text-gray-500 mb-6">Add your first address for quicker checkout.</p>
+        <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-2xs p-10 text-center space-y-3">
+          <MapPin className="w-12 h-12 text-neutral-300 mx-auto" />
+          <h3 className="text-sm font-bold text-neutral-900">No saved addresses</h3>
+          <p className="text-xs text-neutral-500 max-w-xs mx-auto">Add your primary delivery address for 1-click checkout.</p>
           <button
             onClick={openAddForm}
-            className="inline-block bg-black text-white px-8 py-3 rounded-xl text-sm font-bold uppercase tracking-wider hover:bg-gray-900 transition-colors"
+            className="inline-block bg-[#1A1A1A] text-white px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors"
           >
             Add Address
           </button>
@@ -183,57 +189,77 @@ export default function AddressBookPage() {
           {addresses.map((addr) => (
             <div
               key={addr.id}
-              className={`bg-white rounded-xl border shadow-sm p-5 relative transition-all ${
-                addr.is_default ? "border-[#D4AF37] ring-1 ring-[#D4AF37]/20" : "border-gray-100"
+              className={`bg-white rounded-2xl border p-5 relative transition-all shadow-2xs flex flex-col justify-between ${
+                addr.is_default ? "border-[#D4AF37] ring-1 ring-[#D4AF37]/30" : "border-neutral-200/90"
               }`}
             >
               {addr.is_default && (
-                <div className="absolute top-3 right-3">
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#D4AF37]/10 text-[#D4AF37] text-[10px] font-bold uppercase tracking-wider">
+                <div className="absolute top-4 right-4">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/40 text-[#b8962f] text-[10px] font-bold uppercase tracking-wider">
                     <Star className="w-3 h-3 fill-current" /> Default
                   </span>
                 </div>
               )}
 
-              <p className="font-bold text-sm text-gray-900 uppercase tracking-wide">{addr.full_name}</p>
-              {addr.phone && <p className="text-xs text-gray-500 mt-0.5 font-mono">{addr.phone}</p>}
-              <div className="mt-3 text-xs text-gray-600 space-y-0.5 leading-relaxed">
-                <p>{addr.address_line1}</p>
-                {addr.address_line2 && <p>{addr.address_line2}</p>}
-                <p>{addr.city}, {addr.state} - {addr.zip}</p>
-                <p className="text-gray-400 uppercase tracking-wider text-[10px] font-bold mt-1">{addr.country}</p>
+              <div className="space-y-2">
+                <div>
+                  <p className="font-bold text-xs sm:text-sm text-neutral-900 uppercase tracking-wide">{addr.full_name}</p>
+                  {addr.phone && <p className="text-xs text-neutral-400 font-mono mt-0.5">{addr.phone}</p>}
+                </div>
+
+                <div className="text-xs text-neutral-600 leading-relaxed font-sans pt-1">
+                  <p>{addr.address_line1}</p>
+                  {addr.address_line2 && <p>{addr.address_line2}</p>}
+                  <p className="font-medium text-neutral-800">{addr.city}, {addr.state} - {addr.zip}</p>
+                  <p className="text-neutral-400 text-[10px] font-bold uppercase tracking-wider mt-1">{addr.country}</p>
+                </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-gray-100 flex items-center gap-3">
-                <button
-                  onClick={() => openEditForm(addr)}
-                  className="flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-gray-900 transition-colors"
-                >
-                  <Edit2 className="w-3.5 h-3.5" /> Edit
-                </button>
-                {!addr.is_default && (
+              {/* Action Buttons */}
+              <div className="mt-4 pt-3 border-t border-neutral-100 flex items-center justify-between">
+                <div className="flex items-center gap-3">
                   <button
-                    onClick={() => handleSetDefault(addr.id)}
-                    className="flex items-center gap-1 text-xs font-semibold text-[#D4AF37] hover:text-[#b8962f] transition-colors"
+                    onClick={() => openEditForm(addr)}
+                    className="flex items-center gap-1 text-xs font-bold text-neutral-600 hover:text-black transition-colors cursor-pointer"
                   >
-                    <Star className="w-3.5 h-3.5" /> Set Default
+                    <Edit2 className="w-3.5 h-3.5" /> Edit
                   </button>
-                )}
+
+                  {!addr.is_default && (
+                    <button
+                      onClick={() => handleSetDefault(addr.id)}
+                      className="flex items-center gap-1 text-xs font-bold text-[#D4AF37] hover:text-[#b8962f] transition-colors cursor-pointer"
+                    >
+                      <Check className="w-3.5 h-3.5" /> Make Default
+                    </button>
+                  )}
+                </div>
+
                 <button
                   onClick={() => setDeleteConfirm(addr.id)}
-                  className="flex items-center gap-1 text-xs font-semibold text-red-400 hover:text-red-600 transition-colors ml-auto"
+                  className="text-xs font-bold text-neutral-400 hover:text-red-600 transition-colors cursor-pointer"
                 >
-                  <Trash2 className="w-3.5 h-3.5" /> Delete
+                  Delete
                 </button>
               </div>
 
-              {/* Delete Confirm Inline */}
+              {/* Delete Confirmation Box */}
               {deleteConfirm === addr.id && (
-                <div className="mt-3 p-3 bg-red-50 rounded-lg border border-red-100 flex items-center justify-between gap-3">
-                  <p className="text-xs text-red-600 font-medium">Delete this address?</p>
+                <div className="mt-3 p-3 bg-red-50 rounded-xl border border-red-200 flex items-center justify-between gap-3 text-xs">
+                  <p className="text-red-700 font-medium">Delete address?</p>
                   <div className="flex gap-2">
-                    <button onClick={() => setDeleteConfirm(null)} className="text-xs font-semibold text-gray-500 hover:text-gray-700 px-3 py-1 rounded border border-gray-200 bg-white">Cancel</button>
-                    <button onClick={() => handleDelete(addr.id)} className="text-xs font-semibold text-white bg-red-600 hover:bg-red-700 px-3 py-1 rounded">Confirm</button>
+                    <button 
+                      onClick={() => setDeleteConfirm(null)} 
+                      className="px-2.5 py-1 rounded-lg border border-neutral-200 bg-white text-neutral-700 font-semibold"
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      onClick={() => handleDelete(addr.id)} 
+                      className="px-2.5 py-1 rounded-lg bg-red-600 text-white font-bold uppercase tracking-wider"
+                    >
+                      Confirm
+                    </button>
                   </div>
                 </div>
               )}
@@ -244,76 +270,117 @@ export default function AddressBookPage() {
 
       {/* Address Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => !isSubmitting && setShowForm(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white rounded-t-2xl z-10">
-              <h3 className="font-bold text-gray-900">{editingId ? "Edit Address" : "Add New Address"}</h3>
-              <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600">
+        <div 
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-xs p-4" 
+          onClick={() => !isSubmitting && setShowForm(false)}
+        >
+          <div 
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-neutral-200" 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-5 py-4 border-b border-neutral-100 flex items-center justify-between bg-neutral-50/50">
+              <h3 className="font-serif font-bold text-neutral-900">{editingId ? "Edit Address" : "Add New Address"}</h3>
+              <button onClick={() => setShowForm(false)} className="text-neutral-400 hover:text-black cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Full Name *</label>
-                  <input required value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37]" />
+                  <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-wide mb-1">Full Name *</label>
+                  <input 
+                    required 
+                    value={form.full_name} 
+                    onChange={(e) => setForm({ ...form, full_name: e.target.value })} 
+                    className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl font-medium focus:outline-none focus:border-[#D4AF37]" 
+                  />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Phone</label>
-                  <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37]" />
+                  <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-wide mb-1">Phone Number</label>
+                  <input 
+                    value={form.phone} 
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })} 
+                    className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl font-medium focus:outline-none focus:border-[#D4AF37]" 
+                  />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Address Line 1 *</label>
-                <input required value={form.address_line1} onChange={(e) => setForm({ ...form, address_line1: e.target.value })} className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37]" />
+                <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-wide mb-1">Street Address Line 1 *</label>
+                <input 
+                  required 
+                  value={form.address_line1} 
+                  onChange={(e) => setForm({ ...form, address_line1: e.target.value })} 
+                  className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl font-medium focus:outline-none focus:border-[#D4AF37]" 
+                />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Address Line 2</label>
-                <input value={form.address_line2} onChange={(e) => setForm({ ...form, address_line2: e.target.value })} className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37]" />
+                <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-wide mb-1">Apartment, Suite (Optional)</label>
+                <input 
+                  value={form.address_line2} 
+                  onChange={(e) => setForm({ ...form, address_line2: e.target.value })} 
+                  className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl font-medium focus:outline-none focus:border-[#D4AF37]" 
+                />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">City *</label>
-                  <input required value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37]" />
+                  <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-wide mb-1">City *</label>
+                  <input 
+                    required 
+                    value={form.city} 
+                    onChange={(e) => setForm({ ...form, city: e.target.value })} 
+                    className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl font-medium focus:outline-none focus:border-[#D4AF37]" 
+                  />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">State *</label>
-                  <input required value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37]" />
+                  <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-wide mb-1">State *</label>
+                  <input 
+                    required 
+                    value={form.state} 
+                    onChange={(e) => setForm({ ...form, state: e.target.value })} 
+                    className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl font-medium focus:outline-none focus:border-[#D4AF37]" 
+                  />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">PIN Code *</label>
-                  <input required value={form.zip} onChange={(e) => setForm({ ...form, zip: e.target.value })} className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37]" />
+                  <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-wide mb-1">PIN / Zip *</label>
+                  <input 
+                    required 
+                    value={form.zip} 
+                    onChange={(e) => setForm({ ...form, zip: e.target.value })} 
+                    className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl font-mono focus:outline-none focus:border-[#D4AF37]" 
+                  />
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 pt-2">
+              <div className="flex items-center gap-2.5 pt-2">
                 <input
                   type="checkbox"
                   id="is_default"
                   checked={form.is_default}
                   onChange={(e) => setForm({ ...form, is_default: e.target.checked })}
-                  className="w-4 h-4 accent-[#D4AF37] rounded"
+                  className="w-4 h-4 accent-black cursor-pointer"
                 />
-                <label htmlFor="is_default" className="text-sm text-gray-600 font-medium cursor-pointer">Set as default address</label>
+                <label htmlFor="is_default" className="text-xs text-neutral-700 font-semibold cursor-pointer">
+                  Set as default shipping address
+                </label>
               </div>
 
-              <div className="flex gap-3 pt-4">
+              <div className="flex gap-3 pt-3">
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
                   disabled={isSubmitting}
-                  className="flex-1 py-3 border border-gray-300 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  className="flex-1 py-3 border border-neutral-300 rounded-xl font-semibold text-neutral-700 hover:bg-neutral-50 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 py-3 bg-black text-white rounded-xl text-sm font-bold uppercase tracking-wider hover:bg-gray-900 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 py-3 bg-[#1A1A1A] hover:bg-black text-white rounded-xl font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-2 cursor-pointer"
                 >
                   {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                   {editingId ? "Update Address" : "Save Address"}
@@ -323,6 +390,7 @@ export default function AddressBookPage() {
           </div>
         </div>
       )}
+
     </div>
   );
 }

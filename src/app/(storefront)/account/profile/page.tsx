@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/store/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/ui/Toast";
-import { UserCircle, Lock, Loader2, Save, Eye, EyeOff } from "lucide-react";
+import { UserCircle, Lock, Loader2, Save, Eye, EyeOff, Camera, Trash2 } from "lucide-react";
 
 export default function ProfileSettingsPage() {
   const { user, profile, refreshProfile } = useAuth();
@@ -13,6 +13,7 @@ export default function ProfileSettingsPage() {
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -29,6 +30,57 @@ export default function ProfileSettingsPage() {
       setPhone(profile.phone || "");
     }
   }, [profile]);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      addToast({ title: "File too large", message: "Please select an image smaller than 5MB.", type: "error" });
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+    try {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64Url = reader.result as string;
+        const { error } = await supabase
+          .from("profiles")
+          .update({ avatar_url: base64Url })
+          .eq("id", user.id);
+
+        if (error) {
+          addToast({ title: "Upload Failed", message: error.message, type: "error" });
+        } else {
+          await refreshProfile();
+          addToast({ title: "Photo Updated", message: "Your profile picture has been updated.", type: "success" });
+        }
+        setIsUploadingAvatar(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (err: any) {
+      addToast({ title: "Upload Failed", message: err.message, type: "error" });
+      setIsUploadingAvatar(false);
+    }
+  };
+
+  const handleDeleteAvatar = async () => {
+    if (!user) return;
+    setIsUploadingAvatar(true);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ avatar_url: null })
+      .eq("id", user.id);
+
+    if (error) {
+      addToast({ title: "Error", message: error.message, type: "error" });
+    } else {
+      await refreshProfile();
+      addToast({ title: "Photo Deleted", message: "Profile picture removed.", type: "success" });
+    }
+    setIsUploadingAvatar(false);
+  };
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,20 +156,66 @@ export default function ProfileSettingsPage() {
             <UserCircle className="w-5 h-5 text-[#D4AF37]" />
           </div>
           <div>
-            <h3 className="font-bold text-gray-900 text-sm">Personal Information</h3>
-            <p className="text-xs text-gray-400">Update your name and phone number</p>
+            <h3 className="font-bold text-gray-900 text-sm">Personal Information & Avatar</h3>
+            <p className="text-xs text-gray-400">Update your profile picture, name, and phone number</p>
           </div>
         </div>
 
-        <form onSubmit={handleSaveProfile} className="p-6 space-y-5">
-          {/* Avatar/Initials */}
-          <div className="flex items-center gap-4 pb-5 border-b border-gray-50">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#b8962f] flex items-center justify-center text-white text-xl font-bold shadow-sm">
-              {(profile?.full_name || user?.email || "?")[0].toUpperCase()}
+        <form onSubmit={handleSaveProfile} className="p-6 space-y-6">
+          {/* Avatar / Photo Upload */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-gray-100">
+            <div className="flex items-center gap-4">
+              <div className="relative group">
+                {profile?.avatar_url ? (
+                  <img
+                    src={profile.avatar_url}
+                    alt="Profile"
+                    className="w-16 h-16 rounded-full object-cover border-2 border-[#D4AF37] shadow-sm"
+                  />
+                ) : (
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#1A1A1A] to-neutral-800 text-[#D4AF37] flex items-center justify-center text-xl font-bold border-2 border-[#D4AF37]/50 shadow-sm">
+                    {(profile?.full_name || user?.email || "?")[0].toUpperCase()}
+                  </div>
+                )}
+                {isUploadingAvatar && (
+                  <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center">
+                    <Loader2 className="w-5 h-5 animate-spin text-white" />
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <p className="font-bold text-gray-900">{profile?.full_name || "Set your name"}</p>
+                <p className="text-xs text-gray-500 font-mono">{user?.email}</p>
+              </div>
             </div>
-            <div>
-              <p className="font-bold text-gray-900">{profile?.full_name || "Set your name"}</p>
-              <p className="text-sm text-gray-500 font-mono">{user?.email}</p>
+
+            {/* Photo Action Buttons */}
+            <div className="flex items-center gap-2">
+              <label className="flex items-center gap-2 bg-[#1A1A1A] hover:bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl cursor-pointer transition-all shadow-xs">
+                <Camera className="w-3.5 h-3.5" />
+                <span>{profile?.avatar_url ? "Change Photo" : "Upload Photo"}</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarUpload}
+                  disabled={isUploadingAvatar}
+                  className="hidden"
+                />
+              </label>
+
+              {profile?.avatar_url && (
+                <button
+                  type="button"
+                  onClick={handleDeleteAvatar}
+                  disabled={isUploadingAvatar}
+                  className="flex items-center gap-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold px-3 py-2.5 rounded-xl transition-all cursor-pointer"
+                  title="Remove Photo"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Delete</span>
+                </button>
+              )}
             </div>
           </div>
 

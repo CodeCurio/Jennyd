@@ -38,6 +38,25 @@ export function OrderActionsClient({ order, onUpdate }: OrderActionsProps) {
       const { error } = await supabase.from('orders').update(updateData).eq('id', order.id);
       if (error) throw error;
 
+      // Trigger email if marked as shipped
+      if (field === 'fulfillment_status' && status === 'shipped') {
+        try {
+          await fetch('/api/emails/order-shipped', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: order.email,
+              orderNumber: order.order_number,
+              customerName: order.shipping_address?.fullName || 'Valued Customer',
+              trackingUrl: additionalMetadata?.tracking_url,
+              trackingId: additionalMetadata?.tracking_number
+            })
+          });
+        } catch (emailErr) {
+          console.error("Failed to trigger shipped email:", emailErr);
+        }
+      }
+
       addToast({ title: "Success", message: successMsg, type: "success" });
       setShowShippingModal(false);
       if (onUpdate) onUpdate();

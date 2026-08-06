@@ -15,7 +15,11 @@ import {
   ArrowLeft,
   Check,
   ShieldCheck,
-  Globe
+  Globe,
+  Eye,
+  EyeOff,
+  MailCheck,
+  Mail
 } from "lucide-react";
 import { useCart } from "@/lib/store/CartContext";
 import { useToast } from "@/components/ui/Toast";
@@ -25,6 +29,46 @@ import { useCurrency } from "@/lib/store/CurrencyContext";
 import { useAuth } from "@/lib/store/AuthContext";
 
 type Step = "shipping" | "auth" | "payment" | "review";
+
+const parseSupabaseAuthError = (err: any): string => {
+  if (!err) return "An unexpected error occurred. Please try again.";
+
+  let msg = "";
+  let code: string | number = "";
+  let name = "";
+
+  if (typeof err === "string") {
+    msg = err;
+  } else if (typeof err === "object") {
+    msg = err.message || err.error_description || err.msg || err.error || "";
+    code = err.code || err.status || "";
+    name = err.name || "";
+  }
+
+  if (name === "AuthRetryableFetchError" || String(code) === "500" || String(err).includes("AuthRetryableFetchError")) {
+    return "Supabase Email Error (HTTP 500): Unable to send verification email. Please check Supabase Custom SMTP settings in Dashboard, or sign in with Google.";
+  }
+
+  const msgLower = msg.toLowerCase();
+
+  if (code === "user_already_exists" || msgLower.includes("already registered") || msgLower.includes("already exists")) {
+    return "An account with this email already exists. Please click 'Sign In' below to log in.";
+  }
+
+  if (code === "invalid_credentials" || msgLower.includes("invalid login credentials")) {
+    return "Invalid email address or password. Please check your credentials.";
+  }
+
+  if (msgLower.includes("rate limit")) {
+    return "Email rate limit exceeded. Please wait a few minutes or use Google Login.";
+  }
+
+  if (msg && msg !== "{}" && msg !== "[object Object]") {
+    return msg;
+  }
+
+  return "Authentication failed. Please check your details or try signing in.";
+};
 
 const POPULAR_COUNTRIES = [
   "India",
@@ -137,25 +181,80 @@ export default function CheckoutPage() {
   // Auth State
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
+  const [authConfirmPassword, setAuthConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
+  const [authErrorMsg, setAuthErrorMsg] = useState<string | null>(null);
+  const [isVerificationSent, setIsVerificationSent] = useState(false);
 
   const isOtherCountry = country === "Other Country";
   const finalCountryName = isOtherCountry ? customCountry.trim() : country;
   const availableStates = COUNTRY_STATES[country] || [];
 
-  // Check auth user session on mount (No forced redirect)
+  // Load saved address from localStorage on mount & check session
   useEffect(() => {
-    const checkUser = async () => {
+    const checkUserAndRestoredAddress = async () => {
+      // 1. Try restoring address from localStorage if present
+      let restoredAddress: any = null;
+      try {
+        const savedStr = localStorage.getItem("jennyd_checkout_address");
+        if (savedStr) {
+          restoredAddress = JSON.parse(savedStr);
+          if (restoredAddress.country) setCountry(restoredAddress.country);
+          if (restoredAddress.customCountry) setCustomCountry(restoredAddress.customCountry);
+          if (restoredAddress.email) {
+            setEmail(restoredAddress.email);
+            setAuthEmail(restoredAddress.email);
+          }
+          if (restoredAddress.firstName) setFirstName(restoredAddress.firstName);
+          if (restoredAddress.lastName) setLastName(restoredAddress.lastName);
+          if (restoredAddress.addressLine1) setAddressLine1(restoredAddress.addressLine1);
+          if (restoredAddress.addressLine2) setAddressLine2(restoredAddress.addressLine2);
+          if (restoredAddress.city) setCity(restoredAddress.city);
+          if (restoredAddress.state) setState(restoredAddress.state);
+          if (restoredAddress.zip) setZip(restoredAddress.zip);
+          if (restoredAddress.phone) setPhone(restoredAddress.phone);
+        }
+      } catch (e) {
+        console.error("Error reading saved address from localStorage", e);
+      }
+
+      // 2. Check session
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setUserId(session.user.id);
-        setEmail(session.user.email || "");
-        setAuthEmail(session.user.email || "");
+        if (session.user.email) {
+          setEmail(session.user.email);
+          setAuthEmail(session.user.email);
+        }
+
+        // If we restored an address and user is logged in, auto-save address and jump to payment step!
+        if (restoredAddress && restoredAddress.addressLine1) {
+          const fn = `${restoredAddress.firstName || ""} ${restoredAddress.lastName || ""}`.trim();
+          try {
+            await supabase.from("addresses").update({ is_default: false }).eq("user_id", session.user.id);
+            await supabase.from("addresses").insert({
+              user_id: session.user.id,
+              full_name: fn,
+              phone: restoredAddress.phone || "",
+              address_line1: restoredAddress.addressLine1,
+              address_line2: restoredAddress.addressLine2 || "",
+              city: restoredAddress.city || "",
+              state: restoredAddress.state || "",
+              zip: restoredAddress.zip || "",
+              country: restoredAddress.country || "India",
+              is_default: true
+            });
+          } catch (err) {
+            console.error("Auto-saving restored address failed", err);
+          }
+          setActiveStep("payment");
+        }
       }
       setIsCheckingAuth(false);
     };
-    checkUser();
+    checkUserAndRestoredAddress();
   }, []);
 
   // Update state defaults when country changes
@@ -208,6 +307,19 @@ export default function CheckoutPage() {
     }
   };
 
+  // Helper to persist current form to localStorage
+  const persistAddressToLocal = () => {
+    try {
+      const addressData = {
+        country, customCountry, email, firstName, lastName,
+        addressLine1, addressLine2, city, state, zip, phone
+      };
+      localStorage.setItem("jennyd_checkout_address", JSON.stringify(addressData));
+    } catch (e) {
+      console.error("Failed saving address to localStorage", e);
+    }
+  };
+
   // Form Validation
   const handleShippingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -220,6 +332,9 @@ export default function CheckoutPage() {
       return;
     }
     
+    // Always persist address to local storage
+    persistAddressToLocal();
+
     if (!userId) {
       setAuthEmail(email);
       setActiveStep("auth");
@@ -229,29 +344,97 @@ export default function CheckoutPage() {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    setIsAuthLoading(true);
+    setAuthErrorMsg(null);
+    persistAddressToLocal();
+
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/api/auth/callback?next=/checkout`
+        }
+      });
+      if (error) throw error;
+    } catch (err: any) {
+      console.error("Google Sign In Error:", err);
+      setAuthErrorMsg(err.message || "Failed to initiate Google Login");
+      addToast({ title: "Google Sign In Failed", message: err.message, type: "error" });
+      setIsAuthLoading(false);
+    }
+  };
+
   const handleInlineAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsAuthLoading(true);
-    let authError = null;
+    setAuthErrorMsg(null);
+    setIsVerificationSent(false);
+
+    persistAddressToLocal();
+
+    let authError: any = null;
     let newUserId = null;
 
     if (authMode === "login") {
       const { error } = await signIn(authEmail, authPassword);
-      authError = error;
-      if (!error) {
+      if (error) {
+        authError = error;
+      } else {
         const { data: { session } } = await supabase.auth.getSession();
         newUserId = session?.user?.id;
       }
     } else {
-      const { error, data } = await supabase.auth.signUp({ email: authEmail, password: authPassword });
-      authError = error?.message;
-      if (!error && data?.session?.user?.id) {
+      if (authPassword.length < 6) {
+        const msg = "Password must be at least 6 characters.";
+        setAuthErrorMsg(msg);
+        addToast({ title: "Validation Error", message: msg, type: "error" });
+        setIsAuthLoading(false);
+        return;
+      }
+      if (authPassword !== authConfirmPassword) {
+        const msg = "Passwords do not match. Please check and re-enter.";
+        setAuthErrorMsg(msg);
+        addToast({ title: "Validation Error", message: msg, type: "error" });
+        setIsAuthLoading(false);
+        return;
+      }
+
+      const { error, data } = await supabase.auth.signUp({ 
+        email: authEmail, 
+        password: authPassword,
+        options: {
+          emailRedirectTo: `${window.location.origin}/api/auth/callback?next=/checkout`
+        }
+      });
+
+      console.log("Supabase Inline SignUp Result:", { error, data });
+
+      if (error) {
+        authError = error;
+      } else if (data?.user && data.user.identities && data.user.identities.length === 0) {
+        authError = "An account with this email already exists. Please sign in instead.";
+      } else if (data?.session?.user?.id) {
         newUserId = data.session.user.id;
+      } else if (data?.user) {
+        // Verification email sent!
+        setIsVerificationSent(true);
+        addToast({
+          title: "Verification Email Sent",
+          message: "Please check your inbox and click the link to confirm your account.",
+          type: "success"
+        });
+        setIsAuthLoading(false);
+        return;
+      } else {
+        authError = "Could not complete account registration. Please try signing in.";
       }
     }
 
     if (authError) {
-      addToast({ title: "Authentication Failed", message: authError, type: "error" });
+      const cleanMsg = parseSupabaseAuthError(authError);
+      setAuthErrorMsg(cleanMsg);
+      addToast({ title: "Authentication Notice", message: cleanMsg, type: "error" });
       setIsAuthLoading(false);
       return;
     }
@@ -260,8 +443,6 @@ export default function CheckoutPage() {
       setUserId(newUserId);
       await saveAddressToBook(newUserId);
       setActiveStep("payment");
-    } else {
-      addToast({ title: "Verify Email", message: "Please check your email for a verification link.", type: "success" });
     }
     setIsAuthLoading(false);
   };
@@ -353,6 +534,29 @@ export default function CheckoutPage() {
 
     if (appliedCoupon) {
       await supabase.from("coupons").update({ times_used: (appliedCoupon.times_used || 0) + 1 }).eq("id", appliedCoupon.id);
+    }
+
+    // Send Order Confirmation Email via Resend
+    try {
+      await fetch("/api/emails/order-receipt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email,
+          orderNumber: orderNumber,
+          customerName: `${firstName} ${lastName}`,
+          totalAmount: grandTotal,
+          items: items.map(item => ({
+            title: item.title,
+            quantity: item.quantity,
+            price: item.price,
+            image: item.image
+          })),
+          shippingAddress: fullAddress
+        })
+      });
+    } catch (emailErr) {
+      console.error("Order receipt email error:", emailErr);
     }
 
     orderPlacedRef.current = true;
@@ -718,56 +922,185 @@ export default function CheckoutPage() {
             {activeStep === "auth" && (
               <div className="bg-white rounded-2xl p-6 sm:p-8 border border-neutral-200/90 shadow-2xs space-y-6">
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Lock className="w-5 h-5 text-neutral-600" />
+                  <div className="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Lock className="w-5 h-5 text-neutral-700" />
                   </div>
-                  <h2 className="text-xl sm:text-2xl font-serif text-[#1A1A1A] font-semibold mb-2">Secure Checkout</h2>
-                  <p className="text-sm text-neutral-500">Sign in to save your address securely and track your order easily.</p>
+                  <h2 className="text-xl sm:text-2xl font-serif text-[#1A1A1A] font-semibold mb-1">
+                    Account Authorization
+                  </h2>
+                  <p className="text-xs sm:text-sm text-neutral-500 max-w-md mx-auto">
+                    Sign in or create an account to save your address securely and complete your checkout.
+                  </p>
                 </div>
                 
-                <form onSubmit={handleInlineAuth} className="max-w-sm mx-auto space-y-4">
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide block mb-1">Email Address</label>
-                    <input
-                      type="email"
-                      required
-                      value={authEmail}
-                      onChange={(e) => setAuthEmail(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:border-[#D4AF37]"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide block mb-1">Password</label>
-                    <input
-                      type="password"
-                      required
-                      value={authPassword}
-                      onChange={(e) => setAuthPassword(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:border-[#D4AF37]"
-                    />
-                  </div>
-                  
-                  <div className="pt-2">
-                    <Button 
-                      type="submit" 
-                      disabled={isAuthLoading}
-                      className="w-full bg-[#1A1A1A] hover:bg-black text-white text-sm font-bold uppercase tracking-wider py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-md transition-all"
-                    >
-                      {isAuthLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                      <span>{authMode === "login" ? "Sign In & Continue" : "Create Account & Continue"}</span>
-                    </Button>
-                  </div>
-                </form>
+                {isVerificationSent ? (
+                  <div className="bg-gradient-to-b from-[#FAF8F5] via-white to-[#FAF8F5] border border-[#D4AF37]/40 rounded-2xl p-5 sm:p-8 text-center space-y-4 shadow-sm relative overflow-hidden">
+                    <div className="w-14 h-14 bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30 rounded-full flex items-center justify-center mx-auto shadow-xs">
+                      <MailCheck className="w-7 h-7" />
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <h3 className="text-xl sm:text-2xl font-serif font-bold text-neutral-900 tracking-tight">
+                        Verification Link Sent!
+                      </h3>
+                      <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed max-w-md mx-auto pt-1">
+                        We sent a confirmation email to{" "}
+                        <span className="font-bold font-mono text-neutral-900 bg-neutral-100 px-2 py-0.5 rounded border border-neutral-200/80 inline-block break-all my-1">
+                          {authEmail}
+                        </span>
+                        . Please check your inbox and click the link to verify your account and complete your order.
+                      </p>
+                    </div>
 
-                <div className="text-center pt-2">
-                  <button 
-                    type="button" 
-                    onClick={() => setAuthMode(authMode === "login" ? "signup" : "login")}
-                    className="text-sm font-bold text-[#D4AF37] hover:underline"
-                  >
-                    {authMode === "login" ? "Don't have an account? Sign Up" : "Already have an account? Sign In"}
-                  </button>
-                </div>
+                    <div className="bg-amber-50/70 border border-amber-200/70 rounded-xl p-3 text-[11px] text-amber-900 flex items-center justify-center gap-2 max-w-sm mx-auto">
+                      <Mail className="w-4 h-4 text-[#D4AF37] shrink-0" />
+                      <span>Can't find the email? Check your Spam or Junk folder.</span>
+                    </div>
+
+                    <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsVerificationSent(false);
+                          setAuthMode("login");
+                          setAuthErrorMsg(null);
+                        }}
+                        className="w-full sm:w-auto bg-[#1A1A1A] hover:bg-black text-white px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-xs cursor-pointer flex items-center justify-center gap-2"
+                      >
+                        <ArrowLeft className="w-4 h-4 text-[#D4AF37]" />
+                        <span>Back to Sign In</span>
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="max-w-sm mx-auto space-y-5">
+                    {/* Google OAuth Button */}
+                    <button
+                      type="button"
+                      onClick={handleGoogleSignIn}
+                      disabled={isAuthLoading}
+                      className="w-full py-3 px-4 bg-white border border-neutral-300 rounded-xl text-xs sm:text-sm font-semibold text-neutral-800 hover:bg-neutral-50 hover:border-neutral-400 flex items-center justify-center gap-3 transition-all shadow-xs cursor-pointer disabled:opacity-50"
+                    >
+                      <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                      </svg>
+                      <span>Continue with Google</span>
+                    </button>
+
+                    {/* Divider */}
+                    <div className="relative flex items-center justify-center">
+                      <div className="border-t border-neutral-200 w-full" />
+                      <span className="bg-white px-3 text-[10px] font-bold text-neutral-400 uppercase tracking-widest absolute">
+                        Or with email
+                      </span>
+                    </div>
+
+                    {/* Error Banner */}
+                    {authErrorMsg && (
+                      <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium">
+                        {authErrorMsg}
+                      </div>
+                    )}
+
+                    {/* Email/Password Form */}
+                    <form onSubmit={handleInlineAuth} className="space-y-4">
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide block mb-1">
+                          Email Address *
+                        </label>
+                        <input
+                          type="email"
+                          required
+                          placeholder="you@example.com"
+                          value={authEmail}
+                          onChange={(e) => {
+                            setAuthEmail(e.target.value);
+                            if (authErrorMsg) setAuthErrorMsg(null);
+                          }}
+                          className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] transition-all"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="flex justify-between items-center mb-1">
+                          <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide block">
+                            Password *
+                          </label>
+                        </div>
+                        <div className="relative">
+                          <input
+                            type={showPassword ? "text" : "password"}
+                            required
+                            placeholder="Enter password"
+                            value={authPassword}
+                            onChange={(e) => {
+                              setAuthPassword(e.target.value);
+                              if (authErrorMsg) setAuthErrorMsg(null);
+                            }}
+                            className="w-full px-3.5 py-2.5 pr-10 bg-neutral-50/50 border border-neutral-200 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] transition-all"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute inset-y-0 right-3 flex items-center text-neutral-400 hover:text-neutral-700 cursor-pointer"
+                          >
+                            {showPassword ? (
+                              <EyeOff className="w-4 h-4" />
+                            ) : (
+                              <Eye className="w-4 h-4" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      {authMode === "signup" && (
+                        <div className="space-y-1">
+                          <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide block mb-1">
+                            Confirm Password *
+                          </label>
+                          <input
+                            type="password"
+                            required
+                            placeholder="Re-enter password"
+                            value={authConfirmPassword}
+                            onChange={(e) => {
+                              setAuthConfirmPassword(e.target.value);
+                              if (authErrorMsg) setAuthErrorMsg(null);
+                            }}
+                            className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] transition-all"
+                          />
+                        </div>
+                      )}
+                      
+                      <div className="pt-2">
+                        <Button 
+                          type="submit" 
+                          disabled={isAuthLoading}
+                          className="w-full bg-[#1A1A1A] hover:bg-black text-white text-xs sm:text-sm font-bold uppercase tracking-wider py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer"
+                        >
+                          {isAuthLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                          <span>{authMode === "login" ? "Sign In & Continue" : "Create Account & Continue"}</span>
+                        </Button>
+                      </div>
+                    </form>
+
+                    <div className="text-center pt-1">
+                      <button 
+                        type="button" 
+                        onClick={() => {
+                          setAuthMode(authMode === "login" ? "signup" : "login");
+                          setAuthErrorMsg(null);
+                        }}
+                        className="text-xs font-bold text-[#D4AF37] hover:underline cursor-pointer"
+                      >
+                        {authMode === "login" ? "Don't have an account? Sign Up" : "Already have an account? Sign In"}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
