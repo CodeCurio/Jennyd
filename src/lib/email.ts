@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { render } from "@react-email/components";
 import OrderReceiptEmail from "@/emails/OrderReceipt";
 import OrderShippedEmail from "@/emails/OrderShipped";
 
@@ -27,17 +28,21 @@ export const sendOrderReceiptEmail = async (
       return { success: false, error: "RESEND_API_KEY environment variable is missing on Vercel." };
     }
 
-    let { data, error } = await resend.emails.send({
-      from: SENDER_EMAIL,
-      to: email,
-      subject: `Order Confirmation - ${orderNumber}`,
-      react: OrderReceiptEmail({
+    const emailHtml = await render(
+      OrderReceiptEmail({
         orderNumber,
         customerName,
         totalAmount,
         items,
         shippingAddress
-      }),
+      })
+    );
+
+    let { data, error } = await resend.emails.send({
+      from: SENDER_EMAIL,
+      to: email,
+      subject: `Order Confirmation - ${orderNumber}`,
+      html: emailHtml,
     });
 
     // If custom sender failed for any reason, retry with onboarding@resend.dev
@@ -47,13 +52,7 @@ export const sendOrderReceiptEmail = async (
         from: "onboarding@resend.dev",
         to: email,
         subject: `Order Confirmation - ${orderNumber}`,
-        react: OrderReceiptEmail({
-          orderNumber,
-          customerName,
-          totalAmount,
-          items,
-          shippingAddress
-        }),
+        html: emailHtml,
       });
       data = fallbackRes.data;
       error = fallbackRes.error;
@@ -86,16 +85,20 @@ export const sendOrderShippedEmail = async (
       return { success: false, error: "RESEND_API_KEY environment variable is missing on Vercel." };
     }
 
-    let { data, error } = await resend.emails.send({
-      from: SENDER_EMAIL,
-      to: email,
-      subject: `Your Order ${orderNumber} has been shipped!`,
-      react: OrderShippedEmail({
+    const emailHtml = await render(
+      OrderShippedEmail({
         orderNumber,
         customerName,
         trackingUrl,
         trackingId
-      }),
+      })
+    );
+
+    let { data, error } = await resend.emails.send({
+      from: SENDER_EMAIL,
+      to: email,
+      subject: `Your Order ${orderNumber} has been shipped!`,
+      html: emailHtml,
     });
 
     if (error && SENDER_EMAIL !== "onboarding@resend.dev") {
@@ -103,12 +106,7 @@ export const sendOrderShippedEmail = async (
         from: "onboarding@resend.dev",
         to: email,
         subject: `Your Order ${orderNumber} has been shipped!`,
-        react: OrderShippedEmail({
-          orderNumber,
-          customerName,
-          trackingUrl,
-          trackingId
-        }),
+        html: emailHtml,
       });
       data = fallbackRes.data;
       error = fallbackRes.error;
