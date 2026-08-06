@@ -38,7 +38,7 @@ export default function OrderReceiptEmail({
         <Container style={{ backgroundColor: "#ffffff", border: "1px solid #e5e5e5", borderRadius: "16px", padding: "32px", maxWidth: "600px", margin: "0 auto" }}>
           
           {/* Header Logo */}
-          <Section style={{ textAlignment: "center" as any, textAlign: "center", marginBottom: "24px" }}>
+          <Section style={{ textAlign: "center", marginBottom: "24px" }}>
             <Text style={{ fontSize: "22px", fontFamily: "serif", fontWeight: "bold", color: "#1a1a1a", letterSpacing: "3px", textTransform: "uppercase", margin: 0 }}>
               JENNYD PARFUMS
             </Text>
