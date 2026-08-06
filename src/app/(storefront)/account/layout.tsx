@@ -71,7 +71,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
 
   return (
     <div className="bg-[#fcfaf8] min-h-[80vh]">
-      <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-10 md:py-16">
+      <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-6 md:py-16">
 
         {/* Page Header */}
         <div className="mb-8">
@@ -85,7 +85,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
 
           {/* Sidebar */}
           <aside className="w-full md:w-64 shrink-0">
-            <nav className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <nav className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto whitespace-nowrap no-scrollbar md:overflow-hidden md:whitespace-normal flex md:block flex-row">
               {SIDEBAR_LINKS.map((link) => {
                 const isActive = link.exact
                   ? pathname === link.href
@@ -95,15 +95,16 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`flex items-center gap-3 px-5 py-4 text-sm font-medium transition-all border-b border-gray-50 last:border-b-0 group ${
+                    className={`flex items-center gap-2 md:gap-3 px-4 md:px-5 py-3 md:py-4 text-xs md:text-sm font-medium transition-all md:border-b border-gray-50 md:last:border-b-0 group ${
                       isActive
-                        ? "bg-gray-50 text-gray-900 border-l-[3px] border-l-[#D4AF37]"
-                        : "text-gray-500 hover:bg-gray-50 hover:text-gray-900 border-l-[3px] border-l-transparent"
+                        ? "bg-gray-50 text-gray-900 border-b-[3px] md:border-b-0 md:border-l-[3px] border-[#D4AF37]"
+                        : "text-gray-500 hover:bg-gray-50 hover:text-gray-900 border-b-[3px] md:border-b-0 md:border-l-[3px] border-transparent"
                     }`}
                   >
                     <link.icon className={`w-4.5 h-4.5 ${isActive ? "text-[#D4AF37]" : "text-gray-400 group-hover:text-gray-600"}`} />
-                    <span className="flex-1">{link.label}</span>
-                    <ChevronRight className={`w-4 h-4 ${isActive ? "text-gray-400" : "text-gray-300"}`} />
+                    <span className="flex-1 hidden md:block">{link.label}</span>
+                    <span className="md:hidden">{link.label}</span>
+                    <ChevronRight className={`w-4 h-4 hidden md:block ${isActive ? "text-gray-400" : "text-gray-300"}`} />
                   </Link>
                 );
               })}
@@ -111,7 +112,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
               {/* Logout */}
               <button
                 onClick={handleSignOut}
-                className="flex items-center gap-3 px-5 py-4 text-sm font-medium text-red-500 hover:bg-red-50 transition-all w-full text-left border-l-[3px] border-l-transparent"
+                className="flex items-center gap-2 md:gap-3 px-4 md:px-5 py-3 md:py-4 text-xs md:text-sm font-medium text-red-500 hover:bg-red-50 transition-all text-left border-b-[3px] md:border-b-0 md:border-l-[3px] border-transparent"
               >
                 <LogOut className="w-4.5 h-4.5" />
                 <span>Sign Out</span>

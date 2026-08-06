@@ -50,7 +50,7 @@ export default function AdminSettingsPage() {
 
   // Announcement Bar State
   const [announcementActive, setAnnouncementActive] = useState(true);
-  const [announcementText, setAnnouncementText] = useState("Worldwide Shipping | Cash on Delivery (COD) Available");
+  const [announcementText, setAnnouncementText] = useState("Worldwide Shipping | Online Secure Payments");
   const [announcementLink, setAnnouncementLink] = useState("");
   const [announcementColor, setAnnouncementColor] = useState("#000000");
   const [announcementTextColor, setAnnouncementTextColor] = useState("#ffffff");
@@ -813,7 +813,7 @@ export default function AdminSettingsPage() {
                                 value={ann.text} 
                                 onChange={e => handleUpdateAnnouncement(idx, "text", e.target.value)}
                                 required
-                                placeholder="e.g. Worldwide Shipping | Cash on Delivery (COD) Available"
+                                placeholder="e.g. Worldwide Shipping | Online Secure Payments"
                                 className="w-full border border-gray-300 rounded p-2 text-xs focus:ring-black focus:border-black"
                               />
                             </div>

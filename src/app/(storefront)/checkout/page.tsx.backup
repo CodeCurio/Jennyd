@@ -22,9 +22,8 @@ import { useToast } from "@/components/ui/Toast";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/Button";
 import { useCurrency } from "@/lib/store/CurrencyContext";
-import { useAuth } from "@/lib/store/AuthContext";
 
-type Step = "shipping" | "auth" | "payment" | "review";
+type Step = "shipping" | "payment" | "review";
 
 const POPULAR_COUNTRIES = [
   "India",
@@ -103,7 +102,6 @@ export default function CheckoutPage() {
   const { items, subtotal, discount, appliedCoupon, clearCart } = useCart();
   const { formatPrice, rates } = useCurrency();
   const { addToast } = useToast();
-  const { signIn, signUp } = useAuth();
 
   const [activeStep, setActiveStep] = useState<Step>("shipping");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -134,29 +132,25 @@ export default function CheckoutPage() {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [isMobileSummaryOpen, setIsMobileSummaryOpen] = useState(false);
 
-  // Auth State
-  const [authEmail, setAuthEmail] = useState("");
-  const [authPassword, setAuthPassword] = useState("");
-  const [isAuthLoading, setIsAuthLoading] = useState(false);
-  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
-
   const isOtherCountry = country === "Other Country";
   const finalCountryName = isOtherCountry ? customCountry.trim() : country;
   const availableStates = COUNTRY_STATES[country] || [];
 
-  // Check auth user session on mount (No forced redirect)
+  // Check auth user session on mount; require login to proceed
   useEffect(() => {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setUserId(session.user.id);
         setEmail(session.user.email || "");
-        setAuthEmail(session.user.email || "");
+        setIsCheckingAuth(false);
+      } else {
+        addToast({ title: "Sign In Required", message: "Please log in or create an account to proceed with checkout and enable order tracking.", type: "error" });
+        router.push("/account/login?next=/checkout");
       }
-      setIsCheckingAuth(false);
     };
     checkUser();
-  }, []);
+  }, [router, addToast]);
 
   // Update state defaults when country changes
   useEffect(() => {
@@ -187,29 +181,8 @@ export default function CheckoutPage() {
   const shippingCost = (isIndia && shippingMethod === "express") ? 150 : baseShippingCost;
   const grandTotal = subtotal - discount + shippingCost;
 
-  const saveAddressToBook = async (uid: string) => {
-    if (!uid) return;
-    try {
-      await supabase.from("addresses").update({ is_default: false }).eq("user_id", uid);
-      await supabase.from("addresses").insert({
-        user_id: uid,
-        full_name: `${firstName} ${lastName}`.trim(),
-        phone: phone,
-        address_line1: addressLine1,
-        address_line2: addressLine2,
-        city: city,
-        state: state,
-        zip: zip,
-        country: finalCountryName,
-        is_default: true
-      });
-    } catch (e) {
-      console.error("Failed to save address", e);
-    }
-  };
-
   // Form Validation
-  const handleShippingSubmit = async (e: React.FormEvent) => {
+  const handleShippingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (isOtherCountry && !customCountry.trim()) {
       addToast({ title: "Country Required", message: "Please enter your country name.", type: "error" });
@@ -219,51 +192,7 @@ export default function CheckoutPage() {
       addToast({ title: "Required Fields Missing", message: "Please complete all mandatory address fields.", type: "error" });
       return;
     }
-    
-    if (!userId) {
-      setAuthEmail(email);
-      setActiveStep("auth");
-    } else {
-      await saveAddressToBook(userId);
-      setActiveStep("payment");
-    }
-  };
-
-  const handleInlineAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsAuthLoading(true);
-    let authError = null;
-    let newUserId = null;
-
-    if (authMode === "login") {
-      const { error } = await signIn(authEmail, authPassword);
-      authError = error;
-      if (!error) {
-        const { data: { session } } = await supabase.auth.getSession();
-        newUserId = session?.user?.id;
-      }
-    } else {
-      const { error, data } = await supabase.auth.signUp({ email: authEmail, password: authPassword });
-      authError = error?.message;
-      if (!error && data?.session?.user?.id) {
-        newUserId = data.session.user.id;
-      }
-    }
-
-    if (authError) {
-      addToast({ title: "Authentication Failed", message: authError, type: "error" });
-      setIsAuthLoading(false);
-      return;
-    }
-
-    if (newUserId) {
-      setUserId(newUserId);
-      await saveAddressToBook(newUserId);
-      setActiveStep("payment");
-    } else {
-      addToast({ title: "Verify Email", message: "Please check your email for a verification link.", type: "success" });
-    }
-    setIsAuthLoading(false);
+    setActiveStep("payment");
   };
 
   const loadRazorpayScript = () => {
@@ -457,6 +386,18 @@ export default function CheckoutPage() {
     <div className="bg-[#FAF8F5] min-h-screen font-sans text-neutral-900 pb-24">
       
       {/* Minimal Luxury Header */}
+      <header className="bg-white border-b border-neutral-200/80 sticky top-0 z-40">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          <Link href="/" className="font-serif text-xl sm:text-2xl font-bold tracking-widest text-[#1A1A1A]">
+            JENNYD PARFUMS
+          </Link>
+          
+          <div className="flex items-center gap-1.5 text-xs text-neutral-500 font-medium">
+            <Lock className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Encrypted Checkout</span>
+          </div>
+        </div>
+      </header>
 
       {/* Clean Stepper Breadcrumb */}
       <div className="bg-white border-b border-neutral-200/60 py-3">
@@ -471,10 +412,10 @@ export default function CheckoutPage() {
           </button>
           <ChevronRight className="w-3.5 h-3.5 text-neutral-300" />
           <button 
-            onClick={() => { if (email && firstName && addressLine1 && userId) setActiveStep("payment"); }}
-            className={(activeStep === "payment" || activeStep === "auth") ? "text-neutral-900 font-bold" : "hover:text-black"}
+            onClick={() => { if (email && firstName && addressLine1) setActiveStep("payment"); }}
+            className={activeStep === "payment" ? "text-neutral-900 font-bold" : "hover:text-black"}
           >
-            2. Payment
+            2. Shipping & Payment
           </button>
           <ChevronRight className="w-3.5 h-3.5 text-neutral-300" />
           <span className={activeStep === "review" ? "text-neutral-900 font-bold" : ""}>
@@ -517,7 +458,7 @@ export default function CheckoutPage() {
             
             {/* STEP 1: Address */}
             {activeStep === "shipping" && (
-              <form onSubmit={handleShippingSubmit} className="bg-white rounded-2xl p-5 sm:p-8 border border-neutral-200/90 shadow-2xs space-y-4">
+              <form onSubmit={handleShippingSubmit} className="bg-white rounded-2xl p-6 sm:p-8 border border-neutral-200/90 shadow-2xs space-y-5">
                 <h2 className="text-lg sm:text-xl font-serif text-[#1A1A1A] font-semibold border-b border-neutral-100 pb-3">
                   Shipping & Contact Address
                 </h2>
@@ -525,53 +466,53 @@ export default function CheckoutPage() {
                 {/* Email & Phone */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide block mb-1">Email *</label>
+                    <label className="text-xs font-semibold text-neutral-700 block">Email *</label>
                     <input
                       type="email"
                       required
                       placeholder="you@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] transition-all"
+                      className="w-full px-3.5 py-2.5 bg-white border border-neutral-300 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:border-neutral-900"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide block mb-1">Phone Number *</label>
+                    <label className="text-xs font-semibold text-neutral-700 block">Phone Number *</label>
                     <input
                       type="tel"
                       required
                       placeholder="Mobile number"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] transition-all"
+                      className="w-full px-3.5 py-2.5 bg-white border border-neutral-300 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:border-neutral-900"
                     />
                   </div>
                 </div>
 
                 {/* Name */}
-                <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide block mb-1">First Name *</label>
+                    <label className="text-xs font-semibold text-neutral-700 block">First Name *</label>
                     <input
                       type="text"
                       required
                       placeholder="First Name"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] transition-all"
+                      className="w-full px-3.5 py-2.5 bg-white border border-neutral-300 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:border-neutral-900"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide block mb-1">Last Name *</label>
+                    <label className="text-xs font-semibold text-neutral-700 block">Last Name *</label>
                     <input
                       type="text"
                       required
                       placeholder="Last Name"
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] transition-all"
+                      className="w-full px-3.5 py-2.5 bg-white border border-neutral-300 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:border-neutral-900"
                     />
                   </div>
                 </div>
@@ -579,32 +520,32 @@ export default function CheckoutPage() {
                 {/* Address Lines */}
                 <div className="space-y-3">
                   <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide block mb-1">Street Address *</label>
+                    <label className="text-xs font-semibold text-neutral-700 block">Street Address *</label>
                     <input
                       type="text"
                       required
                       placeholder="Flat, House no., Building, Street"
                       value={addressLine1}
                       onChange={(e) => setAddressLine1(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] transition-all"
+                      className="w-full px-3.5 py-2.5 bg-white border border-neutral-300 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:border-neutral-900"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide block mb-1">Apartment, Suite (Optional)</label>
+                    <label className="text-xs font-semibold text-neutral-700 block">Apartment, Suite (Optional)</label>
                     <input
                       type="text"
                       placeholder="Apartment or suite number"
                       value={addressLine2}
                       onChange={(e) => setAddressLine2(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] transition-all"
+                      className="w-full px-3.5 py-2.5 bg-white border border-neutral-300 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:border-neutral-900"
                     />
                   </div>
                 </div>
 
                 {/* Country Dropdown & Custom Country Input */}
                 <div className="space-y-2">
-                  <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide block mb-1">Country / Region *</label>
+                  <label className="text-xs font-semibold text-neutral-700 block">Country / Region *</label>
                   <div className="relative">
                     <select
                       value={country}
@@ -614,7 +555,7 @@ export default function CheckoutPage() {
                           setShippingMethod("standard");
                         }
                       }}
-                      className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-base sm:text-sm font-semibold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] appearance-none cursor-pointer transition-all"
+                      className="w-full px-3.5 py-2.5 bg-white border border-neutral-300 rounded-xl text-base sm:text-sm font-semibold text-neutral-900 focus:outline-none focus:border-neutral-900 appearance-none cursor-pointer"
                     >
                       {POPULAR_COUNTRIES.map((c) => (
                         <option key={c} value={c}>{c}</option>
@@ -644,28 +585,28 @@ export default function CheckoutPage() {
                 </div>
 
                 {/* City, State & Zip Code */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide block mb-1">City *</label>
+                    <label className="text-xs font-semibold text-neutral-700 block">City *</label>
                     <input
                       type="text"
                       required
                       placeholder="City"
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] transition-all"
+                      className="w-full px-3.5 py-2.5 bg-white border border-neutral-300 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:border-neutral-900"
                     />
                   </div>
 
                   {/* State Select or Custom Input */}
                   <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide block mb-1">State / Region *</label>
+                    <label className="text-xs font-semibold text-neutral-700 block">State / Region *</label>
                     {availableStates.length > 0 ? (
                       <div className="relative">
                         <select
                           value={state}
                           onChange={(e) => setState(e.target.value)}
-                          className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-base sm:text-sm font-semibold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] appearance-none cursor-pointer transition-all"
+                          className="w-full px-3.5 py-2.5 bg-white border border-neutral-300 rounded-xl text-base sm:text-sm font-semibold text-neutral-900 focus:outline-none focus:border-neutral-900 appearance-none cursor-pointer"
                         >
                           {availableStates.map((st) => (
                             <option key={st} value={st}>{st}</option>
@@ -684,94 +625,37 @@ export default function CheckoutPage() {
                         placeholder="State / Region"
                         value={state}
                         onChange={(e) => setState(e.target.value)}
-                        className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] transition-all"
+                        className="w-full px-3.5 py-2.5 bg-white border border-neutral-300 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:border-neutral-900"
                       />
                     )}
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide block mb-1">Postal / ZIP Code *</label>
+                    <label className="text-xs font-semibold text-neutral-700 block">Postal / ZIP Code *</label>
                     <input
                       type="text"
                       required
                       placeholder="Postal Code"
                       value={zip}
                       onChange={(e) => setZip(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-base sm:text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] transition-all"
+                      className="w-full px-3.5 py-2.5 bg-white border border-neutral-300 rounded-xl text-base sm:text-sm font-mono focus:outline-none focus:border-neutral-900"
                     />
                   </div>
                 </div>
 
-                <div className="fixed bottom-0 left-0 right-0 p-3 bg-white border-t border-neutral-200 z-50 sm:relative sm:p-0 sm:border-0 sm:bg-transparent sm:pt-4 sm:flex sm:justify-end shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] sm:shadow-none pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+                <div className="pt-3 flex justify-end">
                   <Button 
                     type="submit" 
-                    className="w-full sm:w-auto bg-[#1A1A1A] hover:bg-black text-white text-sm sm:text-xs font-bold uppercase tracking-wider py-3.5 px-8 rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-md transition-all active:scale-98"
+                    className="w-full sm:w-auto bg-[#1A1A1A] hover:bg-black text-white text-xs font-bold uppercase tracking-wider py-3.5 px-8 rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-md transition-all active:scale-98"
                   >
-                    <span>Continue to Payment</span>
+                    <span>Continue to Shipping & Payment</span>
                     <ArrowRight className="w-4 h-4" />
                   </Button>
                 </div>
               </form>
             )}
 
-            {/* STEP 2: Auth (Login/Signup inline) */}
-            {activeStep === "auth" && (
-              <div className="bg-white rounded-2xl p-6 sm:p-8 border border-neutral-200/90 shadow-2xs space-y-6">
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Lock className="w-5 h-5 text-neutral-600" />
-                  </div>
-                  <h2 className="text-xl sm:text-2xl font-serif text-[#1A1A1A] font-semibold mb-2">Secure Checkout</h2>
-                  <p className="text-sm text-neutral-500">Sign in to save your address securely and track your order easily.</p>
-                </div>
-                
-                <form onSubmit={handleInlineAuth} className="max-w-sm mx-auto space-y-4">
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide block mb-1">Email Address</label>
-                    <input
-                      type="email"
-                      required
-                      value={authEmail}
-                      onChange={(e) => setAuthEmail(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:border-[#D4AF37]"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide block mb-1">Password</label>
-                    <input
-                      type="password"
-                      required
-                      value={authPassword}
-                      onChange={(e) => setAuthPassword(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:border-[#D4AF37]"
-                    />
-                  </div>
-                  
-                  <div className="pt-2">
-                    <Button 
-                      type="submit" 
-                      disabled={isAuthLoading}
-                      className="w-full bg-[#1A1A1A] hover:bg-black text-white text-sm font-bold uppercase tracking-wider py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-md transition-all"
-                    >
-                      {isAuthLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                      <span>{authMode === "login" ? "Sign In & Continue" : "Create Account & Continue"}</span>
-                    </Button>
-                  </div>
-                </form>
-
-                <div className="text-center pt-2">
-                  <button 
-                    type="button" 
-                    onClick={() => setAuthMode(authMode === "login" ? "signup" : "login")}
-                    className="text-sm font-bold text-[#D4AF37] hover:underline"
-                  >
-                    {authMode === "login" ? "Don't have an account? Sign Up" : "Already have an account? Sign In"}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* STEP 3: Delivery & Payment Options */}
+            {/* STEP 2: Delivery & Payment Options */}
             {activeStep === "payment" && (
               <form onSubmit={handlePaymentSubmit} className="bg-white rounded-2xl p-6 sm:p-8 border border-neutral-200/90 shadow-2xs space-y-6">
                 <h2 className="text-lg sm:text-xl font-serif text-[#1A1A1A] font-semibold border-b border-neutral-100 pb-3">
@@ -876,21 +760,41 @@ export default function CheckoutPage() {
                       </div>
                     </label>
 
+                    <label className={`flex items-start gap-3 p-4 rounded-xl border transition-all cursor-pointer ${
+                      paymentMethod === "cod" 
+                        ? "border-neutral-900 bg-neutral-50 shadow-xs" 
+                        : "border-neutral-200 bg-white hover:border-neutral-300"
+                    }`}>
+                      <input
+                        type="radio"
+                        name="payment_radio"
+                        checked={paymentMethod === "cod"}
+                        onChange={() => setPaymentMethod("cod")}
+                        className="w-4 h-4 accent-black mt-0.5 cursor-pointer"
+                      />
+                      <div>
+                        <span className="text-xs sm:text-sm font-bold text-neutral-900 block">Cash on Delivery (COD)</span>
+                        <p className="text-xs text-neutral-500 mt-0.5">
+                          Pay cash to courier partner at delivery.
+                        </p>
+                      </div>
+                    </label>
+
                   </div>
                 </div>
 
-                <div className="fixed bottom-0 left-0 right-0 p-3 bg-white border-t border-neutral-200 z-50 sm:relative sm:p-0 sm:border-0 sm:bg-transparent sm:pt-4 sm:flex sm:items-center sm:justify-between shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] sm:shadow-none pb-[calc(0.75rem+env(safe-area-inset-bottom))] flex justify-between items-center gap-4">
+                <div className="pt-3 flex items-center justify-between">
                   <button
                     type="button"
                     onClick={() => setActiveStep("shipping")}
-                    className="text-sm sm:text-xs font-semibold text-neutral-600 hover:text-black flex items-center gap-1 cursor-pointer"
+                    className="text-xs font-semibold text-neutral-600 hover:text-black flex items-center gap-1 cursor-pointer"
                   >
-                    <ArrowLeft className="w-4 h-4 sm:w-3.5 sm:h-3.5" /> Back
+                    <ArrowLeft className="w-3.5 h-3.5" /> Back
                   </button>
 
                   <Button 
                     type="submit" 
-                    className="flex-1 sm:flex-none bg-[#1A1A1A] hover:bg-black text-white text-sm sm:text-xs font-bold uppercase tracking-wider py-3.5 px-8 rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-md transition-all active:scale-98"
+                    className="bg-[#1A1A1A] hover:bg-black text-white text-xs font-bold uppercase tracking-wider py-3.5 px-8 rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-md transition-all active:scale-98"
                   >
                     <span>Review Order</span>
                     <ArrowRight className="w-4 h-4" />
@@ -926,7 +830,7 @@ export default function CheckoutPage() {
                       <button onClick={() => setActiveStep("payment")} className="text-[10px] text-neutral-600 font-semibold hover:underline cursor-pointer">Change</button>
                     </div>
                     <p className="font-semibold text-neutral-800">
-                      Online Payment (Razorpay)
+                      {paymentMethod === "online" ? "Online Payment (Razorpay)" : "Cash on Delivery (COD)"}
                     </p>
                     <p className="text-neutral-500">
                       Speed: {shippingMethod === "express" ? "Priority Express" : "Standard Delivery"}
@@ -950,19 +854,19 @@ export default function CheckoutPage() {
                   </label>
                 </div>
 
-                <div className="fixed bottom-0 left-0 right-0 p-3 bg-white border-t border-neutral-200 z-50 sm:relative sm:p-0 sm:border-0 sm:bg-transparent sm:pt-4 sm:flex sm:items-center sm:justify-between shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] sm:shadow-none pb-[calc(0.75rem+env(safe-area-inset-bottom))] flex justify-between items-center gap-4">
+                <div className="pt-2 flex items-center justify-between gap-4">
                   <button
                     type="button"
                     onClick={() => setActiveStep("payment")}
-                    className="text-sm sm:text-xs font-semibold text-neutral-600 hover:text-black flex items-center gap-1 cursor-pointer"
+                    className="text-xs font-semibold text-neutral-600 hover:text-black flex items-center gap-1 cursor-pointer"
                   >
-                    <ArrowLeft className="w-4 h-4 sm:w-3.5 sm:h-3.5" /> Back
+                    <ArrowLeft className="w-3.5 h-3.5" /> Back
                   </button>
 
                   <Button 
                     onClick={handlePlaceOrder}
                     disabled={isSubmitting || !agreeTerms}
-                    className={`flex-1 sm:flex-none text-sm sm:text-xs font-bold uppercase tracking-widest py-3.5 px-8 rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-md transition-all active:scale-98 ${
+                    className={`text-xs font-bold uppercase tracking-widest py-3.5 px-8 rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-md transition-all active:scale-98 ${
                       !agreeTerms || isSubmitting 
                         ? "bg-neutral-300 text-neutral-500 cursor-not-allowed"
                         : "bg-[#1A1A1A] hover:bg-black text-white shadow-lg"

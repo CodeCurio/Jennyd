@@ -457,7 +457,7 @@ export default function CartPage() {
                     <span>256-Bit Encrypted & Verified Checkout</span>
                   </div>
                   <span className="text-[10px] text-neutral-400">
-                    Insured International Courier Delivery | 7-Days Easy Return Policy
+                    Insured International Courier Delivery | No Returns / Final Sale
                   </span>
                 </div>
               </div>

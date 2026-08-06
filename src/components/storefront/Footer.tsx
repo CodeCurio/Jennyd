@@ -240,7 +240,7 @@ export async function Footer() {
             </li>
             <li>
               <Link href="/returns" className="hover:text-[#D4AF37] hover:translate-x-1 transition-all inline-block">
-                Returns & Refund Policy
+                Cancellation & No-Refund Policy
               </Link>
             </li>
             <li>

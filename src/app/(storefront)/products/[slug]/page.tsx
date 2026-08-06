@@ -38,7 +38,7 @@ const REAL_TRUST_BADGES = [
   { icon: Award, label: "100% Authentic Fragrance", sub: "Formulated with Fine Oils" },
   { icon: Truck, label: "Express Delivery", sub: "Dispatched Within 24H" },
   { icon: PackageCheck, label: "Luxury Packaging", sub: "Sealed Original Box" },
-  { icon: ShieldCheck, label: "7-Day Easy Returns", sub: "Valid on Unopened Boxes" },
+  { icon: ShieldCheck, label: "Secure Payments", sub: "256-bit Encrypted Checkout" },
 ];
 
 export default function ProductPage({ params }: { params: Promise<{ slug: string }> }) {

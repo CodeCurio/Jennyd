@@ -13,11 +13,11 @@ const FAQ_CATEGORIES = [
     items: [
       {
         question: "What payment methods do you accept?",
-        answer: "We accept all major credit & debit cards, UPI (Google Pay, PhonePe, Paytm), Net Banking, and Cash on Delivery (COD) across India via Razorpay."
+        answer: "We accept all major credit & debit cards, UPI (Google Pay, PhonePe, Paytm), and Net Banking across India via Razorpay."
       },
       {
         question: "Can I modify or cancel my order after placing it?",
-        answer: "Orders are processed rapidly to ensure prompt dispatch. If you need to make changes or cancel, please contact us within 2 hours of placing your order at support@jennyd.com or +91 9682899765."
+        answer: "Orders are processed rapidly to ensure prompt dispatch. If you need to make changes or cancel, please contact us within 2 hours of placing your order at support@jennyd.com or +91 9682899765. Once shipped, orders cannot be cancelled."
       },
       {
         question: "How can I track my order status?",
@@ -56,11 +56,11 @@ const FAQ_CATEGORIES = [
     ]
   },
   {
-    category: "Returns & Exchanges",
+    category: "Cancellations & Returns",
     items: [
       {
         question: "What is your return & replacement policy?",
-        answer: "Unopened and factory-sealed perfume boxes are eligible for returns or replacements within 7 days of delivery. If you receive a damaged or defective item, please contact our support team immediately with unboxing proof for an instant hassle-free replacement."
+        answer: "Please note that we have a strict NO RETURN and NO REFUND policy. Once a product is sold and dispatched, it cannot be returned or exchanged under any circumstances."
       }
     ]
   }

@@ -164,7 +164,7 @@ export default function OrderHistoryPage() {
                 {/* Order Header */}
                 <button
                   onClick={() => toggleExpand(order.id)}
-                  className="w-full px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-left"
+                  className="w-full px-4 sm:px-6 py-4 sm:py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-left"
                 >
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
@@ -213,8 +213,8 @@ export default function OrderHistoryPage() {
                           {items.map((item) => {
                             const imageUrl = item.products?.metadata?.images?.[0] || "/assets/placeholder.jpg";
                             return (
-                              <div key={item.id} className="px-6 py-4 flex items-center gap-4">
-                                <div className="w-14 h-14 rounded-lg bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
+                              <div key={item.id} className="px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-3 sm:gap-4">
+                                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
                                   <img src={imageUrl} alt={item.title} className="w-full h-full object-cover" />
                                 </div>
                                 <div className="flex-1 min-w-0">
@@ -231,7 +231,7 @@ export default function OrderHistoryPage() {
                         </div>
 
                         {/* Order Summary */}
-                        <div className="px-6 py-4 bg-gray-50/80 border-t border-gray-100 text-xs space-y-1.5 text-gray-500 font-medium">
+                        <div className="px-4 sm:px-6 py-3 sm:py-4 bg-gray-50/80 border-t border-gray-100 text-xs space-y-1.5 text-gray-500 font-medium">
                           <div className="flex justify-between">
                             <span>Subtotal</span>
                             <span className="text-gray-900 font-mono">{formatPrice(Number(order.subtotal))}</span>

@@ -1,11 +1,12 @@
-import { Header } from "@/components/storefront/Header";
-import { Footer } from "@/components/storefront/Footer";
-import { CartDrawer } from "@/components/storefront/CartDrawer";
 import { CartProvider } from "@/lib/store/CartContext";
 import { ToastProvider } from "@/components/ui/Toast";
 import { AuthProvider } from "@/lib/store/AuthContext";
-import { LanguageSelectorPopup } from "@/components/storefront/LanguageSelectorPopup";
 import { CurrencyProvider } from "@/lib/store/CurrencyContext";
+import { StorefrontUIWrapper } from "@/components/storefront/StorefrontUIWrapper";
+import { Header } from "@/components/storefront/Header";
+import { Footer } from "@/components/storefront/Footer";
+import { CartDrawer } from "@/components/storefront/CartDrawer";
+import { LanguageSelectorPopup } from "@/components/storefront/LanguageSelectorPopup";
 import { WhatsAppButton } from "@/components/storefront/WhatsAppButton";
 
 export default function StorefrontLayout({
@@ -18,16 +19,15 @@ export default function StorefrontLayout({
       <AuthProvider>
         <CurrencyProvider>
           <CartProvider>
-            <div className="flex flex-col min-h-screen">
-              <Header />
-              <main className="flex-1">
-                {children}
-              </main>
-              <Footer />
-              <CartDrawer />
-              <LanguageSelectorPopup />
-              <WhatsAppButton />
-            </div>
+            <StorefrontUIWrapper
+              header={<Header />}
+              footer={<Footer />}
+              cartDrawer={<CartDrawer />}
+              languageSelector={<LanguageSelectorPopup />}
+              whatsAppButton={<WhatsAppButton />}
+            >
+              {children}
+            </StorefrontUIWrapper>
           </CartProvider>
         </CurrencyProvider>
       </AuthProvider>
