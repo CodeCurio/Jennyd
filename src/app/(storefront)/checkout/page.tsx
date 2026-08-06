@@ -476,6 +476,7 @@ export default function CheckoutPage() {
 
     if (newUserId) {
       setUserId(newUserId);
+      setEmail(authEmail);
       await saveAddressToBook(newUserId);
       setActiveStep("payment");
     }
@@ -513,11 +514,13 @@ export default function CheckoutPage() {
       country: finalCountryName
     };
 
-    if (userId && email) {
+    const targetEmail = (email || authEmail || "").trim();
+
+    if (userId && targetEmail) {
       await fetch("/api/profile/upsert", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, email, fullName: `${firstName} ${lastName}`, phone })
+        body: JSON.stringify({ userId, email: targetEmail, fullName: `${firstName} ${lastName}`, phone })
       });
     }
 
@@ -527,7 +530,7 @@ export default function CheckoutPage() {
         {
           order_number: orderNumber,
           user_id: userId,
-          email,
+          email: targetEmail,
           shipping_address: fullAddress,
           billing_address: fullAddress,
           shipping_method: shippingMethod === "express" ? "Express Delivery" : "Standard Delivery",
@@ -581,11 +584,12 @@ export default function CheckoutPage() {
 
     // Send Order Confirmation Email via Resend
     try {
-      await fetch("/api/emails/order-receipt", {
+      console.log("Sending order receipt email to:", targetEmail);
+      const emailRes = await fetch("/api/emails/order-receipt", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: email,
+          email: targetEmail,
           orderNumber: orderNumber,
           customerName: `${firstName} ${lastName}`,
           totalAmount: grandTotal,
@@ -598,6 +602,8 @@ export default function CheckoutPage() {
           shippingAddress: fullAddress
         })
       });
+      const emailJson = await emailRes.json();
+      console.log("Order Receipt Email Result:", emailJson);
     } catch (emailErr) {
       console.error("Order receipt email error:", emailErr);
     }

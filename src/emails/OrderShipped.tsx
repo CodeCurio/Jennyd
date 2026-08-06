@@ -8,14 +8,13 @@ import {
   Preview,
   Section,
   Text,
-  Tailwind,
   Button,
 } from "@react-email/components";
 import * as React from "react";
 
 interface OrderShippedEmailProps {
-  orderNumber: string;
-  customerName: string;
+  orderNumber?: string;
+  customerName?: string;
   trackingUrl?: string;
   trackingId?: string;
 }
@@ -32,53 +31,59 @@ export default function OrderShippedEmail({
     <Html>
       <Head />
       <Preview>{previewText}</Preview>
-      <Tailwind>
-        <Body className="bg-white my-auto mx-auto font-sans">
-          <Container className="border border-solid border-[#eaeaea] rounded my-[40px] mx-auto p-[20px] max-w-[600px]">
-            <Section className="mt-[32px] text-center">
-              <Text className="text-[24px] font-serif font-bold text-[#1a1a1a] tracking-widest uppercase m-0">
-                JENNYD PARFUMS
-              </Text>
-            </Section>
-            
-            <Heading className="text-black text-[24px] font-normal text-center p-0 my-[30px] mx-0">
-              Your order is on the way!
-            </Heading>
-            
-            <Text className="text-black text-[14px] leading-[24px]">
-              Dear {customerName},
+      <Body style={{ backgroundColor: "#faf8f5", fontFamily: "serif, sans-serif", margin: "0", padding: "20px 0" }}>
+        <Container style={{ backgroundColor: "#ffffff", border: "1px solid #e5e5e5", borderRadius: "16px", padding: "32px", maxWidth: "600px", margin: "0 auto" }}>
+          
+          <Section style={{ textAlign: "center" }}>
+            <Text style={{ fontSize: "22px", fontFamily: "serif", fontWeight: "bold", color: "#1a1a1a", letterSpacing: "3px", textTransform: "uppercase", margin: 0 }}>
+              JENNYD PARFUMS
             </Text>
-            <Text className="text-black text-[14px] leading-[24px]">
-              Great news! Your luxury fragrance order <strong>{orderNumber}</strong> has been shipped and is currently in transit.
+            <Text style={{ fontSize: "11px", color: "#D4AF37", letterSpacing: "2px", textTransform: "uppercase", margin: "4px 0 0 0" }}>
+              LUXURY FRAGRANCES
             </Text>
+          </Section>
 
-            {trackingId && (
-              <Text className="text-black text-[14px] leading-[24px] mt-[10px]">
-                Your tracking number is: <strong>{trackingId}</strong>
+          <Hr style={{ borderColor: "#f0f0f0", margin: "20px 0" }} />
+
+          <Heading style={{ color: "#1a1a1a", fontSize: "20px", fontWeight: "normal", textAlign: "center", margin: "20px 0 10px 0" }}>
+            Your Order is on the Way!
+          </Heading>
+          
+          <Text style={{ color: "#555555", fontSize: "14px", lineHeight: "22px", textAlign: "center", margin: "0 0 24px 0" }}>
+            Dear <strong>{customerName}</strong>, great news! Your luxury fragrance order <strong style={{ color: "#1a1a1a" }}>#{orderNumber}</strong> has been shipped and is currently in transit.
+          </Text>
+
+          {trackingId && (
+            <Section style={{ backgroundColor: "#faf8f5", borderRadius: "12px", padding: "16px", textAlign: "center", marginBottom: "24px" }}>
+              <Text style={{ color: "#888888", fontSize: "11px", fontWeight: "bold", letterSpacing: "1px", textTransform: "uppercase", margin: "0 0 4px 0" }}>
+                Tracking Number
               </Text>
-            )}
-
-            <Section className="text-center mt-[32px] mb-[32px]">
-              <Button
-                className="bg-[#1a1a1a] rounded text-white text-[12px] font-bold uppercase tracking-wider no-underline text-center px-6 py-4"
-                href={trackingUrl}
-              >
-                Track Your Order
-              </Button>
-            </Section>
-
-            <Hr className="border border-solid border-[#eaeaea] my-[26px] mx-0 w-full" />
-            
-            <Section className="text-center mt-[32px] mb-[32px]">
-              <Text className="text-gray-500 text-[12px] leading-[24px]">
-                Thank you for shopping with Jennyd Parfums.<br/>
-                If you have any questions, reply to this email or contact us at support@jennydscents.com
+              <Text style={{ color: "#1a1a1a", fontSize: "16px", fontWeight: "bold", fontFamily: "monospace", margin: 0 }}>
+                {trackingId}
               </Text>
             </Section>
-            
-          </Container>
-        </Body>
-      </Tailwind>
+          )}
+
+          <Section style={{ textAlign: "center", margin: "32px 0" }}>
+            <Button
+              style={{ backgroundColor: "#1a1a1a", borderRadius: "10px", color: "#ffffff", fontSize: "12px", fontWeight: "bold", letterSpacing: "1px", textTransform: "uppercase", textDecoration: "none", textAlign: "center", padding: "14px 28px", display: "inline-block" }}
+              href={trackingUrl}
+            >
+              Track Your Order
+            </Button>
+          </Section>
+
+          <Hr style={{ borderColor: "#f0f0f0", margin: "24px 0" }} />
+          
+          <Section style={{ textAlign: "center" }}>
+            <Text style={{ color: "#999999", fontSize: "12px", lineHeight: "20px", margin: 0 }}>
+              Thank you for shopping with Jennyd Parfums.<br/>
+              If you have any questions, reply to this email or contact us at <a href="mailto:support@jennydscents.com" style={{ color: "#D4AF37", textDecoration: "underline" }}>support@jennydscents.com</a>.
+            </Text>
+          </Section>
+
+        </Container>
+      </Body>
     </Html>
   );
 }
