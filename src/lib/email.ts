@@ -9,10 +9,8 @@ const getResendClient = () => {
   return new Resend(apiKey);
 };
 
-// For testing on unverified domains, Resend requires sending from onboarding@resend.dev
-const SENDER_EMAIL = process.env.NODE_ENV === "production" 
-  ? "Jennyd Parfums <support@jennydscents.com>" 
-  : "onboarding@resend.dev";
+// Verified custom domain sender address
+const SENDER_EMAIL = process.env.RESEND_SENDER_EMAIL || "Jennyd Parfums <support@jennydscents.com>";
 
 export const sendOrderReceiptEmail = async (
   email: string,
@@ -29,10 +27,8 @@ export const sendOrderReceiptEmail = async (
       return { success: false, error: "RESEND_API_KEY environment variable is missing on Vercel." };
     }
 
-    const preferredSender = process.env.RESEND_SENDER_EMAIL || "onboarding@resend.dev";
-
     let { data, error } = await resend.emails.send({
-      from: preferredSender,
+      from: SENDER_EMAIL,
       to: email,
       subject: `Order Confirmation - ${orderNumber}`,
       react: OrderReceiptEmail({
@@ -44,9 +40,9 @@ export const sendOrderReceiptEmail = async (
       }),
     });
 
-    // If preferred sender failed (e.g., domain unverified), fallback to onboarding@resend.dev
-    if (error && preferredSender !== "onboarding@resend.dev") {
-      console.warn("Preferred sender failed, retrying with onboarding@resend.dev:", error);
+    // If custom sender failed for any reason, retry with onboarding@resend.dev
+    if (error && SENDER_EMAIL !== "onboarding@resend.dev") {
+      console.warn("Primary sender failed, retrying with onboarding@resend.dev:", error);
       const fallbackRes = await resend.emails.send({
         from: "onboarding@resend.dev",
         to: email,
@@ -90,10 +86,8 @@ export const sendOrderShippedEmail = async (
       return { success: false, error: "RESEND_API_KEY environment variable is missing on Vercel." };
     }
 
-    const preferredSender = process.env.RESEND_SENDER_EMAIL || "onboarding@resend.dev";
-
     let { data, error } = await resend.emails.send({
-      from: preferredSender,
+      from: SENDER_EMAIL,
       to: email,
       subject: `Your Order ${orderNumber} has been shipped!`,
       react: OrderShippedEmail({
@@ -104,7 +98,7 @@ export const sendOrderShippedEmail = async (
       }),
     });
 
-    if (error && preferredSender !== "onboarding@resend.dev") {
+    if (error && SENDER_EMAIL !== "onboarding@resend.dev") {
       const fallbackRes = await resend.emails.send({
         from: "onboarding@resend.dev",
         to: email,
