@@ -5,6 +5,7 @@ import {
   Heading,
   Hr,
   Html,
+  Img,
   Preview,
   Section,
   Text,
@@ -25,7 +26,7 @@ export default function OrderShippedEmail({
   trackingUrl = "https://jennydscents.com/account/orders",
   trackingId = "",
 }: OrderShippedEmailProps) {
-  const previewText = `Your order ${orderNumber} has been shipped!`;
+  const previewText = `Your Jennyd Scents order ${orderNumber} has been shipped!`;
 
   return (
     <Html>
@@ -34,12 +35,19 @@ export default function OrderShippedEmail({
       <Body style={{ backgroundColor: "#faf8f5", fontFamily: "serif, sans-serif", margin: "0", padding: "20px 0" }}>
         <Container style={{ backgroundColor: "#ffffff", border: "1px solid #e5e5e5", borderRadius: "16px", padding: "32px", maxWidth: "600px", margin: "0 auto" }}>
           
-          <Section style={{ textAlign: "center" }}>
+          <Section style={{ textAlign: "center", marginBottom: "24px" }}>
+            <Img
+              src="https://www.jennydscents.com/logo.png"
+              width="70"
+              height="70"
+              alt="Jennyd Scents Logo"
+              style={{ margin: "0 auto 12px auto", display: "block", borderRadius: "50%" }}
+            />
             <Text style={{ fontSize: "22px", fontFamily: "serif", fontWeight: "bold", color: "#1a1a1a", letterSpacing: "3px", textTransform: "uppercase", margin: 0 }}>
-              JENNYD PARFUMS
+              JENNYD SCENTS
             </Text>
             <Text style={{ fontSize: "11px", color: "#D4AF37", letterSpacing: "2px", textTransform: "uppercase", margin: "4px 0 0 0" }}>
-              LUXURY FRAGRANCES
+              LUXURY EXTRAIT DE PARFUM
             </Text>
           </Section>
 
