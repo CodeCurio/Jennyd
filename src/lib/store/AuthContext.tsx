@@ -81,25 +81,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     initSession();
 
-    // Catch email confirmation hash fragments (#access_token=...&type=signup) and redirect to /account
-    if (typeof window !== "undefined" && window.location.hash) {
-      const hash = window.location.hash;
-      if (hash.includes("access_token") || hash.includes("type=signup") || hash.includes("type=email_verification")) {
-        const currentPath = window.location.pathname;
-        const targetPath = currentPath === "/checkout" ? "/checkout" : "/account";
-
-        // Clean the hash fragment from the URL address bar gracefully
-        try {
-          window.history.replaceState(null, "", currentPath + window.location.search);
-        } catch (e) {}
-
-        // Auto-redirect user to /account or /checkout
-        if (currentPath !== targetPath) {
-          window.location.href = targetPath;
-        }
-      }
-    }
-
     // Subscribe to auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
@@ -112,11 +93,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         setIsLoading(false);
 
-        // If user just confirmed email or signed in from hash token, ensure redirection to /account
-        if ((event === "SIGNED_IN" || event === "USER_UPDATED") && typeof window !== "undefined") {
-          if (window.location.hash.includes("type=signup") || window.location.hash.includes("access_token")) {
+        // Handle email confirmation token redirection (#access_token=... or code=...)
+        if (typeof window !== "undefined" && newSession?.user) {
+          const hash = window.location.hash;
+          const search = window.location.search;
+          if (hash.includes("access_token") || hash.includes("type=signup") || search.includes("code=")) {
             const currentPath = window.location.pathname;
             const targetPath = currentPath === "/checkout" ? "/checkout" : "/account";
+
+            // Clean address bar URL
+            try {
+              window.history.replaceState(null, "", targetPath);
+            } catch (e) {}
+
             if (currentPath !== targetPath) {
               window.location.href = targetPath;
             }

@@ -49,12 +49,9 @@ export default function SignupPage() {
       const msg = typeof res.error === "string" ? res.error : (res.error as any)?.message || "Failed to create account.";
       setError(msg);
       setIsLoading(false);
-    } else if (res.isVerificationSent) {
+    } else {
       setIsVerificationSent(true);
       setIsLoading(false);
-    } else {
-      const nextUrl = new URLSearchParams(window.location.search).get("next") || "/account";
-      router.push(nextUrl);
     }
   };
 
