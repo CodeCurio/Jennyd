@@ -14,7 +14,7 @@ export default function AdminOrdersPage() {
       setIsLoading(true);
       const { data, error } = await supabase
         .from("orders")
-        .select("id, order_number, created_at, email, total, payment_status, fulfillment_status, shipping_address")
+        .select("id, order_number, created_at, email, total, payment_status, fulfillment_status, shipping_address, metadata, order_items(id, title, quantity, variant_info, products(slug, metadata))")
         .order("created_at", { ascending: false });
 
       if (data && !error) {
@@ -28,15 +28,15 @@ export default function AdminOrdersPage() {
 
   if (isLoading) {
     return (
-      <div className="h-96 flex flex-col items-center justify-center gap-3 bg-white border border-gray-150 rounded-xl">
-        <Loader2 className="w-8 h-8 animate-spin text-black" />
-        <span className="text-xs font-semibold uppercase tracking-widest text-gray-400">Loading orders catalog...</span>
+      <div className="h-80 flex flex-col items-center justify-center gap-3 bg-white border border-neutral-200 rounded-xl shadow-2xs">
+        <Loader2 className="w-7 h-7 animate-spin text-[#D4AF37]" strokeWidth={2} />
+        <span className="text-xs font-bold uppercase tracking-widest text-neutral-400">Loading Orders Catalog...</span>
       </div>
     );
   }
 
   return (
-    <div className="pb-10">
+    <div className="pb-10 max-w-7xl mx-auto">
       <OrdersTableClient initialOrders={orders} />
     </div>
   );
