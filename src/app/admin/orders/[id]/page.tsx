@@ -92,7 +92,7 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
               {order.payment_status === "paid" ? (
                 <span className="px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 rounded">Paid</span>
               ) : (
-                <span className="px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200 rounded">COD / Pending</span>
+                <span className="px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200 rounded">Pending / Unpaid</span>
               )}
               <span className={`px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider rounded border ${
                 ['shipped', 'delivered'].includes(order.fulfillment_status) ? 'bg-[#D4AF37]/10 text-[#b8952c] border-[#D4AF37]/30' : 'bg-neutral-100 text-neutral-700 border-neutral-200'
@@ -194,7 +194,7 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
                 <div>
                   <span className="font-bold text-xs uppercase tracking-wider text-neutral-900 block">Total Amount</span>
                   <span className="text-[10px] text-neutral-400 font-medium">
-                    Payment via {order.payment_status === "paid" ? "Online Razorpay" : "Cash on Delivery (COD)"}
+                    Payment via {order.payment_status === "paid" ? "Online Razorpay" : "Pending Payment"}
                   </span>
                 </div>
                 <span className="text-xl font-bold font-mono text-[#D4AF37]">₹{Number(order.total).toLocaleString('en-IN')}</span>

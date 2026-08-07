@@ -540,7 +540,7 @@ export default function CheckoutPage() {
           tax_amount: 0,
           total: grandTotal,
           coupon_code: appliedCoupon ? appliedCoupon.code : null,
-          payment_status: paymentMethod === "cod" ? "pending" : "paid",
+          payment_status: "paid",
           fulfillment_status: "pending",
           metadata: razorpayPaymentId ? { razorpay_payment_id: razorpayPaymentId, razorpay_order_id: razorpayOrderId } : null
         }
@@ -626,70 +626,66 @@ export default function CheckoutPage() {
     const orderNumber = `JD-${Math.floor(100000 + Math.random() * 900000)}`;
 
     try {
-      if (paymentMethod === "online") {
-        const isLoaded = await loadRazorpayScript();
-        if (!isLoaded) {
-          throw new Error("Razorpay SDK failed to load.");
-        }
-
-        const cleanPhone = phone.replace(/\D/g, "").slice(-10);
-        const createOrderRes = await fetch("/api/razorpay/create-order", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ amount: grandTotal, receipt: orderNumber })
-        });
-        const createOrderData = await createOrderRes.json();
-        if (!createOrderData.success || !createOrderData.order) {
-          throw new Error(createOrderData.error || "Failed to initialize payment");
-        }
-
-        const razorpayOrder = createOrderData.order;
-
-        const options = {
-          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-          amount: razorpayOrder.amount,
-          currency: razorpayOrder.currency || "INR",
-          name: "Jennyd Parfums",
-          description: `Order #${orderNumber}`,
-          image: "/logo.png",
-          order_id: razorpayOrder.id,
-          handler: async function (response: any) {
-            try {
-              const verifyRes = await fetch("/api/razorpay/verify-payment", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(response)
-              });
-              const verifyData = await verifyRes.json();
-              if (verifyData.success) {
-                await saveOrderToDatabase(orderNumber, response.razorpay_payment_id, response.razorpay_order_id);
-              } else {
-                throw new Error(verifyData.error || "Payment verification failed.");
-              }
-            } catch (vErr: any) {
-              addToast({ title: "Payment Failed", message: vErr.message, type: "error" });
-              setIsSubmitting(false);
-            }
-          },
-          prefill: {
-            name: `${firstName} ${lastName}`,
-            email: email,
-            contact: cleanPhone ? `+91${cleanPhone}` : phone,
-          },
-          theme: { color: "#1A1A1A" },
-          modal: {
-            ondismiss: function () {
-              setIsSubmitting(false);
-              addToast({ title: "Payment Cancelled", message: "Razorpay payment window closed.", type: "error" });
-            }
-          }
-        };
-
-        const razorpayInstance = new (window as any).Razorpay(options);
-        razorpayInstance.open();
-      } else {
-        await saveOrderToDatabase(orderNumber);
+      const isLoaded = await loadRazorpayScript();
+      if (!isLoaded) {
+        throw new Error("Razorpay SDK failed to load.");
       }
+
+      const cleanPhone = phone.replace(/\D/g, "").slice(-10);
+      const createOrderRes = await fetch("/api/razorpay/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: grandTotal, receipt: orderNumber })
+      });
+      const createOrderData = await createOrderRes.json();
+      if (!createOrderData.success || !createOrderData.order) {
+        throw new Error(createOrderData.error || "Failed to initialize payment");
+      }
+
+      const razorpayOrder = createOrderData.order;
+
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount: razorpayOrder.amount,
+        currency: razorpayOrder.currency || "INR",
+        name: "Jennyd Parfums",
+        description: `Order #${orderNumber}`,
+        image: "/logo.png",
+        order_id: razorpayOrder.id,
+        handler: async function (response: any) {
+          try {
+            const verifyRes = await fetch("/api/razorpay/verify-payment", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(response)
+            });
+            const verifyData = await verifyRes.json();
+            if (verifyData.success) {
+              await saveOrderToDatabase(orderNumber, response.razorpay_payment_id, response.razorpay_order_id);
+            } else {
+              throw new Error(verifyData.error || "Payment verification failed.");
+            }
+          } catch (vErr: any) {
+            addToast({ title: "Payment Failed", message: vErr.message, type: "error" });
+            setIsSubmitting(false);
+          }
+        },
+        prefill: {
+          name: `${firstName} ${lastName}`,
+          email: email,
+          contact: cleanPhone ? `+91${cleanPhone}` : phone,
+        },
+        theme: { color: "#1A1A1A" },
+        modal: {
+          ondismiss: function () {
+            setIsSubmitting(false);
+            addToast({ title: "Payment Cancelled", message: "Razorpay payment window closed.", type: "error" });
+          }
+        }
+      };
+
+      const razorpayInstance = new (window as any).Razorpay(options);
+      razorpayInstance.open();
     } catch (err: any) {
       console.error(err);
       addToast({ title: "Order Failed", message: err.message || "Something went wrong.", type: "error" });
@@ -1233,55 +1229,22 @@ export default function CheckoutPage() {
                 {/* Payment Options */}
                 <div className="space-y-2 pt-2 border-t border-neutral-100">
                   <span className="text-xs font-bold uppercase tracking-wider text-neutral-600 block">
-                    Select Payment Method
+                    Payment Method
                   </span>
 
-                  <div className="space-y-2.5">
-                    
-                    <label className={`flex items-start gap-3 p-4 rounded-xl border transition-all cursor-pointer ${
-                      paymentMethod === "online" 
-                        ? "border-neutral-900 bg-neutral-50 shadow-xs" 
-                        : "border-neutral-200 bg-white hover:border-neutral-300"
-                    }`}>
-                      <input
-                        type="radio"
-                        name="payment_radio"
-                        checked={paymentMethod === "online"}
-                        onChange={() => setPaymentMethod("online")}
-                        className="w-4 h-4 accent-black mt-0.5 cursor-pointer"
-                      />
-                      <div>
-                        <span className="text-xs sm:text-sm font-bold text-neutral-900 block">Online Payment (Razorpay Secure)</span>
-                        <p className="text-xs text-neutral-500 mt-0.5">
-                          Pay safely via UPI (GPay, PhonePe, Paytm, BHIM), Cards or NetBanking.
-                        </p>
-                      </div>
-                    </label>
-
-                    {/* Cash on Delivery (Enabled for Testing) */}
-                    <label className={`flex items-start gap-3 p-4 rounded-xl border transition-all cursor-pointer ${
-                      paymentMethod === "cod" 
-                        ? "border-neutral-900 bg-neutral-50 shadow-xs" 
-                        : "border-neutral-200 bg-white hover:border-neutral-300"
-                    }`}>
-                      <input
-                        type="radio"
-                        name="payment_radio"
-                        checked={paymentMethod === "cod"}
-                        onChange={() => setPaymentMethod("cod")}
-                        className="w-4 h-4 accent-black mt-0.5 cursor-pointer"
-                      />
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs sm:text-sm font-bold text-neutral-900 block">Cash on Delivery (COD)</span>
-                          <span className="px-2 py-0.5 bg-[#D4AF37]/20 text-[#b8962f] rounded text-[10px] font-bold uppercase tracking-wider">Test Mode</span>
-                        </div>
-                        <p className="text-xs text-neutral-500 mt-0.5">
-                          Pay upon delivery (Enabled for testing order emails).
-                        </p>
-                      </div>
-                    </label>
-
+                  <div className="p-4 rounded-xl border border-neutral-900 bg-neutral-50 flex items-start gap-3 shadow-xs">
+                    <input
+                      type="radio"
+                      checked
+                      readOnly
+                      className="w-4 h-4 accent-black mt-0.5"
+                    />
+                    <div>
+                      <span className="text-xs sm:text-sm font-bold text-neutral-900 block">Online Payment (Razorpay 256-Bit Secure)</span>
+                      <p className="text-xs text-neutral-500 mt-0.5">
+                        Pay safely via UPI (GPay, PhonePe, Paytm, BHIM), Cards, NetBanking or Wallets.
+                      </p>
+                    </div>
                   </div>
                 </div>
 

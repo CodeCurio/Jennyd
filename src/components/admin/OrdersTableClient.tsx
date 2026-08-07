@@ -367,7 +367,7 @@ export function OrdersTableClient({ initialOrders }: { initialOrders: Order[] })
                           {order.payment_status === 'paid' ? (
                             <span className="px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 rounded">Paid</span>
                           ) : (
-                            <span className="px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200 rounded">COD / Pending</span>
+                            <span className="px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200 rounded">Pending / Unpaid</span>
                           )}
 
                           {/* Inline Fulfillment Status Changer */}
