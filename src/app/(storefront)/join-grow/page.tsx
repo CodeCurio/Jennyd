@@ -199,13 +199,13 @@ export default function JoinGrowPage() {
           <div className="lg:col-span-5 order-1 lg:order-1 flex justify-center">
             <div 
               onClick={() => setLightboxImage(IMAGES.section1)}
-              className="relative w-full aspect-[4/5] max-w-xs sm:max-w-sm bg-neutral-900 rounded-2xl overflow-hidden shadow-xl group cursor-pointer transition-transform duration-500 hover:scale-[1.01]"
+              className="relative w-full aspect-[3/4.4] max-w-sm sm:max-w-md lg:max-w-full rounded-2xl overflow-hidden shadow-2xl group cursor-pointer transition-transform duration-500 hover:scale-[1.01]"
             >
               <Image
                 src={IMAGES.section1}
                 alt="Become An Independent Business Owner"
                 fill
-                className="object-contain p-2 transition-transform duration-700 group-hover:scale-105"
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
                 priority
               />
               <button
@@ -338,13 +338,13 @@ export default function JoinGrowPage() {
           <div className="lg:col-span-5 order-1 lg:order-2 flex justify-center">
             <div 
               onClick={() => setLightboxImage(IMAGES.section2)}
-              className="relative w-full aspect-[4/5] max-w-xs sm:max-w-sm bg-neutral-900 rounded-2xl overflow-hidden shadow-xl group cursor-pointer transition-transform duration-500 hover:scale-[1.01]"
+              className="relative w-full aspect-[3/4.4] max-w-sm sm:max-w-md lg:max-w-full rounded-2xl overflow-hidden shadow-2xl group cursor-pointer transition-transform duration-500 hover:scale-[1.01]"
             >
               <Image
                 src={IMAGES.section2}
                 alt="Your Journey Can Include"
                 fill
-                className="object-contain p-2 transition-transform duration-700 group-hover:scale-105"
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <button
                 onClick={(e) => {
@@ -373,13 +373,13 @@ export default function JoinGrowPage() {
           <div className="lg:col-span-5 order-1 lg:order-1 flex justify-center">
             <div 
               onClick={() => setLightboxImage(IMAGES.section3)}
-              className="relative w-full aspect-[4/5] max-w-xs sm:max-w-sm bg-neutral-900 rounded-2xl overflow-hidden shadow-xl group cursor-pointer transition-transform duration-500 hover:scale-[1.01]"
+              className="relative w-full aspect-[3/4.4] max-w-sm sm:max-w-md lg:max-w-full rounded-2xl overflow-hidden shadow-2xl group cursor-pointer transition-transform duration-500 hover:scale-[1.01]"
             >
               <Image
                 src={IMAGES.section3}
                 alt="Build Toward Financial Independence"
                 fill
-                className="object-contain p-2 transition-transform duration-700 group-hover:scale-105"
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <button
                 onClick={(e) => {
@@ -496,13 +496,13 @@ export default function JoinGrowPage() {
           <div className="lg:col-span-5 order-1 lg:order-2 flex justify-center">
             <div 
               onClick={() => setLightboxImage(IMAGES.section4)}
-              className="relative w-full aspect-[4/5] max-w-xs sm:max-w-sm bg-neutral-900 rounded-2xl overflow-hidden shadow-xl group cursor-pointer transition-transform duration-500 hover:scale-[1.01]"
+              className="relative w-full aspect-[3/4.4] max-w-sm sm:max-w-md lg:max-w-full rounded-2xl overflow-hidden shadow-2xl group cursor-pointer transition-transform duration-500 hover:scale-[1.01]"
             >
               <Image
                 src={IMAGES.section4}
                 alt="Build A Better Future"
                 fill
-                className="object-contain p-2 transition-transform duration-700 group-hover:scale-105"
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <button
                 onClick={(e) => {
@@ -531,13 +531,13 @@ export default function JoinGrowPage() {
           <div className="lg:col-span-5 order-1 lg:order-1 flex justify-center">
             <div 
               onClick={() => setLightboxImage(IMAGES.section5)}
-              className="relative w-full aspect-[4/5] max-w-xs sm:max-w-sm bg-neutral-900 rounded-2xl overflow-hidden shadow-xl group cursor-pointer transition-transform duration-500 hover:scale-[1.01]"
+              className="relative w-full aspect-[3/4.4] max-w-sm sm:max-w-md lg:max-w-full rounded-2xl overflow-hidden shadow-2xl group cursor-pointer transition-transform duration-500 hover:scale-[1.01]"
             >
               <Image
                 src={IMAGES.section5}
                 alt="Experience The International Business Lifestyle"
                 fill
-                className="object-contain p-2 transition-transform duration-700 group-hover:scale-105"
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <button
                 onClick={(e) => {
@@ -808,16 +808,16 @@ export default function JoinGrowPage() {
           </div>
 
           {/* Borderless Large Image (Right on desktop - 5 Cols) */}
-          <div className="lg:col-span-5 order-1 lg:order-2 flex justify-center">
+          <div className="lg:col-span-5 order-1 lg:order-2 flex justify-center items-center h-full">
             <div 
               onClick={() => setLightboxImage(IMAGES.section6)}
-              className="relative w-full aspect-[4/5] max-w-xs sm:max-w-sm bg-neutral-900 rounded-2xl overflow-hidden shadow-xl group cursor-pointer transition-transform duration-500 hover:scale-[1.01]"
+              className="relative w-full aspect-[3/4.4] max-w-sm sm:max-w-md lg:max-w-full rounded-2xl overflow-hidden shadow-2xl group cursor-pointer transition-transform duration-500 hover:scale-[1.01]"
             >
               <Image
                 src={IMAGES.section6}
                 alt="Join Build Grow Achieve"
                 fill
-                className="object-contain p-2 transition-transform duration-700 group-hover:scale-105"
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <button
                 onClick={(e) => {
