@@ -219,6 +219,11 @@ export async function Footer() {
                 Social Reforms & Impact ❤️
               </Link>
             </li>
+            <li>
+              <Link href="/join-grow" className="hover:text-[#D4AF37] hover:translate-x-1 transition-all inline-block text-[#D4AF37] font-semibold">
+                Join & Grow Business 🚀
+              </Link>
+            </li>
           </ul>
         </div>
 

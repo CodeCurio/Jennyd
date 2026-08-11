@@ -19,6 +19,7 @@ const NAV_LINKS = [
   { href: "/products?category=women", label: "Women" },
   { href: "/products?category=unisex", label: "Unisex" },
   { href: "/social-impact", label: "Social Reforms" },
+  { href: "/join-grow", label: "Join & Grow" },
   { href: "/about", label: "About Us" },
   { href: "/contact", label: "Contact Us" },
 ];
