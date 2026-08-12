@@ -334,7 +334,7 @@ export default function AddProductPage() {
               <input type="text" value={discountTag} onChange={e => setDiscountTag(e.target.value)} placeholder="e.g. SAVE 29%" className="w-full border border-gray-300 rounded-md p-2.5 text-sm focus:ring-black focus:border-black" />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Point of Sale</label>
+              <label className="text-sm font-medium">Point Value</label>
               <input type="number" value={pointOfSale} onChange={e => setPointOfSale(e.target.value)} placeholder="e.g. 50" className="w-full border border-gray-300 rounded-md p-2.5 text-sm focus:ring-black focus:border-black" />
             </div>
             <div className="space-y-2 md:col-span-2 lg:col-span-4">

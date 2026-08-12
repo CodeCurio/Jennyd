@@ -472,7 +472,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                   )}
                   {PRODUCT.pointOfSale !== undefined && PRODUCT.pointOfSale !== null && PRODUCT.pointOfSale !== "" && (
                     <span className="bg-[#D4AF37] text-black text-[9px] sm:text-[10px] font-extrabold px-2 sm:px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-2xs">
-                      Point of Sale: {PRODUCT.pointOfSale}
+                      PV {PRODUCT.pointOfSale}
                     </span>
                   )}
                 </div>
