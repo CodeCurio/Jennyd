@@ -235,6 +235,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
     price: finalPrice,
     mrp: originalPriceForDisplay,
     discount: m.discountTag || (isSale ? `${Math.round(((displayPrice - displayMrp) / displayPrice) * 100)}% OFF` : ""),
+    pointOfSale: m.pointOfSale !== undefined ? m.pointOfSale : (m.point_of_sale !== undefined ? m.point_of_sale : null),
     images: uniqueImages,
     notes: m.notes || [],
     longevity: m.longevity || null,
@@ -467,6 +468,11 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                   {PRODUCT.discount && (
                     <span className="bg-[#D4AF37] text-black text-[9px] sm:text-[10px] font-extrabold px-2 sm:px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-2xs">
                       {PRODUCT.discount}
+                    </span>
+                  )}
+                  {PRODUCT.pointOfSale !== undefined && PRODUCT.pointOfSale !== null && PRODUCT.pointOfSale !== "" && (
+                    <span className="bg-[#D4AF37] text-black text-[9px] sm:text-[10px] font-extrabold px-2 sm:px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-2xs">
+                      Point of Sale: {PRODUCT.pointOfSale}
                     </span>
                   )}
                 </div>

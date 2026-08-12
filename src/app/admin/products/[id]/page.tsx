@@ -32,6 +32,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const [price, setPrice] = useState("");
   const [mrp, setMrp] = useState("");
   const [discountTag, setDiscountTag] = useState("");
+  const [pointOfSale, setPointOfSale] = useState("");
   const [stock, setStock] = useState("");
   const [sizeRows, setSizeRows] = useState<{ size: string; price: string; stock: string }[]>([]);
   
@@ -83,6 +84,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             setType(m.type || "");
             setBadge(m.badge || "");
             setDiscountTag(m.discountTag || "");
+            setPointOfSale(m.pointOfSale !== undefined ? m.pointOfSale.toString() : (m.point_of_sale !== undefined ? m.point_of_sale.toString() : ""));
             setLongevity(m.longevity || "");
             setBestSeasons(m.bestSeasons || m.best_seasons || "");
             setIdealTime(m.idealTime || m.ideal_time || "");
@@ -160,6 +162,12 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     e.preventDefault();
     if (!title || !slug || !price) return alert("Title, Slug, and Price are required.");
     
+    const parsedPrice = parseFloat(price);
+    if (isNaN(parsedPrice)) return alert("Price must be a valid number.");
+    
+    const parsedMrp = mrp && !isNaN(parseFloat(mrp)) ? parseFloat(mrp) : null;
+    const parsedStock = stock && !isNaN(parseInt(stock)) ? parseInt(stock) : 0;
+    
     setIsSubmitting(true);
     try {
       // 1. Upload Images
@@ -192,6 +200,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         badge,
         type,
         discountTag,
+        pointOfSale,
         longevity,
         bestSeasons,
         idealTime,
@@ -210,9 +219,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       const { error } = await supabase.from('products').update({
         title,
         slug,
-        price: parseFloat(price),
-        sale_price: mrp ? parseFloat(mrp) : null,
-        stock_quantity: stock ? parseInt(stock) : 0,
+        price: parsedPrice,
+        sale_price: parsedMrp,
+        stock_quantity: parsedStock,
         status,
         category_id: categoryId || null,
         metadata,
@@ -224,8 +233,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       alert("Product updated successfully!");
       router.push("/admin/products");
     } catch (error: any) {
-      console.error(error);
-      alert("Error updating product: " + error.message);
+      console.error("Error updating product:", error);
+      const errMsg = error?.message || error?.details || (typeof error === "object" ? JSON.stringify(error) : String(error));
+      alert("Error updating product: " + errMsg);
     } finally {
       setIsSubmitting(false);
     }
@@ -386,7 +396,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         {/* Pricing & Inventory */}
         <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm space-y-6">
           <h2 className="text-lg font-bold border-b border-gray-100 pb-2">Pricing & Inventory</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="space-y-2">
               <label className="text-sm font-medium">Price (₹) *</label>
               <input type="number" value={price} onChange={e => setPrice(e.target.value)} required className="w-full border border-gray-300 rounded-md p-2.5 text-sm focus:ring-black focus:border-black" />
@@ -399,7 +409,11 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
               <label className="text-sm font-medium">Discount Tag</label>
               <input type="text" value={discountTag} onChange={e => setDiscountTag(e.target.value)} className="w-full border border-gray-300 rounded-md p-2.5 text-sm focus:ring-black focus:border-black" />
             </div>
-            <div className="space-y-2 md:col-span-3">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Point of Sale</label>
+              <input type="number" value={pointOfSale} onChange={e => setPointOfSale(e.target.value)} placeholder="e.g. 50" className="w-full border border-gray-300 rounded-md p-2.5 text-sm focus:ring-black focus:border-black" />
+            </div>
+            <div className="space-y-2 md:col-span-2 lg:col-span-4">
               <label className="text-sm font-medium">Stock Quantity</label>
               <input type="number" value={stock} onChange={e => setStock(e.target.value)} className="w-full md:w-1/3 border border-gray-300 rounded-md p-2.5 text-sm focus:ring-black focus:border-black" />
             </div>
