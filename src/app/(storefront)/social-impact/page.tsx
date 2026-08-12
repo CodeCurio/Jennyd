@@ -521,22 +521,28 @@ export default function SocialImpactPage() {
             
             {/* Left Column: High-Res Poster Display Card */}
             <div className="lg:col-span-5 flex justify-center">
-              <div className="relative w-full max-w-md bg-[#121212] p-4 rounded-2xl border-2 border-[#D4AF37]/50 shadow-2xl group">
-                <div className="relative w-full h-[380px] sm:h-[450px] rounded-xl overflow-hidden bg-black flex items-center justify-center border border-neutral-800">
+              <div className="w-full">
+                <div 
+                  onClick={() => setLightboxImage(featuredMovement.image)}
+                  className="relative w-full aspect-[3/4.4] max-w-sm sm:max-w-md lg:max-w-full rounded-2xl overflow-hidden shadow-2xl group cursor-pointer transition-transform duration-500 hover:scale-[1.01]"
+                >
                   <Image
                     src={featuredMovement.image}
                     alt={featuredMovement.title}
                     fill
-                    className="object-contain p-2 transition-transform duration-500 group-hover:scale-103"
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
                     priority
                   />
                   <button
-                    onClick={() => setLightboxImage(featuredMovement.image)}
-                    className="absolute bottom-3 right-3 bg-black/80 hover:bg-[#D4AF37] text-white hover:text-black p-2.5 rounded-xl border border-white/20 transition-all cursor-pointer shadow-lg flex items-center gap-1.5 text-xs font-semibold"
-                    title="View Full Screen Poster"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setLightboxImage(featuredMovement.image);
+                    }}
+                    className="absolute bottom-3 right-3 bg-black/80 hover:bg-[#D4AF37] text-white hover:text-black p-2.5 rounded-lg backdrop-blur-md transition-all cursor-pointer shadow-lg flex items-center gap-1.5 text-xs font-semibold"
+                    title="View Full Screen Image"
                   >
-                    <Maximize2 className="w-4 h-4" />
-                    <span>Expand Poster</span>
+                    <Maximize2 className="w-3.5 h-3.5" />
+                    <span>Expand</span>
                   </button>
                 </div>
                 
@@ -690,32 +696,28 @@ export default function SocialImpactPage() {
                 className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center bg-white p-5 sm:p-8 lg:p-10 rounded-3xl border border-[#EAE7E1] shadow-sm hover:shadow-xl transition-all duration-500"
               >
                 {/* Poster Image Column (5 Cols - Clean Unobscured Image) */}
-                <div className={`lg:col-span-5 relative w-full ${isEven ? "order-1 lg:order-1" : "order-1 lg:order-2"}`}>
+                <div className={`lg:col-span-5 relative w-full flex justify-center ${isEven ? "order-1 lg:order-1" : "order-1 lg:order-2"}`}>
                   <div 
                     onClick={() => setLightboxImage(movement.image)}
-                    className="relative w-full aspect-[4/5] bg-[#FAF8F5] p-2.5 sm:p-3 rounded-2xl border border-[#EAE7E1] shadow-md hover:shadow-xl transition-all duration-300 group cursor-pointer overflow-hidden"
+                    className="relative w-full aspect-[3/4.4] max-w-sm sm:max-w-md lg:max-w-full rounded-2xl overflow-hidden shadow-2xl group cursor-pointer transition-transform duration-500 hover:scale-[1.01]"
                   >
-                    <div className="relative w-full h-full rounded-xl overflow-hidden bg-neutral-950 flex items-center justify-center border border-neutral-200">
-                      <Image
-                        src={movement.image}
-                        alt={movement.title}
-                        fill
-                        className="object-contain p-1 group-hover:scale-103 transition-transform duration-500"
-                      />
-                      
-                      {/* Floating Expand Poster Button */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setLightboxImage(movement.image);
-                        }}
-                        className="absolute bottom-3 right-3 bg-black/80 hover:bg-[#D4AF37] text-white hover:text-black p-2.5 rounded-xl border border-white/20 transition-all cursor-pointer shadow-lg flex items-center gap-1.5 text-xs font-semibold"
-                        title="View Full Screen Poster"
-                      >
-                        <Maximize2 className="w-4 h-4" />
-                        <span className="hidden sm:inline text-[11px]">View Poster</span>
-                      </button>
-                    </div>
+                    <Image
+                      src={movement.image}
+                      alt={movement.title}
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setLightboxImage(movement.image);
+                      }}
+                      className="absolute bottom-3 right-3 bg-black/80 hover:bg-[#D4AF37] text-white hover:text-black p-2.5 rounded-lg backdrop-blur-md transition-all cursor-pointer shadow-lg flex items-center gap-1.5 text-xs font-semibold"
+                      title="View Full Screen Image"
+                    >
+                      <Maximize2 className="w-3.5 h-3.5" />
+                      <span>Expand</span>
+                    </button>
                   </div>
                 </div>
 
@@ -1052,19 +1054,26 @@ export default function SocialImpactPage() {
 
               {/* Left Side (42%): Poster Art Gallery Display */}
               <div className="lg:w-[42%] bg-[#050505] p-6 sm:p-8 flex flex-col items-center justify-center relative border-b lg:border-b-0 lg:border-r border-neutral-800 shrink-0">
-                <div className="relative w-full h-[320px] sm:h-[420px] lg:h-full min-h-[350px] rounded-2xl overflow-hidden bg-black flex items-center justify-center border border-white/10 group">
+                <div 
+                  onClick={() => setLightboxImage(selectedMovement.image)}
+                  className="relative w-full aspect-[3/4.4] rounded-2xl overflow-hidden shadow-2xl group cursor-pointer transition-transform duration-500 hover:scale-[1.01]"
+                >
                   <Image
                     src={selectedMovement.image}
                     alt={selectedMovement.title}
                     fill
-                    className="object-contain p-2"
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                   <button
-                    onClick={() => setLightboxImage(selectedMovement.image)}
-                    className="absolute bottom-3 right-3 bg-black/80 hover:bg-[#D4AF37] text-white hover:text-black p-2.5 rounded-xl border border-white/20 transition-all cursor-pointer shadow-lg flex items-center gap-1.5 text-xs font-semibold"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setLightboxImage(selectedMovement.image);
+                    }}
+                    className="absolute bottom-3 right-3 bg-black/80 hover:bg-[#D4AF37] text-white hover:text-black p-2.5 rounded-lg backdrop-blur-md transition-all cursor-pointer shadow-lg flex items-center gap-1.5 text-xs font-semibold"
+                    title="View Full Screen Image"
                   >
-                    <Maximize2 className="w-4 h-4" />
-                    <span>View High-Res Lightbox</span>
+                    <Maximize2 className="w-3.5 h-3.5" />
+                    <span>Expand</span>
                   </button>
                 </div>
                 
