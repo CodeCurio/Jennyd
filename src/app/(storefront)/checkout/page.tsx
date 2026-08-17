@@ -19,7 +19,12 @@ import {
   Eye,
   EyeOff,
   MailCheck,
-  Mail
+  Mail,
+  Sparkles,
+  CheckCircle2,
+  User,
+  Phone,
+  Building2
 } from "lucide-react";
 import { useCart } from "@/lib/store/CartContext";
 import { useToast } from "@/components/ui/Toast";
@@ -93,6 +98,24 @@ const POPULAR_COUNTRIES = [
   "Bahrain",
   "Other Country"
 ];
+
+const COUNTRY_DIAL_CODES: Record<string, { code: string; flag: string }> = {
+  "India": { code: "+91", flag: "🇮🇳" },
+  "United States": { code: "+1", flag: "🇺🇸" },
+  "United Arab Emirates": { code: "+971", flag: "🇦🇪" },
+  "United Kingdom": { code: "+44", flag: "🇬🇧" },
+  "Canada": { code: "+1", flag: "🇨🇦" },
+  "Australia": { code: "+61", flag: "🇦🇺" },
+  "Saudi Arabia": { code: "+966", flag: "🇸🇦" },
+  "Singapore": { code: "+65", flag: "🇸🇬" },
+  "Germany": { code: "+49", flag: "🇩🇪" },
+  "France": { code: "+33", flag: "🇫🇷" },
+  "Qatar": { code: "+974", flag: "🇶🇦" },
+  "Oman": { code: "+968", flag: "🇴🇲" },
+  "Kuwait": { code: "+965", flag: "🇰🇼" },
+  "Bahrain": { code: "+973", flag: "🇧🇭" },
+  "Other Country": { code: "+", flag: "🌐" }
+};
 
 const COUNTRY_STATES: Record<string, string[]> = {
   "India": [
@@ -197,6 +220,82 @@ export default function CheckoutPage() {
   const isOtherCountry = country === "Other Country";
   const finalCountryName = isOtherCountry ? customCountry.trim() : country;
   const availableStates = COUNTRY_STATES[country] || [];
+  const currentDialCode = COUNTRY_DIAL_CODES[country] || { code: "+91", flag: "🇮🇳" };
+
+  // Pincode Auto Lookup State
+  const [isPincodeFetching, setIsPincodeFetching] = useState(false);
+  const [pincodeSuccessMsg, setPincodeSuccessMsg] = useState<string | null>(null);
+  const [pincodeErrorMsg, setPincodeErrorMsg] = useState<string | null>(null);
+
+  // Helper to match raw state name to available states dropdown list
+  const matchStateName = (rawState: string, stateList: string[]): string => {
+    if (!rawState || !stateList || stateList.length === 0) return rawState || "";
+    const clean = rawState.trim().toLowerCase();
+    
+    const found = stateList.find((s) => {
+      const sClean = s.toLowerCase();
+      return sClean === clean || sClean.includes(clean) || clean.includes(sClean);
+    });
+    if (found) return found;
+
+    if (clean.includes("delhi")) return "Delhi (NCT)";
+    if (clean.includes("jammu") || clean.includes("kashmir")) return "Jammu and Kashmir";
+    if (clean.includes("pondicherry")) return "Puducherry";
+    if (clean.includes("orissa")) return "Odisha";
+    if (clean.includes("uttaranchal")) return "Uttarakhand";
+    if (clean.includes("daman") || clean.includes("nagar haveli")) return "Dadra and Nagar Haveli and Daman and Diu";
+    if (clean.includes("andaman")) return "Andaman and Nicobar Islands";
+
+    return rawState;
+  };
+
+  // Auto lookup city and state when pincode reaches 6 digits for India
+  useEffect(() => {
+    const cleanZip = zip.replace(/\D/g, "");
+    if (country !== "India" || cleanZip.length !== 6) {
+      setPincodeSuccessMsg(null);
+      setPincodeErrorMsg(null);
+      return;
+    }
+
+    const fetchPincodeDetails = async () => {
+      setIsPincodeFetching(true);
+      setPincodeErrorMsg(null);
+      setPincodeSuccessMsg(null);
+
+      try {
+        const res = await fetch(`https://api.postalpincode.in/pincode/${cleanZip}`);
+        const data = await res.json();
+
+        if (data && data[0] && data[0].Status === "Success" && data[0].PostOffice?.length > 0) {
+          const po = data[0].PostOffice[0];
+          const rawDistrict = po.District || po.Name || po.Block || "";
+          const rawState = po.State || "";
+
+          const formattedCity = rawDistrict
+            .split(" ")
+            .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+            .join(" ");
+
+          const matchedState = matchStateName(rawState, COUNTRY_STATES["India"] || []);
+
+          if (formattedCity) setCity(formattedCity);
+          if (matchedState) setState(matchedState);
+
+          setPincodeSuccessMsg(`✓ Auto-filled: ${formattedCity}, ${matchedState}`);
+        } else {
+          setPincodeErrorMsg("Could not auto-find PIN code location. Please enter city & state manually.");
+        }
+      } catch (err) {
+        console.error("Pincode API Error:", err);
+      } finally {
+        setIsPincodeFetching(false);
+      }
+    };
+
+    const timeoutId = setTimeout(fetchPincodeDetails, 300);
+    return () => clearTimeout(timeoutId);
+  }, [zip, country]);
 
   // Load saved address from localStorage on mount & check session
   useEffect(() => {
@@ -555,7 +654,11 @@ export default function CheckoutPage() {
     const orderItemsPayload = items.map((item) => {
       const cleanProductId = sanitizeUUID(item.productId);
       const rawVariantId = item.variantId && item.variantId !== item.productId ? sanitizeUUID(item.variantId) : null;
-      const sizeInfo = item.productId.includes("-") ? item.productId.split("-").pop() : "100ml";
+      const extractedSize = item.variantInfo
+        ? (item.variantInfo.match(/(\d+\s*ml|\d+\s*g|\d+\s*oz)/i)?.[0] || item.variantInfo)
+        : (item.productId.includes("-") ? item.productId.split("-").pop()! : (item.title.match(/(\d+\s*ml)/i)?.[0] || "100ml"));
+      const sizeInfo = extractedSize.replace(/\s+/g, "");
+
       return {
         order_id: orderData.id,
         product_id: cleanProductId,
@@ -564,7 +667,7 @@ export default function CheckoutPage() {
         quantity: item.quantity,
         unit_price: item.price,
         line_total: item.price * item.quantity,
-        variant_info: { size: sizeInfo }
+        variant_info: { size: sizeInfo, details: item.variantInfo || sizeInfo }
       };
     });
 
@@ -673,7 +776,7 @@ export default function CheckoutPage() {
         prefill: {
           name: `${firstName} ${lastName}`,
           email: email,
-          contact: cleanPhone ? `+91${cleanPhone}` : phone,
+          contact: cleanPhone ? `${currentDialCode.code}${cleanPhone}` : phone,
         },
         theme: { color: "#1A1A1A" },
         modal: {
@@ -774,27 +877,48 @@ export default function CheckoutPage() {
                 {/* Email & Phone */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide block mb-1">Email *</label>
-                    <input
-                      type="email"
-                      required
-                      placeholder="you@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] transition-all"
-                    />
+                    <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide flex items-center justify-between mb-1">
+                      <span>Email Address *</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="email"
+                        required
+                        placeholder="you@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] transition-all"
+                      />
+                    </div>
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide block mb-1">Phone Number *</label>
-                    <input
-                      type="tel"
-                      required
-                      placeholder="Mobile number"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] transition-all"
-                    />
+                    <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide flex items-center justify-between mb-1">
+                      <span>Phone Number *</span>
+                      <span className="text-[9px] text-[#D4AF37] font-mono font-bold uppercase tracking-wider">
+                        Auto Code
+                      </span>
+                    </label>
+                    <div className="flex gap-2">
+                      {/* Auto Country Code Prefix */}
+                      <div className="flex items-center gap-1 px-3 py-2.5 bg-[#FAF8F5] border border-neutral-200 rounded-xl text-xs sm:text-sm font-bold font-mono text-neutral-900 shrink-0 select-none shadow-2xs">
+                        <span>{currentDialCode.flag}</span>
+                        <span>{currentDialCode.code}</span>
+                      </div>
+                      <div className="relative flex-1">
+                        <input
+                          type="tel"
+                          required
+                          placeholder={country === "India" ? "10-digit mobile number" : "Mobile number"}
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] transition-all"
+                        />
+                        {phone.replace(/\D/g, "").length >= (country === "India" ? 10 : 7) && (
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 absolute right-3 top-1/2 -translate-y-1/2" />
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -808,7 +932,7 @@ export default function CheckoutPage() {
                       placeholder="First Name"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] transition-all"
+                      className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] transition-all capitalize"
                     />
                   </div>
 
@@ -820,7 +944,7 @@ export default function CheckoutPage() {
                       placeholder="Last Name"
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] transition-all"
+                      className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] transition-all capitalize"
                     />
                   </div>
                 </div>
@@ -843,7 +967,7 @@ export default function CheckoutPage() {
                     <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide block mb-1">Apartment, Suite (Optional)</label>
                     <input
                       type="text"
-                      placeholder="Apartment or suite number"
+                      placeholder="Apartment, suite, or landmark"
                       value={addressLine2}
                       onChange={(e) => setAddressLine2(e.target.value)}
                       className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] transition-all"
@@ -892,17 +1016,47 @@ export default function CheckoutPage() {
                   )}
                 </div>
 
-                {/* City, State & Zip Code */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+                {/* Postal Code (First in Grid), City & State */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 pt-1">
+                  
+                  {/* Pincode Field with Auto-Lookup indicator */}
                   <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide block mb-1">City *</label>
+                    <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide flex items-center justify-between mb-1">
+                      <span>PIN / Postal Code *</span>
+                      {country === "India" && (
+                        <span className="text-[9px] text-[#D4AF37] font-bold uppercase tracking-wider flex items-center gap-0.5">
+                          <Sparkles className="w-2.5 h-2.5" /> Auto-fill
+                        </span>
+                      )}
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        required
+                        maxLength={10}
+                        placeholder={country === "India" ? "6-digit PIN" : "Postal Code"}
+                        value={zip}
+                        onChange={(e) => setZip(e.target.value)}
+                        className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-base sm:text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] transition-all"
+                      />
+                      {isPincodeFetching && (
+                        <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                          <Loader2 className="w-4 h-4 animate-spin text-[#D4AF37]" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* City Input (Auto-populated or Manual) */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide block mb-1">City / District *</label>
                     <input
                       type="text"
                       required
                       placeholder="City"
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] transition-all"
+                      className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] transition-all capitalize"
                     />
                   </div>
 
@@ -933,23 +1087,24 @@ export default function CheckoutPage() {
                         placeholder="State / Region"
                         value={state}
                         onChange={(e) => setState(e.target.value)}
-                        className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] transition-all"
+                        className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-base sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] transition-all capitalize"
                       />
                     )}
                   </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wide block mb-1">Postal / ZIP Code *</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Postal Code"
-                      value={zip}
-                      onChange={(e) => setZip(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-base sm:text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 focus:border-[#D4AF37] transition-all"
-                    />
-                  </div>
                 </div>
+
+                {/* Auto-Pincode Status Banner */}
+                {pincodeSuccessMsg && (
+                  <div className="flex items-center gap-1.5 text-xs text-emerald-800 font-semibold bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200/80">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>{pincodeSuccessMsg}</span>
+                  </div>
+                )}
+                {pincodeErrorMsg && (
+                  <p className="text-[11px] text-amber-700 font-medium pl-1">
+                    {pincodeErrorMsg}
+                  </p>
+                )}
 
                 <div className="fixed bottom-0 left-0 right-0 p-3 bg-white border-t border-neutral-200 z-50 sm:relative sm:p-0 sm:border-0 sm:bg-transparent sm:pt-4 sm:flex sm:justify-end shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] sm:shadow-none pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
                   <Button 
@@ -1368,7 +1523,9 @@ export default function CheckoutPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-serif font-semibold text-xs text-[#1A1A1A] truncate">{item.title}</h4>
-                      <p className="text-[11px] text-neutral-400 mt-0.5">Qty: {item.quantity}</p>
+                      <p className="text-[11px] text-neutral-400 mt-0.5 font-mono">
+                        {item.variantInfo ? `${item.variantInfo} • ` : ""}Qty: {item.quantity}
+                      </p>
                     </div>
                     <span className="text-xs font-semibold text-neutral-900 shrink-0">
                       {formatPrice(item.price * item.quantity)}

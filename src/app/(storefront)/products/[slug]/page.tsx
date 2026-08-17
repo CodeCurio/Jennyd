@@ -33,6 +33,7 @@ import { useToast } from "@/components/ui/Toast";
 import { supabase } from "@/lib/supabase";
 import { ProductReviews } from "@/components/storefront/ProductReviews";
 import { useCurrency } from "@/lib/store/CurrencyContext";
+import { getProductVariantInfo } from "@/lib/utils";
 
 const REAL_TRUST_BADGES = [
   { icon: Award, label: "100% Authentic Fragrance", sub: "Formulated with Fine Oils" },
@@ -264,14 +265,20 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
 
   const handleAddToCart = () => {
     if (!isSelectedSizeAvailable) return;
+    const sizeText = selectedSize || "100ml";
+    const variantInfo = getProductVariantInfo(productData, sizeText);
+    const cleanTitle = PRODUCT.title;
+
     addItem({ 
-      productId: `${PRODUCT.id}-${selectedSize}`, 
-      title: `${PRODUCT.title} (${selectedSize})`, 
+      productId: `${PRODUCT.id}-${sizeText}`, 
+      variantId: `${PRODUCT.id}-${sizeText}`,
+      title: cleanTitle, 
       price: PRODUCT.price, 
       quantity,
-      image: PRODUCT.images[0]
+      image: PRODUCT.images[0],
+      variantInfo
     });
-    addToast({ title: "Added to Bag", message: `${quantity}x ${PRODUCT.title} (${selectedSize}) added to your bag.`, type: "success" });
+    addToast({ title: "Added to Bag", message: `${quantity}x ${cleanTitle} (${variantInfo}) added to your bag.`, type: "success" });
   };
 
   const handleCheckPincode = (e: React.FormEvent) => {
@@ -870,14 +877,18 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                   badge: relProduct.metadata?.badge
                 }} 
                 onQuickAdd={() => {
+                  const variantInfo = getProductVariantInfo(relProduct);
+                  const sizeFromInfo = variantInfo.split(" ")[0];
                   addItem({ 
-                    productId: relProduct.id, 
+                    productId: `${relProduct.id}-${sizeFromInfo}`, 
+                    variantId: `${relProduct.id}-${sizeFromInfo}`,
                     title: relProduct.title, 
                     price: relProduct.price,
                     quantity: 1,
-                    image: relProduct.metadata?.images?.[0] || "/assets/product image 1.jpeg"
+                    image: relProduct.metadata?.images?.[0] || "/assets/product image 1.jpeg",
+                    variantInfo
                   });
-                  addToast({ title: "Added to Bag", message: `${relProduct.title} has been added.`, type: "success" });
+                  addToast({ title: "Added to Bag", message: `${relProduct.title} (${variantInfo}) has been added.`, type: "success" });
                 }}
               />
             ))}

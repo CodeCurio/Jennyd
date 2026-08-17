@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { useCart } from "@/lib/store/CartContext";
 import { useToast } from "@/components/ui/Toast";
 import { useCurrency } from "@/lib/store/CurrencyContext";
+import { getProductVariantInfo } from "@/lib/utils";
 
 interface QuickViewModalProps {
   product: any;
@@ -83,16 +84,22 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
     : [product.image || "/assets/placeholder.jpg"];
 
   const handleAddToCart = () => {
+    const sizeText = selectedSize || "100ml";
+    const variantInfo = getProductVariantInfo(product, sizeText);
+    const cleanTitle = product.title;
+
     addItem({
-      productId: `${product.id}-${selectedSize}`,
-      title: `${product.title} (${selectedSize})`,
+      productId: `${product.id}-${sizeText}`,
+      variantId: `${product.id}-${sizeText}`,
+      title: cleanTitle,
       price: finalPrice,
       image: images[0],
-      quantity
+      quantity,
+      variantInfo
     });
     addToast({ 
       title: "Added to cart", 
-      message: `${quantity}x ${product.title} (${selectedSize}) added to cart.`, 
+      message: `${quantity}x ${cleanTitle} (${variantInfo}) added to cart.`, 
       type: "success" 
     });
     onClose();

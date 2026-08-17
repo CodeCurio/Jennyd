@@ -20,6 +20,7 @@ import Link from "next/link";
 import { useToast } from "@/components/ui/Toast";
 import { useCurrency } from "@/lib/store/CurrencyContext";
 import { useCart } from "@/lib/store/CartContext";
+import { getProductVariantInfo } from "@/lib/utils";
 
 interface OrderItem {
   id: string;
@@ -116,14 +117,19 @@ export default function OrderHistoryPage() {
     }
 
     items.forEach(item => {
-      const variantId = item.variant_info?.size ? `${item.product_id}-${item.variant_info.size}` : item.product_id;
+      const sizeText = item.variant_info?.size || undefined;
+      const variantInfo = getProductVariantInfo(item.products || { title: item.title }, sizeText);
+      const sizeFromInfo = variantInfo.split(" ")[0];
+      const fullProductId = `${item.product_id}-${sizeFromInfo}`;
+
       addItem({
-        productId: item.product_id,
-        variantId: variantId,
+        productId: fullProductId,
+        variantId: fullProductId,
         title: item.title,
         price: item.unit_price,
         quantity: item.quantity,
-        image: item.products?.metadata?.images?.[0] || "/assets/placeholder.jpg"
+        image: item.products?.metadata?.images?.[0] || "/assets/placeholder.jpg",
+        variantInfo
       });
     });
 

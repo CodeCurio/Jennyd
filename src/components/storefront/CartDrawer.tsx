@@ -8,6 +8,7 @@ import { useCart } from "@/lib/store/CartContext";
 import { Button } from "../ui/Button";
 import { supabase } from "@/lib/supabase";
 import { useCurrency } from "@/lib/store/CurrencyContext";
+import { getProductVariantInfo } from "@/lib/utils";
 
 const QUICK_NAV = [
   { label: "Bestsellers", href: "/products?sort=best-selling" },
@@ -209,12 +210,16 @@ export function CartDrawer() {
 
   const handleAddRecommendation = (product: any) => {
     const displayPrice = product.sale_price || product.price;
+    const variantInfo = getProductVariantInfo(product);
+    const sizeFromInfo = variantInfo.split(" ")[0];
     addItem({
-      productId: product.id,
+      productId: `${product.id}-${sizeFromInfo}`,
+      variantId: `${product.id}-${sizeFromInfo}`,
       title: product.title,
       price: displayPrice,
       image: product.image,
       quantity: 1,
+      variantInfo,
     });
   };
 
@@ -343,7 +348,7 @@ export function CartDrawer() {
                         </div>
 
                         <span className="text-[10px] text-neutral-500 font-mono block mt-0.5">
-                          {item.variantInfo || "100ml Extrait"}
+                          {item.variantInfo || getProductVariantInfo({ title: item.title }, item.productId.includes("-") ? item.productId.split("-").pop() : undefined)}
                         </span>
 
                         <div className="flex items-center justify-between gap-2 mt-1.5 pt-1 border-t border-[#EAE7E1]/60">

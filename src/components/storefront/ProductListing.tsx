@@ -9,6 +9,7 @@ import { useCart } from "@/lib/store/CartContext";
 import { useToast } from "@/components/ui/Toast";
 import { QuickViewModal } from "./QuickViewModal";
 import { useCurrency } from "@/lib/store/CurrencyContext";
+import { getProductVariantInfo } from "@/lib/utils";
 
 type Product = any;
 
@@ -193,15 +194,19 @@ export function ProductListing({ initialProducts }: { initialProducts: Product[]
   const handleQuickAdd = (product: Product) => {
     const displayPrice = product.sale_price || product.price;
     const image = product.metadata?.images?.[0] || "/assets/placeholder.jpg";
+    const variantInfo = getProductVariantInfo(product);
+    const sizeFromInfo = variantInfo.split(" ")[0];
 
     addItem({
-      productId: product.id,
+      productId: `${product.id}-${sizeFromInfo}`,
+      variantId: `${product.id}-${sizeFromInfo}`,
       title: product.title,
       price: displayPrice,
       image,
-      quantity: 1
+      quantity: 1,
+      variantInfo
     });
-    addToast({ title: "Added to cart", message: `${product.title} has been added.`, type: "success" });
+    addToast({ title: "Added to cart", message: `${product.title} (${variantInfo}) has been added.`, type: "success" });
   };
 
   const clearAllFilters = () => {

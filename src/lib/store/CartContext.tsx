@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import { getProductVariantInfo } from "@/lib/utils";
 
 export interface CartItem {
   id: string;
@@ -71,16 +72,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [appliedCoupon, isInitialized]);
 
   const addItem = (item: Omit<CartItem, "id">) => {
+    const sizeFromId = item.productId.includes("-") ? item.productId.split("-").pop() : undefined;
+    const resolvedVariantInfo = item.variantInfo || getProductVariantInfo({ title: item.title }, sizeFromId);
+    const itemToAdd = { ...item, variantInfo: resolvedVariantInfo };
+
     setItems((prev) => {
       const existing = prev.find(
-        (i) => i.productId === item.productId && i.variantId === item.variantId
+        (i) => i.productId === itemToAdd.productId && i.variantId === itemToAdd.variantId
       );
       if (existing) {
         return prev.map((i) =>
-          i.id === existing.id ? { ...i, quantity: i.quantity + item.quantity } : i
+          i.id === existing.id ? { ...i, quantity: i.quantity + itemToAdd.quantity } : i
         );
       }
-      return [...prev, { ...item, id: Math.random().toString(36).substr(2, 9) }];
+      return [...prev, { ...itemToAdd, id: Math.random().toString(36).substr(2, 9) }];
     });
     setIsDrawerOpen(true);
   };

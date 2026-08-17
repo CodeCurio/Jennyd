@@ -9,6 +9,7 @@ import { supabase } from "@/lib/supabase";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { useCart } from "@/lib/store/CartContext";
 import { useToast } from "@/components/ui/Toast";
+import { getProductVariantInfo } from "@/lib/utils";
 
 function SearchPageContent() {
   const searchParams = useSearchParams();
@@ -130,15 +131,19 @@ function SearchPageContent() {
   const handleQuickAdd = (product: any) => {
     const displayPrice = product.sale_price || product.price;
     const image = product.metadata?.images?.[0] || "/assets/placeholder.jpg";
+    const variantInfo = getProductVariantInfo(product);
+    const sizeFromInfo = variantInfo.split(" ")[0];
 
     addItem({
-      productId: product.id,
+      productId: `${product.id}-${sizeFromInfo}`,
+      variantId: `${product.id}-${sizeFromInfo}`,
       title: product.title,
       price: displayPrice,
       image,
-      quantity: 1
+      quantity: 1,
+      variantInfo
     });
-    addToast({ title: "Added to cart", message: `${product.title} has been added.`, type: "success" });
+    addToast({ title: "Added to cart", message: `${product.title} (${variantInfo}) has been added.`, type: "success" });
   };
 
   const POPULAR_TAGS = [

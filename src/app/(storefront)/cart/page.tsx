@@ -8,6 +8,7 @@ import { useCart } from "@/lib/store/CartContext";
 import { Button } from "@/components/ui/Button";
 import { supabase } from "@/lib/supabase";
 import { useCurrency } from "@/lib/store/CurrencyContext";
+import { getProductVariantInfo } from "@/lib/utils";
 
 const QUICK_NAV = [
   { label: "Bestsellers", href: "/products?sort=best-selling" },
@@ -258,7 +259,7 @@ export default function CartPage() {
                             </h3>
                             <div className="mt-1.5 flex items-center gap-2 flex-wrap">
                               <span className="text-xs bg-[#FAF8F5] border border-[#EAE7E1] text-neutral-600 font-semibold px-2.5 py-0.5 rounded uppercase tracking-wider font-mono">
-                                {item.variantInfo || "100ml / 3.4 fl oz Extrait"}
+                                {item.variantInfo || getProductVariantInfo({ title: item.title }, item.productId.includes("-") ? item.productId.split("-").pop() : undefined)}
                               </span>
                               <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
                                 In Stock
@@ -326,7 +327,19 @@ export default function CartPage() {
                         <h4 className="font-serif text-xs font-bold text-[#121212] line-clamp-1 mb-1">{p.title}</h4>
                         <span className="text-xs font-mono font-bold text-[#121212] block mb-2">{formatPrice(p.sale_price || p.price)}</span>
                         <button
-                          onClick={() => addItem({ productId: p.id, title: p.title, price: p.sale_price || p.price, image: p.image, quantity: 1 })}
+                          onClick={() => {
+                            const variantInfo = getProductVariantInfo(p);
+                            const sizeFromInfo = variantInfo.split(" ")[0];
+                            addItem({
+                              productId: `${p.id}-${sizeFromInfo}`,
+                              variantId: `${p.id}-${sizeFromInfo}`,
+                              title: p.title,
+                              price: p.sale_price || p.price,
+                              image: p.image,
+                              quantity: 1,
+                              variantInfo,
+                            });
+                          }}
                           className="w-full py-1.5 bg-[#121212] text-white hover:bg-[#D4AF37] text-[10px] font-bold uppercase tracking-widest rounded-lg transition-colors cursor-pointer"
                         >
                           + Add
