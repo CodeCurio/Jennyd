@@ -30,13 +30,58 @@ import {
 
 // Images from public/assets/join-grow/
 const IMAGES = {
-  section1: "/assets/join-grow/join-grow-1.jpeg",
-  section2: "/assets/join-grow/join-grow-2.jpeg",
-  section3: "/assets/join-grow/join-grow-3.jpeg",
-  section4: "/assets/join-grow/join-grow-4.jpeg",
-  section5: "/assets/join-grow/join-grow-5.jpeg",
-  section6: "/assets/join-grow/join-grow-6.jpeg",
+  leader: "/assets/join-grow/join-grow-leader.jpeg", // "I AM THE LEADER of my business"
+  world: "/assets/join-grow/join-grow-world.jpeg", // "WORLD IS OURS - ONE TEAM. ONE DREAM."
+  mentor: "/assets/join-grow/join-grow-mentor.jpeg", // "IT'S MY BUSINESS AND I AM THE MENTOR"
+  ceo: "/assets/join-grow/join-grow-ceo.jpeg", // "HERE I AM THE CEO OF MY LIFE"
+  boss: "/assets/join-grow/join-grow-boss.jpeg", // "HERE I AM THE BOSS AND I WILL DECIDE MY INCOME"
+  family: "/assets/join-grow/join-grow-family.jpeg", // "MY BUSINESS IS the future of my family"
+  brandBoss: "/assets/join-grow/join-grow-brand-boss.jpeg", // "ITS MY BRAND AND I AM THE BOSS"
+  together: "/assets/join-grow/join-grow-together.jpeg", // "WE ARE TOGETHER"
+  earn: "/assets/join-grow/join-grow-earn.jpeg", // "LETS EARN TOGETHER"
+  homeBiz: "/assets/join-grow/join-grow-home-biz.jpeg", // "MAKING MONEY FROM HOME"
+  team: "/assets/join-grow/join-grow-team.jpeg", // "WE ARE A TEAM - WE ARE GROWING TOGETHER"
+  portrait: "/assets/join-grow/join-grow-portrait.jpeg", // Jennyd Scents branded portrait
 };
+
+const BRAND_POSTERS = [
+  {
+    title: "Leadership & Income Control",
+    subtitle: "I WILL DECIDE MY INCOME",
+    image: IMAGES.boss,
+    quote: "Here I am the boss and I will decide my income."
+  },
+  {
+    title: "Ownership & Pride",
+    subtitle: "ITS MY BRAND",
+    image: IMAGES.brandBoss,
+    quote: "Scent your story. Leave your mark."
+  },
+  {
+    title: "Self Determination",
+    subtitle: "CEO OF MY LIFE",
+    image: IMAGES.ceo,
+    quote: "Here I am the CEO of my life."
+  },
+  {
+    title: "Unity & Diversity",
+    subtitle: "WE ARE TOGETHER",
+    image: IMAGES.together,
+    quote: "Together we create. Together we inspire."
+  },
+  {
+    title: "Global Collaboration",
+    subtitle: "WORLD IS OURS",
+    image: IMAGES.world,
+    quote: "One team. One dream. One world."
+  },
+  {
+    title: "Empowered Teamwork",
+    subtitle: "GROWING TOGETHER",
+    image: IMAGES.team,
+    quote: "Finest ingredients, made with love, inspired by connection."
+  }
+];
 
 const JOURNEY_INCLUDES = [
   "Representing premium Jennyd Scents fragrances",
@@ -163,10 +208,6 @@ export default function JoinGrowPage() {
             Welcome to <strong className="text-white font-semibold">Jennyd Scents — Join &amp; Grow</strong>, a business collaboration created for ambitious individuals who want to become Independent Business Owners and Partners with Jennyd Scents.
           </p>
 
-          <p className="text-neutral-400 text-xs max-w-xl mx-auto font-sans font-light leading-relaxed italic">
-            Step into the world of international fragrance entrepreneurship and build a business that can grow with your vision, effort, customer relationships, and entrepreneurial spirit.
-          </p>
-
           {/* Action CTAs */}
           <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
             <a 
@@ -198,12 +239,12 @@ export default function JoinGrowPage() {
           {/* Borderless Large Image (Left on desktop - 5 Cols) */}
           <div className="lg:col-span-5 order-1 lg:order-1 flex justify-center">
             <div 
-              onClick={() => setLightboxImage(IMAGES.section1)}
+              onClick={() => setLightboxImage(IMAGES.leader)}
               className="relative w-full aspect-[3/4.4] max-w-sm sm:max-w-md lg:max-w-full rounded-2xl overflow-hidden shadow-2xl group cursor-pointer transition-transform duration-500 hover:scale-[1.01]"
             >
               <Image
-                src={IMAGES.section1}
-                alt="Become An Independent Business Owner"
+                src={IMAGES.leader}
+                alt="I am the leader of my business"
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
                 priority
@@ -211,7 +252,7 @@ export default function JoinGrowPage() {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setLightboxImage(IMAGES.section1);
+                  setLightboxImage(IMAGES.leader);
                 }}
                 className="absolute bottom-3 right-3 bg-black/80 hover:bg-[#D4AF37] text-white hover:text-black p-2.5 rounded-lg backdrop-blur-md transition-all cursor-pointer shadow-lg flex items-center gap-1.5 text-xs font-semibold"
                 title="View Full Screen Image"
@@ -237,7 +278,7 @@ export default function JoinGrowPage() {
             </div>
 
             <p className="text-neutral-700 text-xs sm:text-sm leading-relaxed font-sans font-light">
-              With Jennyd Scents, you can build your own independent business around a premium fragrance portfolio while benefiting from the support of an established fragrance brand.
+              With Jennyd Scents, you can build your own independent business around a premium fragrance portfolio while benefiting from the support of an established luxury fragrance brand.
             </p>
 
             {/* 3 Core Value Statements Box */}
@@ -337,19 +378,19 @@ export default function JoinGrowPage() {
           {/* Borderless Large Image (Right on desktop - 5 Cols) */}
           <div className="lg:col-span-5 order-1 lg:order-2 flex justify-center">
             <div 
-              onClick={() => setLightboxImage(IMAGES.section2)}
+              onClick={() => setLightboxImage(IMAGES.mentor)}
               className="relative w-full aspect-[3/4.4] max-w-sm sm:max-w-md lg:max-w-full rounded-2xl overflow-hidden shadow-2xl group cursor-pointer transition-transform duration-500 hover:scale-[1.01]"
             >
               <Image
-                src={IMAGES.section2}
-                alt="Your Journey Can Include"
+                src={IMAGES.mentor}
+                alt="It's my business and I am the mentor"
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setLightboxImage(IMAGES.section2);
+                  setLightboxImage(IMAGES.mentor);
                 }}
                 className="absolute bottom-3 right-3 bg-black/80 hover:bg-[#D4AF37] text-white hover:text-black p-2.5 rounded-lg backdrop-blur-md transition-all cursor-pointer shadow-lg flex items-center gap-1.5 text-xs font-semibold"
                 title="View Full Screen Image"
@@ -372,19 +413,19 @@ export default function JoinGrowPage() {
           {/* Borderless Large Image (Left on desktop - 5 Cols) */}
           <div className="lg:col-span-5 order-1 lg:order-1 flex justify-center">
             <div 
-              onClick={() => setLightboxImage(IMAGES.section3)}
+              onClick={() => setLightboxImage(IMAGES.earn)}
               className="relative w-full aspect-[3/4.4] max-w-sm sm:max-w-md lg:max-w-full rounded-2xl overflow-hidden shadow-2xl group cursor-pointer transition-transform duration-500 hover:scale-[1.01]"
             >
               <Image
-                src={IMAGES.section3}
-                alt="Build Toward Financial Independence"
+                src={IMAGES.earn}
+                alt="Let's Earn Together"
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setLightboxImage(IMAGES.section3);
+                  setLightboxImage(IMAGES.earn);
                 }}
                 className="absolute bottom-3 right-3 bg-black/80 hover:bg-[#D4AF37] text-white hover:text-black p-2.5 rounded-lg backdrop-blur-md transition-all cursor-pointer shadow-lg flex items-center gap-1.5 text-xs font-semibold"
                 title="View Full Screen Image"
@@ -442,7 +483,7 @@ export default function JoinGrowPage() {
         </div>
       </section>
 
-      {/* ── SECTION 4: BUILD A BETTER FUTURE ── */}
+      {/* ── SECTION 4: BUILD A BETTER FUTURE & FAMILY LEGACY ── */}
       <section 
         className="w-full py-10 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto bg-[#FAF8F5] border-b border-[#EAE7E1]"
       >
@@ -457,16 +498,16 @@ export default function JoinGrowPage() {
 
             <div className="space-y-1">
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-serif text-[#121212] font-normal leading-tight">
-                BUILD A BETTER FUTURE
+                BUILD A BETTER FUTURE FOR YOUR FAMILY
               </h2>
               <p className="text-[#D4AF37] text-sm sm:text-base font-serif italic border-l-2 border-[#D4AF37] pl-2.5 py-0.5">
-                "Dream beyond today."
+                "My business is the future of my family."
               </p>
               <div className="w-10 h-[2px] bg-[#D4AF37]" />
             </div>
 
             <p className="text-neutral-700 text-xs sm:text-sm leading-relaxed font-sans font-light">
-              Build something that can help you pursue your personal goals, create greater financial flexibility and work toward the future you envision for yourself and your family.
+              Build an enterprise that can help you pursue your personal goals, create greater financial flexibility and work toward the future you envision for yourself and your family.
             </p>
 
             {/* 3 Pillars Cards */}
@@ -495,19 +536,19 @@ export default function JoinGrowPage() {
           {/* Borderless Large Image (Right on desktop - 5 Cols) */}
           <div className="lg:col-span-5 order-1 lg:order-2 flex justify-center">
             <div 
-              onClick={() => setLightboxImage(IMAGES.section4)}
+              onClick={() => setLightboxImage(IMAGES.family)}
               className="relative w-full aspect-[3/4.4] max-w-sm sm:max-w-md lg:max-w-full rounded-2xl overflow-hidden shadow-2xl group cursor-pointer transition-transform duration-500 hover:scale-[1.01]"
             >
               <Image
-                src={IMAGES.section4}
-                alt="Build A Better Future"
+                src={IMAGES.family}
+                alt="My business is the future of my family"
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setLightboxImage(IMAGES.section4);
+                  setLightboxImage(IMAGES.family);
                 }}
                 className="absolute bottom-3 right-3 bg-black/80 hover:bg-[#D4AF37] text-white hover:text-black p-2.5 rounded-lg backdrop-blur-md transition-all cursor-pointer shadow-lg flex items-center gap-1.5 text-xs font-semibold"
                 title="View Full Screen Image"
@@ -530,19 +571,19 @@ export default function JoinGrowPage() {
           {/* Borderless Large Image (Left on desktop - 5 Cols) */}
           <div className="lg:col-span-5 order-1 lg:order-1 flex justify-center">
             <div 
-              onClick={() => setLightboxImage(IMAGES.section5)}
+              onClick={() => setLightboxImage(IMAGES.homeBiz)}
               className="relative w-full aspect-[3/4.4] max-w-sm sm:max-w-md lg:max-w-full rounded-2xl overflow-hidden shadow-2xl group cursor-pointer transition-transform duration-500 hover:scale-[1.01]"
             >
               <Image
-                src={IMAGES.section5}
-                alt="Experience The International Business Lifestyle"
+                src={IMAGES.homeBiz}
+                alt="Making money from home"
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setLightboxImage(IMAGES.section5);
+                  setLightboxImage(IMAGES.homeBiz);
                 }}
                 className="absolute bottom-3 right-3 bg-black/80 hover:bg-[#D4AF37] text-white hover:text-black p-2.5 rounded-lg backdrop-blur-md transition-all cursor-pointer shadow-lg flex items-center gap-1.5 text-xs font-semibold"
                 title="View Full Screen Image"
@@ -568,7 +609,7 @@ export default function JoinGrowPage() {
             </div>
 
             <p className="text-neutral-700 text-xs sm:text-sm leading-relaxed font-sans font-light">
-              Imagine building your business from wherever you are, connecting with customers and entrepreneurs, discovering new markets and becoming part of an international fragrance community.
+              Imagine building your business from home or wherever you are, connecting with customers and entrepreneurs, discovering new markets and becoming part of an international fragrance community.
             </p>
 
             {/* High Impact Quote Box */}
@@ -595,7 +636,68 @@ export default function JoinGrowPage() {
         </div>
       </section>
 
-      {/* ── SECTION 6: JOIN • BUILD • GROW • ACHIEVE (APPLICATION FORM) ── */}
+      {/* ── SECTION 6: BRAND VISION & EMPOWERMENT POSTER SHOWCASE (ALL 12 BRAND POSTERS) ── */}
+      <section className="w-full py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto bg-[#FAF8F5] border-b border-[#EAE7E1]">
+        <div className="text-center max-w-3xl mx-auto space-y-3 mb-10">
+          <div className="inline-flex items-center gap-1.5 bg-[#D4AF37]/15 border border-[#D4AF37]/40 px-3.5 py-1 rounded-full text-[#D4AF37] text-[11px] font-bold uppercase tracking-[0.2em]">
+            <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
+            <span>JENNYD SCENTS BRAND GALLERY</span>
+          </div>
+
+          <h2 className="text-2xl sm:text-4xl font-serif text-[#121212] font-normal">
+            OUR BRAND VISION &amp; LEADERSHIP GALLERY
+          </h2>
+
+          <p className="text-neutral-600 text-xs sm:text-sm font-sans font-light leading-relaxed">
+            Every scent tells a story. Explore our inspirational campaign posters celebrating leadership, independence, family values, and global collaboration.
+          </p>
+
+          <div className="w-12 h-[2px] bg-[#D4AF37] mx-auto mt-2" />
+        </div>
+
+        {/* 6-Card Interactive Brand Poster Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {BRAND_POSTERS.map((poster, idx) => (
+            <motion.div
+              key={idx}
+              whileHover={{ y: -4 }}
+              onClick={() => setLightboxImage(poster.image)}
+              className="bg-white rounded-2xl border border-[#EAE7E1] overflow-hidden shadow-lg hover:shadow-xl transition-all cursor-pointer group flex flex-col"
+            >
+              <div className="relative aspect-[3/4.2] w-full overflow-hidden bg-neutral-950">
+                <Image
+                  src={poster.image}
+                  alt={poster.title}
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                  <span className="text-white text-xs font-semibold flex items-center gap-1.5 bg-black/70 px-3 py-1.5 rounded-lg backdrop-blur-md">
+                    <Maximize2 className="w-3.5 h-3.5 text-[#D4AF37]" /> Click to Expand Full Poster
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-4 space-y-1.5 flex-1 flex flex-col justify-between">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-[#D4AF37] block">
+                    {poster.subtitle}
+                  </span>
+                  <h3 className="text-base font-serif font-semibold text-[#121212]">
+                    {poster.title}
+                  </h3>
+                </div>
+
+                <p className="text-xs text-neutral-500 font-serif italic border-l-2 border-[#D4AF37] pl-2 py-0.5">
+                  "{poster.quote}"
+                </p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── SECTION 7: JOIN • BUILD • GROW • ACHIEVE (APPLICATION FORM) ── */}
       <section 
         id="apply-section" 
         className="w-full py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto bg-[#0A0A0A] text-white border-b border-[#D4AF37]/40 relative overflow-hidden"
@@ -810,19 +912,19 @@ export default function JoinGrowPage() {
           {/* Borderless Large Image (Right on desktop - 5 Cols) */}
           <div className="lg:col-span-5 order-1 lg:order-2 flex justify-center items-center h-full">
             <div 
-              onClick={() => setLightboxImage(IMAGES.section6)}
+              onClick={() => setLightboxImage(IMAGES.brandBoss)}
               className="relative w-full aspect-[3/4.4] max-w-sm sm:max-w-md lg:max-w-full rounded-2xl overflow-hidden shadow-2xl group cursor-pointer transition-transform duration-500 hover:scale-[1.01]"
             >
               <Image
-                src={IMAGES.section6}
-                alt="Join Build Grow Achieve"
+                src={IMAGES.brandBoss}
+                alt="It's my brand and I am the boss"
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setLightboxImage(IMAGES.section6);
+                  setLightboxImage(IMAGES.brandBoss);
                 }}
                 className="absolute bottom-3 right-3 bg-black/80 hover:bg-[#D4AF37] text-white hover:text-black p-2.5 rounded-lg backdrop-blur-md transition-all cursor-pointer shadow-lg flex items-center gap-1.5 text-xs font-semibold"
                 title="View Full Screen Image"
@@ -836,7 +938,7 @@ export default function JoinGrowPage() {
         </div>
       </section>
 
-      {/* ── 7. IMPORTANT LEGAL DISCLOSURE / DISCLAIMER SECTION ── */}
+      {/* ── 8. IMPORTANT LEGAL DISCLOSURE / DISCLAIMER SECTION ── */}
       <section className="py-8 sm:py-10 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full">
         <div className="bg-white p-5 sm:p-6 rounded-2xl border border-[#D4AF37]/30 shadow-md text-left max-w-3xl mx-auto space-y-2 relative overflow-hidden">
           <div className="flex items-center gap-2 text-[#D4AF37]">
