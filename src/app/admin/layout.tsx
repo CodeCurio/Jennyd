@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut, FlaskConical, Tags, MessageSquare, Ticket, Users } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut, FlaskConical, Tags, MessageSquare, Ticket, Users, Briefcase } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { ToastProvider } from "@/components/ui/Toast";
 
@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { label: "Products", href: "/admin/products", icon: Package },
   { label: "Categories", href: "/admin/categories", icon: Tags },
+  { label: "Partner Inquiries", href: "/admin/partners", icon: Briefcase },
   { label: "Reviews", href: "/admin/reviews", icon: MessageSquare },
   { label: "Notes", href: "/admin/notes", icon: FlaskConical },
   { label: "Orders", href: "/admin/orders", icon: ShoppingCart },

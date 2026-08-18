@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "@/lib/supabase";
 import { 
   TrendingUp, 
   Sparkles, 
@@ -61,6 +62,7 @@ const PARTNER_TYPES = [
 export function JoinGrowSection() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     businessName: "",
@@ -75,8 +77,50 @@ export function JoinGrowSection() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
+    const newApp = {
+      id: `app-${Date.now()}`,
+      full_name: formData.name,
+      business_name: formData.businessName || null,
+      phone: formData.phone,
+      email: formData.email || null,
+      city: formData.city,
+      partner_type: formData.partnerType,
+      message: formData.message || null,
+      status: "Pending",
+      created_at: new Date().toISOString()
+    };
+
+    try {
+      await supabase.from("partner_applications").insert([
+        {
+          full_name: formData.name,
+          business_name: formData.businessName,
+          phone: formData.phone,
+          email: formData.email,
+          city: formData.city,
+          partner_type: formData.partnerType,
+          message: formData.message,
+          status: "Pending",
+          created_at: newApp.created_at
+        }
+      ]);
+    } catch (err) {
+      console.log("Submitted partner inquiry:", formData);
+    }
+
+    // Save to local storage fallback
+    try {
+      const existing = localStorage.getItem("jennyd_partner_applications");
+      const list = existing ? JSON.parse(existing) : [];
+      list.unshift(newApp);
+      localStorage.setItem("jennyd_partner_applications", JSON.stringify(list));
+    } catch (e) {}
+
+    setIsSubmitting(false);
     setSubmitted(true);
   };
 
@@ -154,20 +198,20 @@ export function JoinGrowSection() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-row items-center gap-2.5 pt-1">
+            <div className="flex flex-row items-center gap-2 pt-1">
               <Button
                 onClick={() => setIsModalOpen(true)}
-                className="flex-1 sm:flex-none bg-gradient-to-r from-[#D4AF37] to-[#AA7C11] hover:from-white hover:to-white text-black font-bold uppercase tracking-wider text-[11px] sm:text-xs px-5 sm:px-6 py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 shadow-md shadow-[#D4AF37]/20 flex items-center justify-center gap-1.5 group min-h-[40px]"
+                className="flex-1 sm:flex-none bg-gradient-to-r from-[#D4AF37] to-[#AA7C11] hover:from-white hover:to-white text-black font-bold uppercase tracking-wider text-[10.5px] sm:text-[11px] px-4 py-2 rounded-lg transition-all duration-300 shadow-md shadow-[#D4AF37]/20 flex items-center justify-center gap-1.5 group min-h-[36px]"
               >
                 <span>Become a Partner</span>
-                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
               </Button>
 
               <a
                 href={`https://wa.me/919682899765?text=${encodeURIComponent("Hello Jennyd Team, I would like to inquire about Join & Grow business partnership options.")}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 sm:flex-none bg-white/5 hover:bg-white/15 border border-white/15 hover:border-[#D4AF37]/50 text-white font-semibold text-[11px] sm:text-xs px-4 sm:px-5 py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 min-h-[40px]"
+                className="flex-1 sm:flex-none bg-white/5 hover:bg-white/15 border border-white/15 hover:border-[#D4AF37]/50 text-white font-semibold text-[10.5px] sm:text-[11px] px-3.5 py-2 rounded-lg transition-all duration-300 flex items-center justify-center gap-1.5 min-h-[36px]"
               >
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 <span>WhatsApp Chat</span>
