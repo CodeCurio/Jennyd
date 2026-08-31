@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { supabaseAdmin } from "@/lib/supabase";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -10,11 +10,6 @@ export async function POST(request: Request) {
     if (!userId || !email || userId === "undefined" || userId === "null") {
       return NextResponse.json({ error: "Invalid or missing user identity information" }, { status: 400 });
     }
-
-    const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
 
     const { error } = await supabaseAdmin
       .from("profiles")
