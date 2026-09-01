@@ -53,6 +53,45 @@ const IMAGES = {
   portrait: "/assets/join-grow/join-grow-portrait.jpeg",
 };
 
+const BRAND_POSTERS = [
+  {
+    title: "Leadership & Income Control",
+    subtitle: "I WILL DECIDE MY INCOME",
+    image: IMAGES.boss,
+    quote: "Here I am the boss and I will decide my income."
+  },
+  {
+    title: "Ownership & Pride",
+    subtitle: "ITS MY BRAND",
+    image: IMAGES.brandBoss,
+    quote: "Scent your story. Leave your mark."
+  },
+  {
+    title: "Self Determination",
+    subtitle: "CEO OF MY LIFE",
+    image: IMAGES.ceo,
+    quote: "Here I am the CEO of my life."
+  },
+  {
+    title: "Unity & Diversity",
+    subtitle: "WE ARE TOGETHER",
+    image: IMAGES.together,
+    quote: "Together we create. Together we inspire."
+  },
+  {
+    title: "Global Collaboration",
+    subtitle: "WORLD IS OURS",
+    image: IMAGES.world,
+    quote: "One team. One dream. One world."
+  },
+  {
+    title: "Empowered Teamwork",
+    subtitle: "GROWING TOGETHER",
+    image: IMAGES.team,
+    quote: "Finest ingredients, made with love, inspired by connection."
+  }
+];
+
 const JOURNEY_INCLUDES = [
   "Representing premium Jennyd Scents fragrances",
   "Building your own customer network",
@@ -361,16 +400,20 @@ export default function JoinGrowPage() {
     };
 
     try {
-      await fetch("/api/ibo/register", {
+      const res = await fetch("/api/ibo/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
-    } catch (err) {}
-
-    try {
-      await supabase.from("ibo_registrations").insert([payload]);
-    } catch (err) {}
+      const data = await res.json();
+      if (!res.ok) {
+        setFormError(data.error || "Submission failed. Please check mandatory fields.");
+        setIsSubmitting(false);
+        return;
+      }
+    } catch (err) {
+      console.warn("API call exception:", err);
+    }
 
     try {
       const existing = localStorage.getItem("jennyd_ibo_registrations");
@@ -379,10 +422,8 @@ export default function JoinGrowPage() {
       localStorage.setItem("jennyd_ibo_registrations", JSON.stringify(list));
     } catch (e) {}
 
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSubmitted(true);
-    }, 600);
+    setIsSubmitting(false);
+    setIsSubmitted(true);
   };
 
   const handleWhatsAppDirect = () => {
@@ -582,6 +623,368 @@ export default function JoinGrowPage() {
               </a>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ── SECTION 2: YOUR JOURNEY CAN INCLUDE ── */}
+      <section 
+        className="w-full py-10 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto bg-[#FAF8F5] border-b border-[#EAE7E1]"
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center w-full">
+          
+          {/* Text & Grid Side (Left on desktop - 7 Cols) */}
+          <div className="lg:col-span-7 order-2 lg:order-1 space-y-4 text-left">
+            <div className="inline-flex items-center gap-1.5 bg-[#121212] text-[#D4AF37] px-3 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider">
+              <Compass className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <span>GROWTH ROADMAP</span>
+            </div>
+
+            <div className="space-y-1">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-serif text-[#121212] font-normal leading-tight">
+                YOUR JOURNEY CAN INCLUDE
+              </h2>
+              <p className="text-neutral-500 text-xs sm:text-sm font-sans font-light">
+                Discover the multifaceted opportunities available when you partner with Jennyd Scents.
+              </p>
+              <div className="w-10 h-[2px] bg-[#D4AF37]" />
+            </div>
+
+            {/* 8 Bullet Items Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+              {JOURNEY_INCLUDES.map((item, idx) => (
+                <div key={idx} className="bg-white p-3 rounded-lg border border-[#EAE7E1] shadow-xs flex items-start gap-2.5 hover:border-[#D4AF37] transition-colors group">
+                  <CheckCircle2 className="w-4 h-4 text-[#D4AF37] shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
+                  <span className="text-xs font-medium text-neutral-800 leading-snug">{item}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="p-3 rounded-lg bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-xs text-neutral-700 flex items-center gap-2.5">
+              <Award className="w-4.5 h-4.5 text-[#D4AF37] shrink-0" />
+              <span>Qualify for recognition, exclusive product masterclasses, and international brand incentives as your network grows.</span>
+            </div>
+
+          </div>
+
+          {/* Borderless Large Image (Right on desktop - 5 Cols) */}
+          <div className="lg:col-span-5 order-1 lg:order-2 flex justify-center">
+            <div 
+              onClick={() => setLightboxImage(IMAGES.mentor)}
+              className="relative w-full aspect-[3/4.4] max-w-sm sm:max-w-md lg:max-w-full rounded-2xl overflow-hidden shadow-2xl group cursor-pointer transition-transform duration-500 hover:scale-[1.01]"
+            >
+              <Image
+                src={IMAGES.mentor}
+                alt="It's my business and I am the mentor"
+                fill
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLightboxImage(IMAGES.mentor);
+                }}
+                className="absolute bottom-3 right-3 bg-black/80 hover:bg-[#D4AF37] text-white hover:text-black p-2.5 rounded-lg backdrop-blur-md transition-all cursor-pointer shadow-lg flex items-center gap-1.5 text-xs font-semibold"
+                title="View Full Screen Image"
+              >
+                <Maximize2 className="w-3.5 h-3.5" />
+                <span>Expand</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ── SECTION 3: BUILD TOWARD FINANCIAL INDEPENDENCE ── */}
+      <section 
+        className="w-full py-10 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto border-b border-[#EAE7E1]"
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center w-full">
+          
+          {/* Borderless Large Image (Left on desktop - 5 Cols) */}
+          <div className="lg:col-span-5 order-1 lg:order-1 flex justify-center">
+            <div 
+              onClick={() => setLightboxImage(IMAGES.earn)}
+              className="relative w-full aspect-[3/4.4] max-w-sm sm:max-w-md lg:max-w-full rounded-2xl overflow-hidden shadow-2xl group cursor-pointer transition-transform duration-500 hover:scale-[1.01]"
+            >
+              <Image
+                src={IMAGES.earn}
+                alt="Let's Earn Together"
+                fill
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLightboxImage(IMAGES.earn);
+                }}
+                className="absolute bottom-3 right-3 bg-black/80 hover:bg-[#D4AF37] text-white hover:text-black p-2.5 rounded-lg backdrop-blur-md transition-all cursor-pointer shadow-lg flex items-center gap-1.5 text-xs font-semibold"
+                title="View Full Screen Image"
+              >
+                <Maximize2 className="w-3.5 h-3.5" />
+                <span>Expand</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Text Side (Right on desktop - 7 Cols) */}
+          <div className="lg:col-span-7 order-2 lg:order-2 space-y-4 text-left">
+            <div className="inline-flex items-center gap-1.5 bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 px-3 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider">
+              <TrendingUp className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <span>FINANCIAL INDEPENDENCE</span>
+            </div>
+
+            <div className="space-y-1">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-serif text-[#121212] font-normal leading-tight">
+                BUILD TOWARD FINANCIAL INDEPENDENCE
+              </h2>
+              <div className="w-10 h-[2px] bg-[#D4AF37]" />
+            </div>
+
+            <p className="text-neutral-700 text-xs sm:text-sm leading-relaxed font-sans font-light">
+              Your business can become an additional source of income and a platform for long-term entrepreneurial growth.
+            </p>
+
+            {/* 5-Step Progress Steps */}
+            <div className="space-y-2">
+              {FINANCIAL_STEPS.map((s, i) => (
+                <div key={i} className="bg-white p-3 rounded-lg border border-[#EAE7E1] shadow-xs flex items-center justify-between gap-3 hover:border-[#D4AF37] transition-all">
+                  <div className="flex items-center gap-3">
+                    <span className="font-serif font-bold text-lg text-[#D4AF37] w-7 text-center shrink-0">{s.step}</span>
+                    <div>
+                      <h4 className="text-xs font-bold text-[#121212] uppercase tracking-wider">{s.title}</h4>
+                      <p className="text-[11px] text-neutral-500 font-light leading-normal">{s.desc}</p>
+                    </div>
+                  </div>
+                  <ArrowRight className="w-3.5 h-3.5 text-neutral-400 shrink-0 hidden sm:block" />
+                </div>
+              ))}
+            </div>
+
+            {/* Success Formula Box */}
+            <div className="p-3.5 rounded-xl bg-[#121212] text-white space-y-1 text-xs">
+              <span className="text-[#D4AF37] font-bold uppercase tracking-wider block text-[11px]">KEY FOUNDATION FOR SUCCESS</span>
+              <p className="text-neutral-300 font-light leading-relaxed">
+                Your success will depend on your effort, skills, sales, customer demand, business practices and consistency.
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      {/* ── SECTION 4: BUILD A BETTER FUTURE & FAMILY LEGACY ── */}
+      <section 
+        className="w-full py-10 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto bg-[#FAF8F5] border-b border-[#EAE7E1]"
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center w-full">
+          
+          {/* Text Side (Left on desktop - 7 Cols) */}
+          <div className="lg:col-span-7 order-2 lg:order-1 space-y-4 text-left">
+            <div className="inline-flex items-center gap-1.5 bg-[#121212] text-[#D4AF37] px-3 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider">
+              <Target className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <span>VISION &amp; LEGACY</span>
+            </div>
+
+            <div className="space-y-1">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-serif text-[#121212] font-normal leading-tight">
+                BUILD A BETTER FUTURE FOR YOUR FAMILY
+              </h2>
+              <p className="text-[#D4AF37] text-sm sm:text-base font-serif italic border-l-2 border-[#D4AF37] pl-2.5 py-0.5">
+                &ldquo;My business is the future of my family.&rdquo;
+              </p>
+              <div className="w-10 h-[2px] bg-[#D4AF37]" />
+            </div>
+
+            <p className="text-neutral-700 text-xs sm:text-sm leading-relaxed font-sans font-light">
+              Build an enterprise that can help you pursue your personal goals, create greater financial flexibility and work toward the future you envision for yourself and your family.
+            </p>
+
+            {/* 3 Pillars Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+              <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-[#EAE7E1] shadow-xs space-y-1">
+                <Heart className="w-4 h-4 text-[#D4AF37]" />
+                <h4 className="text-xs font-bold text-[#121212] uppercase tracking-wider">Personal Goals</h4>
+                <p className="text-[11px] text-neutral-500 font-light leading-normal">Turn your passion for luxury fragrances into a rewarding business career.</p>
+              </div>
+
+              <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-[#EAE7E1] shadow-xs space-y-1">
+                <Zap className="w-4 h-4 text-[#D4AF37]" />
+                <h4 className="text-xs font-bold text-[#121212] uppercase tracking-wider">Financial Flexibility</h4>
+                <p className="text-[11px] text-neutral-500 font-light leading-normal">Diversify your income streams with high retail margins and repeat sales.</p>
+              </div>
+
+              <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-[#EAE7E1] shadow-xs space-y-1">
+                <ShieldCheck className="w-4 h-4 text-[#D4AF37]" />
+                <h4 className="text-xs font-bold text-[#121212] uppercase tracking-wider">Family Future</h4>
+                <p className="text-[11px] text-neutral-500 font-light leading-normal">Build a long-term enterprise that creates lasting value for generations.</p>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Borderless Large Image (Right on desktop - 5 Cols) */}
+          <div className="lg:col-span-5 order-1 lg:order-2 flex justify-center">
+            <div 
+              onClick={() => setLightboxImage(IMAGES.family)}
+              className="relative w-full aspect-[3/4.4] max-w-sm sm:max-w-md lg:max-w-full rounded-2xl overflow-hidden shadow-2xl group cursor-pointer transition-transform duration-500 hover:scale-[1.01]"
+            >
+              <Image
+                src={IMAGES.family}
+                alt="My business is the future of my family"
+                fill
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLightboxImage(IMAGES.family);
+                }}
+                className="absolute bottom-3 right-3 bg-black/80 hover:bg-[#D4AF37] text-white hover:text-black p-2.5 rounded-lg backdrop-blur-md transition-all cursor-pointer shadow-lg flex items-center gap-1.5 text-xs font-semibold"
+                title="View Full Screen Image"
+              >
+                <Maximize2 className="w-3.5 h-3.5" />
+                <span>Expand</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ── SECTION 5: EXPERIENCE THE INTERNATIONAL BUSINESS LIFESTYLE ── */}
+      <section 
+        className="w-full py-10 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto border-b border-[#EAE7E1]"
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center w-full">
+          
+          {/* Borderless Large Image (Left on desktop - 5 Cols) */}
+          <div className="lg:col-span-5 order-1 lg:order-1 flex justify-center">
+            <div 
+              onClick={() => setLightboxImage(IMAGES.homeBiz)}
+              className="relative w-full aspect-[3/4.4] max-w-sm sm:max-w-md lg:max-w-full rounded-2xl overflow-hidden shadow-2xl group cursor-pointer transition-transform duration-500 hover:scale-[1.01]"
+            >
+              <Image
+                src={IMAGES.homeBiz}
+                alt="Making money from home"
+                fill
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLightboxImage(IMAGES.homeBiz);
+                }}
+                className="absolute bottom-3 right-3 bg-black/80 hover:bg-[#D4AF37] text-white hover:text-black p-2.5 rounded-lg backdrop-blur-md transition-all cursor-pointer shadow-lg flex items-center gap-1.5 text-xs font-semibold"
+                title="View Full Screen Image"
+              >
+                <Maximize2 className="w-3.5 h-3.5" />
+                <span>Expand</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Text Side (Right on desktop - 7 Cols) */}
+          <div className="lg:col-span-7 order-2 lg:order-2 space-y-4 text-left">
+            <div className="inline-flex items-center gap-1.5 bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 px-3 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider">
+              <Globe className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <span>GLOBAL LIFESTYLE</span>
+            </div>
+
+            <div className="space-y-1">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-serif text-[#121212] font-normal leading-tight">
+                EXPERIENCE THE INTERNATIONAL BUSINESS LIFESTYLE
+              </h2>
+              <div className="w-10 h-[2px] bg-[#D4AF37]" />
+            </div>
+
+            <p className="text-neutral-700 text-xs sm:text-sm leading-relaxed font-sans font-light">
+              Imagine building your business from home or wherever you are, connecting with customers and entrepreneurs, discovering new markets and becoming part of an international fragrance community.
+            </p>
+
+            {/* High Impact Quote Box */}
+            <div className="p-4 sm:p-5 rounded-xl bg-gradient-to-r from-[#121212] to-[#1A1A1A] text-white border border-[#D4AF37]/40 shadow-lg space-y-1.5 relative overflow-hidden">
+              <span className="text-[#D4AF37] uppercase tracking-[0.2em] text-[10px] sm:text-[11px] font-bold block">GLOBAL PHILOSOPHY</span>
+              <p className="text-base sm:text-xl font-serif font-normal text-[#F4E0A5] leading-snug">
+                &ldquo;Your location doesn&apos;t have to define the size of your ambition.&rdquo;
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-sans">
+              <div className="p-3 rounded-lg bg-white border border-[#EAE7E1] shadow-xs">
+                <span className="font-bold text-[#121212] block mb-0.5">Work From Anywhere</span>
+                <span className="text-neutral-500 font-light leading-relaxed">Manage client relationships and sales via digital &amp; social platforms.</span>
+              </div>
+              <div className="p-3 rounded-lg bg-white border border-[#EAE7E1] shadow-xs">
+                <span className="font-bold text-[#121212] block mb-0.5">Global Network</span>
+                <span className="text-neutral-500 font-light leading-relaxed">Connect with fragrance enthusiasts and entrepreneurs worldwide.</span>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      {/* ── SECTION 6: BRAND VISION & EMPOWERMENT POSTER SHOWCASE (ALL 12 BRAND POSTERS) ── */}
+      <section className="w-full py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto bg-[#FAF8F5] border-b border-[#EAE7E1]">
+        <div className="text-center max-w-3xl mx-auto space-y-3 mb-10">
+          <div className="inline-flex items-center gap-1.5 bg-[#D4AF37]/15 border border-[#D4AF37]/40 px-3.5 py-1 rounded-full text-[#D4AF37] text-[11px] font-bold uppercase tracking-[0.2em]">
+            <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
+            <span>JENNYD SCENTS BRAND GALLERY</span>
+          </div>
+
+          <h2 className="text-2xl sm:text-4xl font-serif text-[#121212] font-normal">
+            OUR BRAND VISION &amp; LEADERSHIP GALLERY
+          </h2>
+
+          <p className="text-neutral-600 text-xs sm:text-sm font-sans font-light leading-relaxed">
+            Every scent tells a story. Explore our inspirational campaign posters celebrating leadership, independence, family values, and global collaboration.
+          </p>
+
+          <div className="w-12 h-[2px] bg-[#D4AF37] mx-auto mt-2" />
+        </div>
+
+        {/* 6-Card Interactive Brand Poster Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {BRAND_POSTERS.map((poster, idx) => (
+            <motion.div
+              key={idx}
+              whileHover={{ y: -4 }}
+              onClick={() => setLightboxImage(poster.image)}
+              className="bg-white rounded-2xl border border-[#EAE7E1] overflow-hidden shadow-lg hover:shadow-xl transition-all cursor-pointer group flex flex-col"
+            >
+              <div className="relative aspect-[3/4.2] w-full overflow-hidden bg-neutral-950">
+                <Image
+                  src={poster.image}
+                  alt={poster.title}
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                  <span className="text-white text-xs font-semibold flex items-center gap-1.5 bg-black/70 px-3 py-1.5 rounded-lg backdrop-blur-md">
+                    <Maximize2 className="w-3.5 h-3.5 text-[#D4AF37]" /> Click to Expand Full Poster
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-4 space-y-1.5 flex-1 flex flex-col justify-between">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-[#D4AF37] block">
+                    {poster.subtitle}
+                  </span>
+                  <h3 className="text-base font-serif font-semibold text-[#121212]">
+                    {poster.title}
+                  </h3>
+                </div>
+
+                <p className="text-xs text-neutral-500 font-serif italic border-l-2 border-[#D4AF37] pl-2 py-0.5">
+                  &ldquo;{poster.quote}&rdquo;
+                </p>
+              </div>
+            </motion.div>
+          ))}
         </div>
       </section>
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/ui/Toast";
 import { 
   Search, 
@@ -30,7 +29,10 @@ import {
   CheckSquare,
   AlertCircle,
   Download,
-  Users
+  Users,
+  Database,
+  Copy,
+  Check
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -112,9 +114,6 @@ export interface LegacyPartnerApplication {
   created_at: string;
 }
 
-const LOCAL_IBO_KEY = "jennyd_ibo_registrations";
-const LOCAL_LEGACY_KEY = "jennyd_partner_applications";
-
 export default function AdminPartnersPage() {
   const { addToast } = useToast();
   const [activeTab, setActiveTab] = useState<"ibo" | "legacy">("ibo");
@@ -133,89 +132,36 @@ export default function AdminPartnersPage() {
   const [adminNotes, setAdminNotes] = useState("");
   const [statusUpdating, setStatusUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
+  const [supabaseOnline, setSupabaseOnline] = useState(true);
 
-  // Fetch all registrations from Supabase & LocalStorage
+  // Fetch all registrations from server API / Supabase
   const fetchAllData = async () => {
     setIsLoading(true);
 
-    // 1. Fetch IBO Registrations
-    let supabaseIbos: IBORegistration[] = [];
     try {
-      const { data, error } = await supabase
-        .from("ibo_registrations")
-        .select("*")
-        .order("created_at", { ascending: false });
+      // 1. Fetch IBO registrations
+      const resIbo = await fetch("/api/ibo/list", { cache: "no-store" });
+      const dataIbo = await resIbo.json();
+      if (dataIbo.success && Array.isArray(dataIbo.data)) {
+        setIboList(dataIbo.data);
+        if (dataIbo.supabaseOnline !== undefined) {
+          setSupabaseOnline(dataIbo.supabaseOnline);
+        }
+      }
 
-      if (!error && data) {
-        supabaseIbos = data;
+      // 2. Fetch General Partner inquiries
+      const resPartner = await fetch("/api/partners/list", { cache: "no-store" });
+      const dataPartner = await resPartner.json();
+      if (dataPartner.success && Array.isArray(dataPartner.data)) {
+        setLegacyList(dataPartner.data);
       }
     } catch (err) {
-      console.log("Supabase IBO fetch notice:", err);
+      console.error("Failed to fetch admin partner data:", err);
+      addToast({ title: "Fetch Notice", message: "Failed to connect to data service.", type: "error" });
+    } finally {
+      setIsLoading(false);
     }
-
-    let localIbos: IBORegistration[] = [];
-    try {
-      const saved = localStorage.getItem(LOCAL_IBO_KEY);
-      if (saved) localIbos = JSON.parse(saved);
-    } catch (e) {}
-
-    const combinedIboMap = new Map<string, IBORegistration>();
-    [...supabaseIbos, ...localIbos].forEach((item) => {
-      const key = item.id || `${item.mobile_number}-${item.purchase_order_no}`;
-      if (!combinedIboMap.has(key)) {
-        combinedIboMap.set(key, {
-          ...item,
-          status: item.status || "Pending"
-        });
-      }
-    });
-    setIboList(Array.from(combinedIboMap.values()).sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    ));
-
-    // 2. Fetch Legacy Partner Inquiries
-    let supabaseLegacy: LegacyPartnerApplication[] = [];
-    try {
-      const { data, error } = await supabase
-        .from("partner_applications")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (!error && data) {
-        supabaseLegacy = data.map((item: any) => ({
-          id: item.id || `legacy-${Math.random()}`,
-          full_name: item.full_name || item.name || "N/A",
-          business_name: item.business_name || null,
-          phone: item.phone || "N/A",
-          email: item.email || null,
-          city: item.city || "N/A",
-          partner_type: item.partner_type || "Partner Inquiry",
-          message: item.message || null,
-          status: item.status || "Pending",
-          admin_notes: item.admin_notes || null,
-          created_at: item.created_at || new Date().toISOString()
-        }));
-      }
-    } catch (err) {}
-
-    let localLegacy: LegacyPartnerApplication[] = [];
-    try {
-      const saved = localStorage.getItem(LOCAL_LEGACY_KEY);
-      if (saved) localLegacy = JSON.parse(saved);
-    } catch (e) {}
-
-    const combinedLegacyMap = new Map<string, LegacyPartnerApplication>();
-    [...supabaseLegacy, ...localLegacy].forEach((item) => {
-      const key = item.id || `${item.phone}-${item.created_at}`;
-      if (!combinedLegacyMap.has(key)) {
-        combinedLegacyMap.set(key, item);
-      }
-    });
-    setLegacyList(Array.from(combinedLegacyMap.values()).sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    ));
-
-    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -287,23 +233,25 @@ export default function AdminPartnersPage() {
     setStatusUpdating(true);
 
     try {
-      await supabase
-        .from("ibo_registrations")
-        .update({ status: newStatus, admin_notes: adminNotes })
-        .eq("id", selectedIbo.id);
+      const res = await fetch("/api/ibo/update", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: selectedIbo.id, status: newStatus, admin_notes: adminNotes })
+      });
+      const data = await res.json();
 
-      const updated = iboList.map((a) =>
-        a.id === selectedIbo.id ? { ...a, status: newStatus, admin_notes: adminNotes } : a
-      );
-      setIboList(updated);
-      setSelectedIbo({ ...selectedIbo, status: newStatus, admin_notes: adminNotes });
-      try {
-        localStorage.setItem(LOCAL_IBO_KEY, JSON.stringify(updated));
-      } catch (e) {}
-
-      addToast({ title: "Status Updated", message: `IBO status set to ${newStatus}`, type: "success" });
+      if (res.ok && data.success) {
+        const updated = iboList.map((a) =>
+          a.id === selectedIbo.id ? { ...a, status: newStatus, admin_notes: adminNotes } : a
+        );
+        setIboList(updated);
+        setSelectedIbo({ ...selectedIbo, status: newStatus, admin_notes: adminNotes });
+        addToast({ title: "Status Updated", message: `IBO status set to ${newStatus}`, type: "success" });
+      } else {
+        throw new Error(data.error || "Update failed");
+      }
     } catch (err: any) {
-      addToast({ title: "Updated locally", message: "Saved status update.", type: "info" });
+      addToast({ title: "Error", message: err.message || "Failed to update status", type: "error" });
     } finally {
       setStatusUpdating(false);
     }
@@ -315,14 +263,71 @@ export default function AdminPartnersPage() {
     setIsDeleting(true);
 
     try {
-      await supabase.from("ibo_registrations").delete().eq("id", id);
-      const updated = iboList.filter((a) => a.id !== id);
-      setIboList(updated);
-      try {
-        localStorage.setItem(LOCAL_IBO_KEY, JSON.stringify(updated));
-      } catch (e) {}
-      setSelectedIbo(null);
-      addToast({ title: "Deleted", message: "IBO Registration removed successfully.", type: "success" });
+      const res = await fetch(`/api/ibo/delete?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        const updated = iboList.filter((a) => a.id !== id);
+        setIboList(updated);
+        setSelectedIbo(null);
+        addToast({ title: "Deleted", message: "IBO Registration removed successfully.", type: "success" });
+      } else {
+        throw new Error(data.error || "Delete failed");
+      }
+    } catch (err: any) {
+      addToast({ title: "Error", message: err.message, type: "error" });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // Update Legacy Status
+  const handleUpdateLegacyStatus = async (newStatus: "Pending" | "Contacted" | "Approved" | "Rejected") => {
+    if (!selectedLegacy) return;
+    setStatusUpdating(true);
+
+    try {
+      const res = await fetch("/api/partners/update", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: selectedLegacy.id, status: newStatus, admin_notes: adminNotes })
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        const updated = legacyList.map((a) =>
+          a.id === selectedLegacy.id ? { ...a, status: newStatus, admin_notes: adminNotes } : a
+        );
+        setLegacyList(updated);
+        setSelectedLegacy({ ...selectedLegacy, status: newStatus, admin_notes: adminNotes });
+        addToast({ title: "Status Updated", message: `Inquiry status set to ${newStatus}`, type: "success" });
+      } else {
+        throw new Error(data.error || "Update failed");
+      }
+    } catch (err: any) {
+      addToast({ title: "Error", message: err.message || "Failed to update status", type: "error" });
+    } finally {
+      setStatusUpdating(false);
+    }
+  };
+
+  // Delete Legacy
+  const handleDeleteLegacy = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this partner inquiry?")) return;
+    setIsDeleting(true);
+
+    try {
+      const res = await fetch(`/api/partners/delete?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        const updated = legacyList.filter((a) => a.id !== id);
+        setLegacyList(updated);
+        setSelectedLegacy(null);
+        addToast({ title: "Deleted", message: "Partner Inquiry removed successfully.", type: "success" });
+      } else {
+        throw new Error(data.error || "Delete failed");
+      }
     } catch (err: any) {
       addToast({ title: "Error", message: err.message, type: "error" });
     } finally {
@@ -336,6 +341,71 @@ export default function AdminPartnersPage() {
     const cleanPhone = (ibo.whatsapp_number || ibo.mobile_number).replace(/[^0-9]/g, "");
     const formatted = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
     window.open(`https://wa.me/${formatted}?text=${encodeURIComponent(text)}`, "_blank");
+  };
+
+  // Launch WhatsApp for Legacy Partner
+  const handleLaunchLegacyWhatsApp = (item: LegacyPartnerApplication) => {
+    const text = `Hello ${item.full_name}!\n\nThank you for contacting Jennyd Scents regarding our ${item.partner_type} partnership.\n\nOur partnership team is pleased to assist you with wholesale catalogs, tester kits, and profit margins.`;
+    const cleanPhone = item.phone.replace(/[^0-9]/g, "");
+    const formatted = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
+    window.open(`https://wa.me/${formatted}?text=${encodeURIComponent(text)}`, "_blank");
+  };
+
+  // Export to CSV
+  const handleExportCSV = () => {
+    if (activeTab === "ibo") {
+      const headers = [
+        "Full Name", "PO No", "Status", "Mobile", "WhatsApp", "Email", "City", "State", 
+        "PAN", "Aadhaar", "Sponsor ID", "Sponsor Name", "Bank Name", "A/C Number", "IFSC", "Applied Date"
+      ];
+      const rows = filteredIbos.map(i => [
+        `"${i.full_name || ''}"`,
+        `"${i.purchase_order_no || ''}"`,
+        `"${i.status || 'Pending'}"`,
+        `"${i.mobile_number || ''}"`,
+        `"${i.whatsapp_number || ''}"`,
+        `"${i.email || ''}"`,
+        `"${i.city || ''}"`,
+        `"${i.state || ''}"`,
+        `"${i.pan_tax_number || ''}"`,
+        `"${i.aadhaar_national_id || ''}"`,
+        `"${i.sponsor_ibo_id || ''}"`,
+        `"${i.sponsor_name || ''}"`,
+        `"${i.bank_name || ''}"`,
+        `"${i.account_number || ''}"`,
+        `"${i.ifsc_code || ''}"`,
+        `"${i.created_at || ''}"`
+      ]);
+      const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `Jennyd_IBO_Registrations_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      const headers = ["Full Name", "Business Name", "Partner Type", "Phone", "Email", "City", "Status", "Message", "Applied Date"];
+      const rows = filteredLegacy.map(l => [
+        `"${l.full_name || ''}"`,
+        `"${l.business_name || ''}"`,
+        `"${l.partner_type || ''}"`,
+        `"${l.phone || ''}"`,
+        `"${l.email || ''}"`,
+        `"${l.city || ''}"`,
+        `"${l.status || 'Pending'}"`,
+        `"${(l.message || '').replace(/"/g, '""')}"`,
+        `"${l.created_at || ''}"`
+      ]);
+      const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `Jennyd_Partner_Inquiries_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
 
   if (isLoading) {
@@ -364,13 +434,23 @@ export default function AdminPartnersPage() {
           </h1>
         </div>
 
-        <button
-          onClick={fetchAllData}
-          className="inline-flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold text-xs px-4 py-2 rounded-xl transition-colors cursor-pointer"
-        >
-          <Clock className="w-3.5 h-3.5" />
-          <span>Refresh Data</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleExportCSV}
+            className="inline-flex items-center gap-1.5 bg-white hover:bg-gray-50 text-gray-800 border border-gray-300 font-semibold text-xs px-3.5 py-2 rounded-xl transition-colors cursor-pointer shadow-2xs"
+          >
+            <Download className="w-3.5 h-3.5 text-gray-600" />
+            <span>Export CSV</span>
+          </button>
+
+          <button
+            onClick={fetchAllData}
+            className="inline-flex items-center gap-1.5 bg-[#121212] hover:bg-black text-white font-semibold text-xs px-4 py-2 rounded-xl transition-colors cursor-pointer shadow-sm"
+          >
+            <Clock className="w-3.5 h-3.5 text-[#D4AF37]" />
+            <span>Refresh Data</span>
+          </button>
+        </div>
       </div>
 
       {/* Main Tab Switcher */}
@@ -385,7 +465,7 @@ export default function AdminPartnersPage() {
         >
           <Users className="w-4 h-4 text-[#D4AF37]" />
           <span>IBO Registrations</span>
-          <span className="ml-1 bg-[#D4AF37]/20 text-[#846107] px-2 py-0.5 rounded-full text-[10px] font-mono">
+          <span className="ml-1 bg-[#D4AF37]/20 text-[#846107] px-2 py-0.5 rounded-full text-[10px] font-mono font-bold">
             {iboList.length}
           </span>
         </button>
@@ -400,7 +480,7 @@ export default function AdminPartnersPage() {
         >
           <Briefcase className="w-4 h-4 text-gray-500" />
           <span>General Partner Inquiries</span>
-          <span className="ml-1 bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-[10px] font-mono">
+          <span className="ml-1 bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold">
             {legacyList.length}
           </span>
         </button>
@@ -444,7 +524,7 @@ export default function AdminPartnersPage() {
           </div>
           <div>
             <p className="text-xl font-black text-gray-900">{stats.approved}</p>
-            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Approved IBOs</p>
+            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Approved Partners</p>
           </div>
         </div>
       </div>
@@ -590,7 +670,7 @@ export default function AdminPartnersPage() {
 
                       {/* Date */}
                       <td className="px-6 py-4 text-gray-500 font-mono text-[11px]">
-                        {format(new Date(ibo.created_at), "MMM d, yyyy • h:mm a")}
+                        {ibo.created_at ? format(new Date(ibo.created_at), "MMM d, yyyy • h:mm a") : "—"}
                       </td>
 
                       {/* Status Badge */}
@@ -679,9 +759,9 @@ export default function AdminPartnersPage() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="space-y-0.5">
-                          <span className="font-mono text-gray-900 font-bold block">
+                          <a href={`tel:${app.phone}`} className="font-mono text-gray-900 font-bold block hover:text-[#D4AF37]">
                             📞 {app.phone}
-                          </span>
+                          </a>
                           {app.email && (
                             <span className="text-[11px] text-gray-400 font-mono block">
                               {app.email}
@@ -693,10 +773,21 @@ export default function AdminPartnersPage() {
                         📍 {app.city}
                       </td>
                       <td className="px-6 py-4 text-gray-500 font-mono text-[11px]">
-                        {format(new Date(app.created_at), "MMM d, yyyy • h:mm a")}
+                        {app.created_at ? format(new Date(app.created_at), "MMM d, yyyy • h:mm a") : "—"}
                       </td>
                       <td className="px-6 py-4">
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-800">
+                        <span
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                            app.status === "Approved"
+                              ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                              : app.status === "Contacted"
+                              ? "bg-purple-100 text-purple-800 border border-purple-300"
+                              : app.status === "Rejected"
+                              ? "bg-red-100 text-red-800 border border-red-300"
+                              : "bg-blue-100 text-blue-800 border border-blue-300"
+                          }`}
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full bg-current" />
                           {app.status || "Pending"}
                         </span>
                       </td>
@@ -744,7 +835,7 @@ export default function AdminPartnersPage() {
               </div>
               <button
                 onClick={() => setSelectedIbo(null)}
-                className="text-gray-400 hover:text-gray-700 p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+                className="text-gray-400 hover:text-gray-700 p-1.5 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -762,7 +853,7 @@ export default function AdminPartnersPage() {
                     {selectedIbo.full_name}
                   </h4>
                   <p className="text-xs text-neutral-300 font-sans">
-                    Submitted on {format(new Date(selectedIbo.created_at), "MMMM d, yyyy • h:mm a")}
+                    Submitted on {selectedIbo.created_at ? format(new Date(selectedIbo.created_at), "MMMM d, yyyy • h:mm a") : "N/A"}
                   </p>
                 </div>
 
@@ -1044,25 +1135,96 @@ export default function AdminPartnersPage() {
       {/* ── LEGACY DETAIL MODAL ── */}
       {selectedLegacy && (
         <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto"
           onClick={() => setSelectedLegacy(null)}
         >
           <div
-            className="bg-white rounded-3xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto border border-gray-200 p-6 space-y-4"
+            className="bg-white rounded-3xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto border border-gray-200 p-6 space-y-5"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between pb-3 border-b">
-              <h3 className="font-bold text-gray-900 text-base">Partner Inquiry Details</h3>
-              <button onClick={() => setSelectedLegacy(null)}><X className="w-5 h-5 text-gray-400" /></button>
+              <div className="flex items-center gap-2">
+                <Briefcase className="w-5 h-5 text-[#D4AF37]" />
+                <h3 className="font-bold text-gray-900 text-base">Partner Inquiry Details</h3>
+              </div>
+              <button onClick={() => setSelectedLegacy(null)} className="cursor-pointer text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
             </div>
-            <div className="space-y-2 text-xs">
-              <p><strong>Name:</strong> {selectedLegacy.full_name}</p>
-              {selectedLegacy.business_name && <p><strong>Business:</strong> {selectedLegacy.business_name}</p>}
-              <p><strong>Category:</strong> {selectedLegacy.partner_type}</p>
-              <p><strong>Phone:</strong> {selectedLegacy.phone}</p>
-              <p><strong>Email:</strong> {selectedLegacy.email || "N/A"}</p>
-              <p><strong>City:</strong> {selectedLegacy.city}</p>
-              {selectedLegacy.message && <p><strong>Message:</strong> "{selectedLegacy.message}"</p>}
+
+            <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200 space-y-2 text-xs">
+              <p><strong>Applicant Name:</strong> {selectedLegacy.full_name}</p>
+              {selectedLegacy.business_name && <p><strong>Business / Store:</strong> {selectedLegacy.business_name}</p>}
+              <p><strong>Partnership Type:</strong> <span className="font-bold text-[#916b08]">{selectedLegacy.partner_type}</span></p>
+              <p><strong>Phone / WhatsApp:</strong> <span className="font-mono font-bold select-all">{selectedLegacy.phone}</span></p>
+              <p><strong>Email:</strong> <span className="font-mono select-all">{selectedLegacy.email || "N/A"}</span></p>
+              <p><strong>City &amp; Location:</strong> {selectedLegacy.city}</p>
+              {selectedLegacy.message && <p className="pt-2 border-t border-gray-200 text-gray-700"><strong>Message:</strong> "{selectedLegacy.message}"</p>}
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleLaunchLegacyWhatsApp(selectedLegacy)}
+                className="flex-1 bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-xs py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-md cursor-pointer"
+              >
+                <span>Connect on WhatsApp</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </button>
+              <a
+                href={`tel:${selectedLegacy.phone}`}
+                className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold text-xs rounded-xl flex items-center justify-center gap-1 cursor-pointer"
+              >
+                <Phone className="w-3.5 h-3.5" />
+                <span>Call</span>
+              </a>
+            </div>
+
+            {/* Status Update & Notes */}
+            <div className="space-y-3 pt-3 border-t border-gray-200">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                <label className="text-xs font-bold text-gray-900 uppercase tracking-wider">Status:</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {(["Pending", "Contacted", "Approved", "Rejected"] as const).map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => handleUpdateLegacyStatus(s)}
+                      disabled={statusUpdating}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                        selectedLegacy.status === s
+                          ? "bg-black text-white shadow-sm"
+                          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <textarea
+                rows={2}
+                value={adminNotes}
+                onChange={(e) => setAdminNotes(e.target.value)}
+                placeholder="Follow-up notes..."
+                className="w-full p-2.5 border border-gray-300 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-[#D4AF37] resize-none"
+              />
+
+              <div className="flex justify-between items-center">
+                <button
+                  onClick={() => handleDeleteLegacy(selectedLegacy.id)}
+                  disabled={isDeleting}
+                  className="text-xs text-red-600 hover:text-red-800 font-semibold flex items-center gap-1 cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" /> Delete
+                </button>
+                <button
+                  onClick={() => handleUpdateLegacyStatus(selectedLegacy.status)}
+                  disabled={statusUpdating}
+                  className="bg-black hover:bg-gray-800 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl transition-all cursor-pointer"
+                >
+                  Save Notes
+                </button>
+              </div>
             </div>
           </div>
         </div>

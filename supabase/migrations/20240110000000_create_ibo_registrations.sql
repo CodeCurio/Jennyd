@@ -109,3 +109,50 @@ CREATE INDEX IF NOT EXISTS idx_ibo_registrations_status ON public.ibo_registrati
 CREATE INDEX IF NOT EXISTS idx_ibo_registrations_purchase_order ON public.ibo_registrations (purchase_order_no);
 CREATE INDEX IF NOT EXISTS idx_ibo_registrations_pan ON public.ibo_registrations (pan_tax_number);
 CREATE INDEX IF NOT EXISTS idx_ibo_registrations_mobile ON public.ibo_registrations (mobile_number);
+
+-- ============================================================================
+-- Create table for General Partner Inquiries (Join & Grow Partner Applications)
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.partner_applications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  full_name TEXT NOT NULL,
+  business_name TEXT,
+  phone TEXT NOT NULL,
+  email TEXT,
+  city TEXT NOT NULL,
+  partner_type TEXT NOT NULL DEFAULT 'Retail Store / Boutique Owner',
+  message TEXT,
+  status TEXT NOT NULL DEFAULT 'Pending',
+  admin_notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Enable RLS
+ALTER TABLE public.partner_applications ENABLE ROW LEVEL SECURITY;
+
+-- Auto-update updated_at trigger
+CREATE OR REPLACE TRIGGER update_partner_applications_updated_at 
+  BEFORE UPDATE ON public.partner_applications 
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Policies
+CREATE POLICY "Public insert partner_applications" 
+  ON public.partner_applications 
+  FOR INSERT 
+  WITH CHECK (true);
+
+CREATE POLICY "Admin all partner_applications" 
+  ON public.partner_applications 
+  FOR ALL 
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles 
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+
+CREATE INDEX IF NOT EXISTS idx_partner_applications_created_at ON public.partner_applications (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_partner_applications_status ON public.partner_applications (status);
+CREATE INDEX IF NOT EXISTS idx_partner_applications_phone ON public.partner_applications (phone);
+

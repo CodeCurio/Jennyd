@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin, supabase } from "@/lib/supabase";
+import { saveIboRegistration, IBORecord } from "@/lib/partnerStorage";
+import { randomUUID } from "crypto";
 
 export async function POST(req: Request) {
   try {
@@ -20,7 +21,10 @@ export async function POST(req: Request) {
       );
     }
 
-    const payload = {
+    const newId = body.id && body.id.length > 10 ? body.id : randomUUID();
+
+    const payload: IBORecord = {
+      id: newId,
       full_name: body.full_name.trim(),
       mother_name: body.mother_name ? body.mother_name.trim() : null,
       father_name: body.father_name ? body.father_name.trim() : null,
@@ -29,13 +33,13 @@ export async function POST(req: Request) {
       occupation: body.occupation ? body.occupation.trim() : null,
       marital_status: body.marital_status || null,
 
-      pan_tax_number: body.pan_tax_number ? body.pan_tax_number.trim() : null,
+      pan_tax_number: body.pan_tax_number ? body.pan_tax_number.trim().toUpperCase() : null,
       aadhaar_national_id: body.aadhaar_national_id ? body.aadhaar_national_id.trim() : null,
       other_gov_id: body.other_gov_id ? body.other_gov_id.trim() : null,
-      driving_license: body.driving_license ? body.driving_license.trim() : null,
-      passport_number: body.passport_number ? body.passport_number.trim() : null,
+      driving_license: body.driving_license ? body.driving_license.trim().toUpperCase() : null,
+      passport_number: body.passport_number ? body.passport_number.trim().toUpperCase() : null,
       national_id_number: body.national_id_number ? body.national_id_number.trim() : null,
-      voter_card_number: body.voter_card_number ? body.voter_card_number.trim() : null,
+      voter_card_number: body.voter_card_number ? body.voter_card_number.trim().toUpperCase() : null,
 
       mobile_number: body.mobile_number.trim(),
       whatsapp_number: body.whatsapp_number.trim(),
@@ -62,13 +66,13 @@ export async function POST(req: Request) {
       perm_country: body.perm_country ? body.perm_country.trim() : "India",
 
       sponsor_name: body.sponsor_name ? body.sponsor_name.trim() : null,
-      sponsor_ibo_id: body.sponsor_ibo_id ? body.sponsor_ibo_id.trim() : null,
+      sponsor_ibo_id: body.sponsor_ibo_id ? body.sponsor_ibo_id.trim().toUpperCase() : null,
       sponsor_mobile: body.sponsor_mobile ? body.sponsor_mobile.trim() : null,
 
       account_holder_name: body.account_holder_name ? body.account_holder_name.trim() : null,
       bank_name: body.bank_name ? body.bank_name.trim() : null,
       account_number: body.account_number ? body.account_number.trim() : null,
-      ifsc_code: body.ifsc_code ? body.ifsc_code.trim() : null,
+      ifsc_code: body.ifsc_code ? body.ifsc_code.trim().toUpperCase() : null,
       upi_id: body.upi_id ? body.upi_id.trim() : null,
 
       hear_about_us: Array.isArray(body.hear_about_us) ? body.hear_about_us : [],
@@ -79,32 +83,16 @@ export async function POST(req: Request) {
       purchase_order_no: body.purchase_order_no.trim(),
 
       status: "Pending",
-      created_at: new Date().toISOString()
+      created_at: body.created_at || new Date().toISOString()
     };
 
-    // Attempt insertion with service role client first, then fallback to anon client
-    const client = supabaseAdmin || supabase;
-    const { data, error } = await client
-      .from("ibo_registrations")
-      .insert([payload])
-      .select()
-      .single();
-
-    if (error) {
-      console.warn("Supabase insertion error for IBO:", error);
-      // Return 200 with local fallback marker so UI doesn't crash if table isn't yet migrated
-      return NextResponse.json({
-        success: false,
-        warning: "Database table not ready or error. Saved locally.",
-        error: error.message,
-        payload
-      }, { status: 200 });
-    }
+    const result = await saveIboRegistration(payload);
 
     return NextResponse.json({
       success: true,
-      message: "IBO Registration submitted successfully!",
-      data
+      message: "IBO Registration submitted and saved successfully!",
+      data: result.data,
+      inSupabase: result.inSupabase
     });
   } catch (error: any) {
     console.error("IBO Registration API Error:", error);

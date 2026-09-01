@@ -95,21 +95,13 @@ export function JoinGrowSection() {
     };
 
     try {
-      await supabase.from("partner_applications").insert([
-        {
-          full_name: formData.name,
-          business_name: formData.businessName,
-          phone: formData.phone,
-          email: formData.email,
-          city: formData.city,
-          partner_type: formData.partnerType,
-          message: formData.message,
-          status: "Pending",
-          created_at: newApp.created_at
-        }
-      ]);
+      await fetch("/api/partners/apply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newApp)
+      });
     } catch (err) {
-      console.log("Submitted partner inquiry:", formData);
+      console.warn("Submitted partner inquiry API fallback:", err);
     }
 
     // Save to local storage fallback
